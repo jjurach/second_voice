@@ -31,7 +31,7 @@ aider
 | **Git Integration** | Manual (Bash) | ✅ Automatic (auto-commits) |
 | **Code Awareness** | Good | ✅ Excellent (understands diffs) |
 | **File Editing** | Via Edit tool | ✅ Direct (shows diffs) |
-| **Configuration** | CLAUDE.md | `.aider.conf` |
+| **Configuration** | CLAUDE.md | `.aider.conf.yml` |
 | **Web Search** | ✅ Yes | ⚠️ Depends on model |
 
 **Key Difference:** Aider changes code **immediately** without approval gates. This is fundamentally different from Claude Code.
@@ -217,46 +217,34 @@ Aider: Tries the new way
 
 ## Configuration
 
-### .aider.conf
-Create `.aider.conf` in project root:
+### .aider.conf.yml
+Create `.aider.conf.yml` in project root:
 
 ```yaml
-[aider]
-# Auto-commit changes (recommended)
-auto-commits = true
+# Aider Configuration
+# Reference: https://aider.chat/docs/config/aider_conf.html
 
-# Commit messages template
-auto-commit = "{{summary}}"
+# Model settings
+model: gpt-4o
 
-# Model to use (customize as needed)
-model = "gpt-4"
+# Git settings
+auto-commits: true
+attribute-author: true
+attribute-committer: true
 
-# Project instructions
-# (Reference: see AGENTS.md)
+# Project Context
+read:
+  - AGENTS.md
+  - docs/definition-of-done.md
+  - docs/workflow-mapping.md
+
+# Testing
+auto-test: false
+test-cmd: pytest
 ```
 
-### Reference Project Instructions
-Aider doesn't auto-read CLAUDE.md. Instead:
-
-**Option 1: Create .aider.conf with instructions:**
-```yaml
-[aider]
-# Reference the workflow
-system-message = """
-This project follows the AGENTS.md workflow.
-- Create specs in dev_notes/specs/
-- Create plans in dev_notes/project_plans/
-- Document changes in dev_notes/changes/
-See AGENTS.md for full workflow.
-"""
-```
-
-**Option 2: Tell Aider on startup:**
-```bash
-aider --message "Follow the AGENTS.md workflow.
-Create specs in dev_notes/specs/, plans in dev_notes/project_plans/,
-and changes in dev_notes/changes/."
-```
+### Context Loading
+By adding files to the `read` list in config, Aider automatically loads your project's core instructions on startup. This ensures it always knows about `AGENTS.md`.
 
 ## Using Aider with AGENTS.md
 

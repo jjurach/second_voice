@@ -1,0 +1,25 @@
+# Aider Configuration
+# Reference: https://aider.chat/docs/config/aider_conf.html
+
+#################
+# Model settings:
+model: gpt-4o
+
+#################
+# Git settings:
+auto-commits: true
+attribute-author: true
+attribute-committer: true
+
+#################
+# Project Context:
+# Load core instructions into context window
+read:
+  - AGENTS.md
+  - docs/definition-of-done.md
+  - docs/workflow-mapping.md
+
+#################
+# Testing:
+# auto-test: false
+# test-cmd: pytest
