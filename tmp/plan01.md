@@ -75,6 +75,19 @@ second_voice/
 
 ## Tasks Breakdown
 
+### Phase 0: Critical Fixes (Pre-Refactor)
+
+#### Task 0.1: Fix temporary file location violation
+- [ ] Update `src/cli/second_voice.py` line 78
+- [ ] Change from `/tmp/sv_audio.wav` to `tmp-audio.wav`
+- [ ] Ensure tmp directory or tmp-* files are used per AGENTS.md Rule #5
+- [ ] Test that the fix works with current script
+- [ ] Commit the fix before proceeding with refactoring
+
+**Rationale:** The current code violates AGENTS.md Rule #5 which prohibits using `/tmp` or system temporary directories. All temporary files must use `tmp-*`, `*.tmp`, or `tmp/*` patterns in the current working directory.
+
+---
+
 ### Phase 1: Project Foundation (Setup & Structure)
 
 #### Task 1.1: Create LICENSE file
@@ -140,6 +153,7 @@ second_voice/
   - `transcribe(audio_frames, rate=16000)` - Send to Whisper API
   - `process_with_llm(text, context="", system_prompt="")` - Send to Ollama
   - `_build_recursive_prompt(context, new_text)` - Build prompt with context
+- [ ] **CRITICAL:** Use `tmp-audio.wav` (not `/tmp/`) for temporary audio files per AGENTS.md Rule #5
 - [ ] Add timeout handling (120s default)
 - [ ] Add connection error handling
 - [ ] Add response validation
@@ -338,10 +352,10 @@ second_voice/
 - [ ] Verify all imports are used
 - [ ] Remove unused code
 
-#### Task 7.2: Remove old info files
-- [ ] Delete docs/info1.md through docs/info5.md
-- [ ] Verify consolidated documentation is complete
-- [ ] Update any references to old files
+#### Task 7.2: Verify documentation consolidation
+- [x] Delete docs/info1.md through docs/info5.md (COMPLETED in initial commit)
+- [x] Verify consolidated documentation is complete (COMPLETED)
+- [ ] Final review of all documentation for accuracy
 
 #### Task 7.3: Final documentation review
 - [ ] Proofread README.md
@@ -413,6 +427,7 @@ The project is considered complete when:
 
 This is an informational breakdown only (no time estimates per policy):
 
+- **Phase 0:** Critical bug fix (temporary file location)
 - **Phase 1:** Foundation setup
 - **Phase 2:** Core refactoring (largest phase)
 - **Phase 3:** Demo enhancement
@@ -425,13 +440,15 @@ This is an informational breakdown only (no time estimates per policy):
 
 ## Notes
 
-1. The existing code is working and will serve as the reference implementation
-2. Refactoring should maintain all existing functionality
-3. Hard-coded values should become CLI options with current values as defaults
-4. The VU meter is a new visual enhancement to be added
-5. Testing focuses on core logic (config, processor, recorder) rather than GUI
-6. Documentation references should point to consolidated docs/ files
-7. Final validation requires clean test and demo runs
+1. **CRITICAL:** Phase 0 must complete first - fixes temporary file location violation in current code
+2. The existing code is working and will serve as the reference implementation
+3. Refactoring should maintain all existing functionality
+4. Hard-coded values should become CLI options with current values as defaults
+5. The VU meter is a new visual enhancement to be added
+6. Testing focuses on core logic (config, processor, recorder) rather than GUI
+7. Documentation references should point to consolidated docs/ files
+8. Final validation requires clean test and demo runs
+9. All refactored code must use `tmp-*` or `*.tmp` patterns, never `/tmp/`
 
 ---
 

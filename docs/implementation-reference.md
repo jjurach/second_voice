@@ -216,6 +216,11 @@ def refresh_loop(self):
 
 The current working implementation from `src/cli/second_voice.py` serves as the baseline. Key sections:
 
+**⚠️ CRITICAL NOTE:** The original script contains a temporary file location violation that must be fixed:
+- **Line 78:** Uses `/tmp/sv_audio.wav` which violates AGENTS.md Rule #5
+- **Must change to:** `tmp-audio.wav` (current working directory)
+- This applies to all refactored code as well
+
 ### Configuration Loading Pattern
 
 ```python
@@ -266,9 +271,11 @@ def record_loop(self):
 
 ### Submit and Process Pattern
 
+**⚠️ WARNING:** The code below shows the corrected version with proper temporary file location.
+
 ```python
 def submit(self):
-    temp_wav = "/tmp/sv_audio.wav"
+    temp_wav = "tmp-audio.wav"  # CORRECTED: Was "/tmp/sv_audio.wav" in original
     with wave.open(temp_wav, "wb") as wf:
         wf.setnchannels(1)
         wf.setsampwidth(self.p.get_sample_size(pyaudio.paInt16))
