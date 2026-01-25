@@ -45,7 +45,11 @@
 
 ## 2. Documentation & Resources
 
-TODO: add project specific information to benefit agents.
+-   **`docs/DEFINITION_OF_DONE.md`**: **MANDATORY READ.** This defines the exact criteria for marking a task as complete. You are expected to follow the "State Machine" protocols defined here (verification proofs, config updates, plan status).
+-   **`docs/architecture.md`**: High-level system design.
+-   **`docs/implementation-reference.md`**: Patterns for adding new providers.
+-   **`docs/providers.md`**: User-facing guide to providers.
+-   **`config.example.json`**: The source of truth for all configuration keys. If you add a key, you MUST add it here.
 
 ---
 
