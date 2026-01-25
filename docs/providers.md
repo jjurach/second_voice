@@ -1,27 +1,170 @@
-# LLM Provider Architecture
+# Provider Architecture Guide
 
 ## Overview
 
-Second Voice uses a provider-based architecture to support multiple LLM backends. This allows users to choose between local GPU compute (Ollama) or cloud-based services (OpenRouter) based on their needs and available resources.
+Second Voice uses a dual provider architecture supporting both Speech-to-Text (STT) and Language Model (LLM) processing. You can choose providers based on your privacy requirements, infrastructure availability, and use case.
 
-## Supported Providers
+**Key Principle:** Local providers offer complete data sovereignty - your audio and text never leave your control. Cloud providers offer convenience and zero-infrastructure setup.
 
-### Ollama (Local/Remote GPU)
+---
 
-**Use Case:** Local or SSH-tunneled GPU compute
+## Provider Philosophy: Privacy First
 
-**Pros:**
-- Complete privacy (data never leaves your network)
-- No per-request costs
-- Full control over model selection
-- Can run large models if you have VRAM
+### Privacy-First (Recommended for Sensitive Work)
 
-**Cons:**
-- Requires GPU hardware or SSH tunnel to remote GPU
-- Setup complexity (Docker, port forwarding)
-- Limited to models you can fit in VRAM
+**Local Whisper + Ollama**
+- ✅ Complete data sovereignty
+- ✅ No external dependencies after setup
+- ✅ Ideal for medical, legal, proprietary work
+- ✅ One-time setup cost, no ongoing fees
 
-**Configuration:**
+### Convenience Option (Quick Start)
+
+**Groq + OpenRouter**
+- ✅ Zero infrastructure - works in 2 minutes
+- ✅ Groq offers generous free tier
+- ✅ OpenRouter pay-as-you-go (no minimum)
+- ✅ Access to latest models
+
+### Hybrid Approaches
+
+Mix and match based on needs:
+- **Local STT + Cloud LLM:** Keep audio private, use cloud for text processing
+- **Cloud STT + Local LLM:** Quick transcription, private LLM processing
+
+---
+
+## STT (Speech-to-Text) Providers
+
+### Local Whisper (Privacy-First)
+
+**When to use:**
+- Working with sensitive/confidential audio
+- Medical, legal, or proprietary conversations
+- Already have GPU infrastructure
+- Want complete control over data
+
+**Benefits:**
+- ✅ Audio never leaves your network
+- ✅ No per-request costs
+- ✅ No internet required (after setup)
+- ✅ Full control over model and performance
+
+**Setup:**
+```json
+{
+  "local_whisper": {
+    "url": "http://localhost:8000/v1/audio/transcriptions",
+    "model": "small.en"
+  }
+}
+```
+
+**Docker Setup:**
+```yaml
+services:
+  whisper:
+    image: fedirz/faster-whisper-server:latest-cuda
+    ports: ["8000:8000"]
+    environment:
+      - WHISPER_MODEL=small.en
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+```
+
+**SSH Tunnel (for remote GPU):**
+```bash
+ssh -N -L 8000:localhost:8000 your-server
+```
+
+**Models:** small.en, medium.en, large-v3 (based on VRAM)
+
+---
+
+### Groq (Free Tier, Fast Cloud)
+
+**When to use:**
+- Quick start without infrastructure
+- Testing Second Voice
+- Don't work with sensitive data
+- Want extremely fast transcription
+
+**Benefits:**
+- ✅ Generous free tier
+- ✅ Sub-second transcription (very fast)
+- ✅ Zero setup required
+- ✅ OpenAI-compatible API
+
+**Setup:**
+```json
+{
+  "groq": {
+    "api_key": "${GROQ_API_KEY}",
+    "model": "whisper-large-v3"
+  }
+}
+```
+
+**Get API Key:** https://console.groq.com/keys
+
+**Environment Variable:**
+```bash
+export GROQ_API_KEY="gsk_..."
+```
+
+**Cost:** Free tier available, then pay-as-you-go
+
+---
+
+### OpenAI (Official, Paid)
+
+**When to use:**
+- Need highest reliability
+- Enterprise use with budget
+- Already using OpenAI services
+
+**Benefits:**
+- ✅ Most reliable commercial option
+- ✅ Official Whisper implementation
+- ✅ Good uptime SLA
+
+**Setup:**
+```json
+{
+  "openai": {
+    "api_key": "${OPENAI_API_KEY}",
+    "model": "whisper-1"
+  }
+}
+```
+
+**Get API Key:** https://platform.openai.com/api-keys
+
+**Cost:** ~$0.006 per minute of audio
+
+---
+
+## LLM (Language Model) Providers
+
+### Ollama (Privacy-First)
+
+**When to use:**
+- Working with proprietary/confidential text
+- Medical, legal, or sensitive content
+- Already have GPU infrastructure
+- Want full control over model behavior
+
+**Benefits:**
+- ✅ Text never leaves your network
+- ✅ No per-request costs
+- ✅ Full model control and customization
+- ✅ No rate limits
+
+**Setup:**
 ```json
 {
   "ollama": {
@@ -31,25 +174,50 @@ Second Voice uses a provider-based architecture to support multiple LLM backends
 }
 ```
 
-**Models:** Any Ollama-compatible model you have pulled locally
+**Docker Setup:**
+```yaml
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    volumes:
+      - ./ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+```
 
-### OpenRouter (Cloud API)
+**Pull Models:**
+```bash
+docker exec -it ollama ollama pull llama-pro
+docker exec -it ollama ollama pull mistral
+```
 
-**Use Case:** Cloud-based inference with access to many models
+**SSH Tunnel (for remote GPU):**
+```bash
+ssh -N -L 11434:localhost:11434 your-server
+```
 
-**Pros:**
-- No local infrastructure required
-- Access to cutting-edge models (Claude, GPT-4, etc.)
-- Works anywhere with internet
-- Pay only for what you use
+---
 
-**Cons:**
-- Data sent to third-party (OpenRouter + model provider)
-- Per-request costs
-- Requires internet connection
-- Rate limits based on account tier
+### OpenRouter (Cloud, Many Models)
 
-**Configuration:**
+**When to use:**
+- Quick start without infrastructure
+- Want access to Claude, GPT-4, etc.
+- Occasional use
+- Testing different models
+
+**Benefits:**
+- ✅ Access to 100+ models
+- ✅ No infrastructure needed
+- ✅ Pay only for what you use
+- ✅ Latest models available
+
+**Setup:**
 ```json
 {
   "openrouter": {
@@ -60,312 +228,301 @@ Second Voice uses a provider-based architecture to support multiple LLM backends
 }
 ```
 
-**Models:** See [OpenRouter Models](https://openrouter.ai/models) for full list
+**Get API Key:** https://openrouter.ai/keys
+
+**Popular Models:**
+- `anthropic/claude-3.5-sonnet` (best quality)
+- `meta-llama/llama-3.1-70b-instruct` (good balance)
+- `google/gemini-pro` (fast, affordable)
+
+**Cost:** Varies by model, see https://openrouter.ai/models
+
+---
 
 ## Provider Auto-Detection
 
-Second Voice automatically selects the appropriate provider based on configuration:
+Second Voice automatically selects appropriate providers based on available API keys:
 
-### Detection Logic
-1. **Check for OpenRouter API key:**
-   - Environment variable: `OPENROUTER_API_KEY`
-   - Config file: `openrouter.api_key`
-2. **If API key exists:** Use OpenRouterProvider
-3. **If no API key:** Use OllamaProvider (default)
+### STT Auto-Detection Priority
+
+1. **Check for `GROQ_API_KEY`** → Use Groq
+2. **Check for `OPENAI_API_KEY`** → Use OpenAI
+3. **Default** → Use Local Whisper
+
+### LLM Auto-Detection Priority
+
+1. **Check for `OPENROUTER_API_KEY`** → Use OpenRouter
+2. **Default** → Use Ollama
 
 ### Override Auto-Detection
 
-Use the `--provider` flag to explicitly choose:
+Use CLI flags to explicitly choose providers:
 
 ```bash
-# Force Ollama even if OpenRouter is configured
-second_voice --provider ollama
+# Force specific providers
+second_voice --stt-provider local --llm-provider ollama
 
-# Force OpenRouter
-second_voice --provider openrouter --api-key sk-or-...
+# Mix providers
+second_voice --stt-provider groq --llm-provider ollama
 ```
 
-## Configuration Guide
+---
 
-### Full Configuration Example
+## Complete Configuration Examples
 
-`~/.config/second_voice/settings.json`:
+### Privacy-First Setup
 
+**~/.config/second_voice/settings.json:**
 ```json
 {
+  "local_whisper": {
+    "url": "http://localhost:8000/v1/audio/transcriptions",
+    "model": "medium.en"
+  },
   "ollama": {
     "url": "http://localhost:11434/api/generate",
     "model": "llama-pro"
-  },
-
-  "openrouter": {
-    "api_key": "${OPENROUTER_API_KEY}",
-    "model": "anthropic/claude-3.5-sonnet",
-    "base_url": "https://openrouter.ai/api/v1"
-  },
-
-  "whisper_url": "http://localhost:8000/v1/audio/transcriptions",
-  "whisper_model": "small.en"
+  }
 }
 ```
 
-### Environment Variables
-
-Set environment variables for sensitive data:
-
+**Usage:**
 ```bash
-export OPENROUTER_API_KEY="sk-or-v1-..."
-```
-
-The config file can reference environment variables using `${VAR_NAME}` syntax.
-
-### API Key Security
-
-**Best Practices:**
-- Use environment variables for API keys
-- Never commit API keys to git
-- Rotate keys periodically
-- API keys are automatically masked in verbose output
-
-## Provider API Differences
-
-### Request Format
-
-**Ollama:**
-```python
-POST /api/generate
-{
-  "model": "llama-pro",
-  "prompt": "...",
-  "system": "...",
-  "stream": false
-}
-```
-
-**OpenRouter (OpenAI-compatible):**
-```python
-POST /v1/chat/completions
-Headers: {"Authorization": "Bearer sk-or-..."}
-{
-  "model": "anthropic/claude-3.5-sonnet",
-  "messages": [
-    {"role": "system", "content": "..."},
-    {"role": "user", "content": "..."}
-  ]
-}
-```
-
-### Response Format
-
-**Ollama:**
-```json
-{
-  "response": "Generated text here",
-  "model": "llama-pro",
-  "done": true
-}
-```
-
-**OpenRouter:**
-```json
-{
-  "choices": [
-    {
-      "message": {
-        "content": "Generated text here"
-      }
-    }
-  ]
-}
-```
-
-Both are normalized by the provider classes to return plain text.
-
-## Provider Comparison
-
-| Feature | Ollama | OpenRouter |
-|---------|--------|------------|
-| **Setup Complexity** | High (Docker + GPU) | Low (API key only) |
-| **Privacy** | Complete | Data sent to cloud |
-| **Cost** | Hardware only | Per-request |
-| **Internet Required** | No (or just SSH) | Yes |
-| **Model Selection** | Limited by VRAM | 100+ models |
-| **Latency** | Low (local GPU) | Network dependent |
-| **Reliability** | Self-managed | SLA-backed |
-
-## Crash Log Behavior
-
-When an LLM provider fails, Second Voice saves a crash log to preserve your work:
-
-**Location:** `tmp-crash-{timestamp}.txt`
-
-**Contents:**
-```
-=== Second Voice Crash Log ===
-Timestamp: 2026-01-24 23:45:12
-Provider: openrouter
-Model: anthropic/claude-3.5-sonnet
-
-=== Original STT Transcription ===
-[Your voice-to-text content here]
-
-=== Error Details ===
-ProviderAuthError: Invalid API key
-
-=== Stack Trace ===
-[Full Python stack trace]
-```
-
-**Recovery:**
-1. Check the crash log for your transcribed text
-2. Fix the issue (reconnect, API key, etc.)
-3. Copy text from crash log and process manually or re-record
-
-## Usage Examples
-
-### Basic Usage (Auto-Detect)
-
-```bash
-# Uses OpenRouter if OPENROUTER_API_KEY is set, else Ollama
+# Auto-detects local providers
 second_voice
 ```
 
-### Explicit Provider Selection
+**Benefits:**
+- Complete data sovereignty
+- No external dependencies
+- Zero ongoing costs
+- Ideal for sensitive work
 
+---
+
+### Zero-Infrastructure Quick Start
+
+**Environment Variables:**
 ```bash
-# Use Ollama
-second_voice --provider ollama --model llama-pro
-
-# Use OpenRouter
-second_voice --provider openrouter --model anthropic/claude-3.5-sonnet
+export GROQ_API_KEY="gsk_..."
+export OPENROUTER_API_KEY="sk-or-..."
 ```
 
-### Temporary API Key
-
+**Usage:**
 ```bash
-# Override config with CLI flag
-second_voice --provider openrouter --api-key sk-or-v1-abc123
+# Auto-detects cloud providers
+second_voice
 ```
 
-### Verbose Mode (See Provider Info)
+**Benefits:**
+- Works in 2 minutes
+- No Docker/GPU required
+- Groq free tier available
+- Great for trying Second Voice
 
-```bash
-second_voice --verbose
-# Output includes:
-# Provider: openrouter
-# Model: anthropic/claude-3.5-sonnet
-# API endpoint: https://openrouter.ai/api/v1/chat/completions
+---
+
+### Hybrid: Private Audio, Cloud LLM
+
+**Config + Environment:**
+```json
+{
+  "local_whisper": {
+    "url": "http://localhost:8000/v1/audio/transcriptions",
+    "model": "small.en"
+  }
+}
 ```
+```bash
+export OPENROUTER_API_KEY="sk-or-..."
+```
+
+**Usage:**
+```bash
+second_voice --stt-provider local --llm-provider openrouter
+```
+
+**Benefits:**
+- Audio stays private (local transcription)
+- Text processing uses powerful cloud models
+- Good middle ground
+
+---
+
+## Provider Comparison Tables
+
+### STT Provider Comparison
+
+| Feature | Local Whisper | Groq | OpenAI |
+|---------|---------------|------|--------|
+| **Privacy** | ✅ Complete | ❌ Cloud | ❌ Cloud |
+| **Setup** | Medium (Docker + GPU) | Easy (API key) | Easy (API key) |
+| **Cost** | Hardware only | Free tier | ~$0.006/min |
+| **Speed** | GPU-dependent | Very Fast | Fast |
+| **Internet** | Not required | Required | Required |
+| **Best For** | Sensitive audio | Quick start | Enterprise |
+
+### LLM Provider Comparison
+
+| Feature | Ollama | OpenRouter |
+|---------|--------|------------|
+| **Privacy** | ✅ Complete | ❌ Cloud |
+| **Setup** | Medium (Docker + GPU) | Easy (API key) |
+| **Cost** | Hardware only | Pay-per-use |
+| **Models** | Local models | 100+ models |
+| **Latency** | Low (local) | Network-dependent |
+| **Best For** | Proprietary work | Model variety |
+
+---
+
+## CLI Reference
+
+### Bifurcated Command-Line Options
+
+**STT (Speech-to-Text) Options:**
+```bash
+--stt-provider {local,groq,openai}  # Override auto-detection
+--stt-model MODEL                    # Model name (whisper-large-v3, whisper-1, etc.)
+--stt-api-key KEY                    # API key for cloud providers
+--stt-url URL                        # Local Whisper URL
+```
+
+**LLM (Language Model) Options:**
+```bash
+--llm-provider {ollama,openrouter}   # Override auto-detection
+--llm-model MODEL                    # Model name (llama-pro, claude-3.5-sonnet, etc.)
+--llm-api-key KEY                    # API key for OpenRouter
+--llm-url URL                        # Ollama URL
+```
+
+**General Options:**
+```bash
+--verbose                            # Show provider info and timings
+--debug                              # Show full request/response details
+--config PATH                        # Custom config file
+```
+
+### Usage Examples
+
+**Privacy-first (all local):**
+```bash
+second_voice --stt-provider local --llm-provider ollama
+```
+
+**Quick start (all cloud):**
+```bash
+second_voice --stt-provider groq --llm-provider openrouter
+```
+
+**Specific models:**
+```bash
+second_voice \
+  --stt-provider groq --stt-model whisper-large-v3 \
+  --llm-provider openrouter --llm-model anthropic/claude-3.5-sonnet
+```
+
+**Override API keys:**
+```bash
+second_voice \
+  --stt-api-key gsk_... \
+  --llm-api-key sk-or-...
+```
+
+---
 
 ## Troubleshooting
 
-### Ollama Issues
+### STT Provider Issues
 
-**Problem:** Connection refused
+**Local Whisper: Connection Refused**
 ```
-ProviderConnectionError: Cannot connect to http://localhost:11434
+STTProviderConnectionError: Cannot connect to http://localhost:8000
 ```
-
 **Solutions:**
-1. Check SSH tunnel is active: `lsof -i :11434`
-2. Verify Docker container running: `docker ps | grep ollama`
-3. Test endpoint: `curl http://localhost:11434/api/generate`
+1. Check SSH tunnel: `lsof -i :8000`
+2. Verify Docker: `docker ps | grep whisper`
+3. Test endpoint: `curl http://localhost:8000/health`
 
-**Problem:** Model not found
+**Groq: Authentication Failed**
+```
+STTProviderAuthError: Invalid API key
+```
+**Solutions:**
+1. Check key format: starts with `gsk_`
+2. Verify env var: `echo $GROQ_API_KEY`
+3. Get new key: https://console.groq.com/keys
+
+**OpenAI: Rate Limited**
+```
+STTProviderError: Rate limit exceeded (HTTP 429)
+```
+**Solutions:**
+1. Wait for rate limit reset
+2. Upgrade OpenAI account tier
+3. Use Groq instead (higher limits)
+
+### LLM Provider Issues
+
+**Ollama: Model Not Found**
 ```
 ProviderError: Model 'llama-pro' not found
 ```
-
 **Solutions:**
 1. Pull model: `docker exec -it ollama ollama pull llama-pro`
-2. List available models: `docker exec -it ollama ollama list`
+2. List models: `docker exec -it ollama ollama list`
 
-### OpenRouter Issues
-
-**Problem:** Authentication failed
+**OpenRouter: Invalid API Key**
 ```
 ProviderAuthError: Invalid API key
 ```
-
 **Solutions:**
-1. Check API key format starts with `sk-or-v1-`
-2. Verify key in environment: `echo $OPENROUTER_API_KEY`
+1. Check key format: starts with `sk-or-v1-`
+2. Verify env var: `echo $OPENROUTER_API_KEY`
 3. Get new key: https://openrouter.ai/keys
-4. Check account status (suspended, credits)
 
-**Problem:** Rate limited
+---
+
+## API Key Security
+
+### Best Practices
+
+1. **Use environment variables** for API keys
+2. **Never commit** keys to version control
+3. **Rotate keys** periodically
+4. **Monitor usage** for unexpected activity
+
+### API Key Masking
+
+Second Voice automatically masks API keys in output:
+
+**Verbose Mode:**
 ```
-ProviderError: Rate limit exceeded (HTTP 429)
+STT Provider: groq
+API Key: gsk_***********xyz (masked)
 ```
 
-**Solutions:**
-1. Wait for rate limit reset
-2. Upgrade OpenRouter account tier
-3. Implement retry logic (future enhancement)
-
-**Problem:** Model not available
+**Debug Mode:**
 ```
-ProviderError: Model 'anthropic/claude-3.5-sonnet' not available
+Authorization: Bearer gsk_***********xyz (masked)
 ```
 
-**Solutions:**
-1. Check model list: https://openrouter.ai/models
-2. Verify model ID spelling
-3. Check account permissions for model access
+---
 
 ## Adding New Providers
 
-For developers who want to add additional providers:
+For developers who want to add additional providers, see the implementation guide in `docs/implementation-reference.md`.
 
-### 1. Create Provider Class
+**Provider Pattern:**
+1. Create provider class inheriting from `BaseSTTProvider` or `BaseLLMProvider`
+2. Implement required methods: `process()`, `validate_config()`, `is_available()`
+3. Register in provider factory
+4. Add tests
+5. Update documentation
 
-Create `src/second_voice/engine/providers/yourprovider.py`:
+---
 
-```python
-from .base import BaseLLMProvider, ProviderError
+## Further Reading
 
-class YourProvider(BaseLLMProvider):
-    def __init__(self, config):
-        self.config = config.get('yourprovider', {})
-        self.url = self.config.get('url')
-        self.model = self.config.get('model')
-
-    def process(self, prompt, system_prompt="", context=""):
-        # Your implementation here
-        pass
-
-    def validate_config(self):
-        # Check required config fields
-        pass
-
-    def is_available(self):
-        # Test connectivity
-        pass
-
-    def get_provider_name(self):
-        return "yourprovider"
-```
-
-### 2. Register in Factory
-
-Update `get_provider()` in `providers/__init__.py`:
-
-```python
-def get_provider(config, provider_name=None):
-    if provider_name == 'yourprovider':
-        from .yourprovider import YourProvider
-        return YourProvider(config)
-    # ... existing providers
-```
-
-### 3. Add Tests
-
-Create tests in `tests/test_providers.py` following existing patterns.
-
-### 4. Update Documentation
-
-Add provider documentation to this file and update README.md.
-
-## API Reference
-
-See implementation reference in `docs/implementation-reference.md` for complete code examples.
+- **Architecture:** See `docs/architecture.md` for data flow diagrams
+- **Implementation:** See `docs/implementation-reference.md` for code templates
+- **Quick Start:** See `README.md` for step-by-step setup
