@@ -105,12 +105,164 @@ Example configuration:
 ### Running Tests
 
 ```bash
-python3 tests/test_modes.py
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=src/second_voice
+
+# Run specific test file
+pytest tests/test_config.py -v
+
+# For more testing options, see TESTING.md
 ```
+
+For comprehensive testing documentation, see [TESTING.md](TESTING.md).
 
 ### Architecture
 
 See [docs/architecture.md](docs/architecture.md) for a detailed overview of the system architecture.
+
+## AI Tool Support & Workflow
+
+This project supports multiple AI tools for development. **All tools follow the same AGENTS.md workflow.**
+
+### For Developers Using AI Tools
+
+**Start here:**
+1. Read [AGENTS.md](AGENTS.md) - Core development workflow (mandatory)
+2. Choose your tool below and read its guide
+3. Reference [docs/PROMPT-PATTERNS.md](docs/PROMPT-PATTERNS.md) for effective prompting
+
+### Supported Tools
+
+#### 🎯 Claude Code (Primary)
+**Status:** ✅ Fully Supported
+
+- Official Anthropic CLI tool
+- Built-in approval gates for plans
+- Task tracking (TaskCreate/TaskUpdate)
+- MCP server integration
+- Web search and fetch
+
+**Setup:**
+```bash
+pip install anthropic-claude-code
+cd /path/to/second_voice
+claude-code
+```
+
+**Documentation:**
+- Entry point: [CLAUDE.md](CLAUDE.md)
+- Complete guide: [docs/TOOL-SPECIFIC-GUIDES/claude-code.md](docs/TOOL-SPECIFIC-GUIDES/claude-code.md)
+
+---
+
+#### 🤝 Aider
+**Status:** ✅ Supported (Implicit approval)
+
+- Collaborative AI coding tool
+- Excellent code awareness
+- Automatic git commits
+- No built-in approval gates (conversational approval instead)
+
+**Setup:**
+```bash
+pip install aider-chat
+cd /path/to/second_voice
+aider
+```
+
+**Documentation:**
+- Configuration: `.aider.conf` (create from [docs/TOOL-SPECIFIC-GUIDES/aider.md](docs/TOOL-SPECIFIC-GUIDES/aider.md))
+- Complete guide: [docs/TOOL-SPECIFIC-GUIDES/aider.md](docs/TOOL-SPECIFIC-GUIDES/aider.md)
+
+---
+
+#### 🔬 Google Gemini
+**Status:** ⏳ Experimental (Testing in progress)
+
+- Fast multimodal AI
+- Lower context window (~32k tokens)
+- Function calling support
+- Web search integration
+
+**Documentation:**
+- Status & guide: [docs/TOOL-SPECIFIC-GUIDES/gemini.md](docs/TOOL-SPECIFIC-GUIDES/gemini.md)
+- Help us test! See guide for how to contribute.
+
+---
+
+#### 💻 OpenAI Codex/GPT-4
+**Status:** ⏳ Experimental (Investigation needed)
+
+- Excellent code understanding
+- No official CLI tool (needs custom integration)
+- Lower context window (~8k tokens)
+- Function calling support
+
+**Documentation:**
+- Status & guide: [docs/TOOL-SPECIFIC-GUIDES/codex.md](docs/TOOL-SPECIFIC-GUIDES/codex.md)
+- Help us integrate! See guide for how to contribute.
+
+### All Tools Use the Same Workflow
+
+Regardless of tool, all development follows **AGENTS.md:**
+
+1. **Analyze** - Understand the request
+2. **Spec** - Create spec file in `dev_notes/specs/`
+3. **Plan** - Create plan in `dev_notes/project_plans/` (if non-trivial)
+4. **Approve** - Get explicit approval (tool-specific implementation)
+5. **Implement** - Execute with concurrent documentation
+6. **Verify** - Ensure all criteria are met
+
+### Reference Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [AGENTS.md](AGENTS.md) | **Core workflow - READ FIRST** |
+| [CLAUDE.md](CLAUDE.md) | Claude Code entry point |
+| [docs/TOOLS-CAPABILITIES.md](docs/TOOLS-CAPABILITIES.md) | What each tool can do |
+| [docs/WORKFLOW-MAPPING.md](docs/WORKFLOW-MAPPING.md) | How AGENTS.md maps to each tool |
+| [docs/PROMPT-PATTERNS.md](docs/PROMPT-PATTERNS.md) | Universal prompt structures |
+| [docs/FILE-NAMING-CONVENTIONS.md](docs/FILE-NAMING-CONVENTIONS.md) | Which file names matter |
+| [docs/TOOL-SPECIFIC-GUIDES/](docs/TOOL-SPECIFIC-GUIDES/) | Per-tool complete guides |
+
+### Quick Decision Tree
+
+**Which tool should I use?**
+
+```
+Do I need explicit approval gates?
+  YES → Use Claude Code
+  NO  → Consider Aider
+
+Do I need task tracking?
+  YES → Use Claude Code
+  NO  → Any tool works
+
+Is the project large (full repo context)?
+  YES → Use Claude Code (200k tokens)
+  NO  → Aider or Gemini acceptable
+
+Do I need multimodal input (images)?
+  YES → Use Gemini
+  NO  → Any tool works
+
+Need MCP server integration?
+  YES → Use Claude Code
+  NO  → Any tool works
+```
+
+### Contributing to Tool Support
+
+To add or improve tool support:
+
+1. **Test** - Use tool on a simple task
+2. **Document** - Update guide in `docs/TOOL-SPECIFIC-GUIDES/`
+3. **Reference** - Update [docs/TOOLS-CAPABILITIES.md](docs/TOOLS-CAPABILITIES.md)
+4. **Configure** - Create tool config file (e.g., `.aider.conf`)
+5. **Submit** - PR with documentation and config
 
 ## License
 

@@ -45,7 +45,7 @@
 
 ## 2. Documentation & Resources
 
--   **`docs/DEFINITION_OF_DONE.md`**: **MANDATORY READ.** This defines the exact criteria for marking a task as complete. You are expected to follow the "State Machine" protocols defined here (verification proofs, config updates, plan status).
+-   **`docs/definition-of-done.md`**: **MANDATORY READ.** This defines the exact criteria for marking a task as complete. You are expected to follow the "State Machine" protocols defined here (verification proofs, config updates, plan status).
 -   **`docs/architecture.md`**: High-level system design.
 -   **`docs/implementation-reference.md`**: Patterns for adding new providers.
 -   **`docs/providers.md`**: User-facing guide to providers.
