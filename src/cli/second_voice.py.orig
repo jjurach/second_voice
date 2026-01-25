@@ -1,0 +1,140 @@
+import pyaudio
+import wave
+import requests
+import time
+import os
+import argparse
+import json
+from pathlib import Path
+
+# --- DEFAULT CONFIGURATION ---
+WHISPER_URL = "http://localhost:8000/v1/audio/transcriptions"
+OLLAMA_URL = "http://localhost:11434/api/generate"
+WHISPER_MODEL = "Systran/faster-whisper-large-v3"
+OLLAMA_MODEL = "llama-pro"
+RATE = 16000
+CHUNK = 1024
+DEFAULT_VAULT_DIR = Path.home() / "Documents/Obsidian/VoiceInbox"
+
+DEFAULT_CLEANUP_PROMPT = """You are a professional writing assistant. 
+Your task is to take the following speech-to-text transcript and:
+1. Remove filler words (um, ah, like, you know) and stutters.
+2. Fix obvious typos and grammatical errors.
+3. Organize the text into logical paragraphs with professional formatting.
+4. Maintain the speaker's original intent and tone, but make it read like a polished document.
+Do not add your own commentary; only provide the cleaned-up text."""
+
+def get_args():
+    parser = argparse.ArgumentParser(prog="whisper_capture", description="Remote Whisper & Ollama recording tool.")
+    parser.add_argument("--repl", action="store_true", help="Interactive mode: Enter to start/stop recording.")
+    parser.add_argument("--system-prompt", type=str, help="Path to a file containing a custom system prompt.")
+    parser.add_argument("--no-cleanup", action="store_true", help="Skip the Ollama post-processing step.")
+    return parser.parse_args()
+
+def post_process_ollama(text, system_prompt):
+    print(f"🪄 Cleaning up text with Ollama ({OLLAMA_MODEL})...")
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": text,
+        "system": system_prompt,
+        "stream": False
+    }
+    try:
+        response = requests.post(OLLAMA_URL, json=payload)
+        response.raise_for_status()
+        return response.json().get("response", text)
+    except Exception as e:
+        print(f"⚠️ Ollama Error: {e}. Saving raw transcript.")
+        return text
+
+def record_audio(repl_mode=False):
+    p = pyaudio.PyAudio()
+    stream = p.open(format=pyaudio.paInt16, channels=1, rate=RATE, input=True, frames_per_buffer=CHUNK)
+    
+    if repl_mode:
+        input("\n⌨️  Press ENTER to START recording...")
+    
+    print("🎤 RECORDING... (Press Ctrl+C or ENTER to stop)")
+    frames = []
+    
+    try:
+        if repl_mode:
+            # Non-blocking check for Enter key during recording
+            import select
+            import sys
+            while True:
+                if select.select([sys.stdin], [], [], 0.0)[0]:
+                    sys.stdin.readline()
+                    break
+                data = stream.read(CHUNK, exception_on_overflow=False)
+                frames.append(data)
+        else:
+            while True:
+                data = stream.read(CHUNK, exception_on_overflow=False)
+                frames.append(data)
+    except KeyboardInterrupt:
+        pass
+
+    print("🛑 Stopped.")
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    temp_wav = "capture_temp.wav"
+    with wave.open(temp_wav, 'wb') as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+        wf.setframerate(RATE)
+        wf.writeframes(b''.join(frames))
+    return temp_wav
+
+def main():
+    args = get_args()
+    
+    # Load system prompt
+    system_prompt = DEFAULT_CLEANUP_PROMPT
+    if args.system_prompt:
+        prompt_path = Path(args.system_prompt)
+        if prompt_path.exists():
+            system_prompt = prompt_path.read_text().strip()
+            print(f"📖 Loaded custom system prompt from {args.system_prompt}")
+    
+    # 1. Record
+    audio_file = record_audio(repl_mode=args.repl)
+    
+    # 2. Transcribe (Whisper)
+    print(f"🚀 Sending to Ubuntu RTX 2080 (Whisper)...")
+    try:
+        with open(audio_file, 'rb') as f:
+            response = requests.post(WHISPER_URL, files={'file': f}, data={'model': WHISPER_MODEL})
+            response.raise_for_status()
+            raw_text = response.json().get("text", "")
+            
+            if not raw_text:
+                print("⚠️ No speech detected.")
+                return
+
+            # 3. Clean up (Ollama)
+            final_text = raw_text
+            if not args.no_cleanup:
+                final_text = post_process_ollama(raw_text, system_prompt)
+
+            # 4. Save to Obsidian
+            DEFAULT_VAULT_DIR.mkdir(parents=True, exist_ok=True)
+            filename = f"voice_note_{int(time.time())}.md"
+            filepath = DEFAULT_VAULT_DIR / filename
+            
+            with open(filepath, "w") as out:
+                out.write(f"---\ndate: {time.ctime()}\nmodel: {OLLAMA_MODEL}\n---\n\n{final_text}")
+            
+            print(f"\n✨ DONE. Saved to: {filepath}")
+            print(f"📝 Preview: {final_text[:100]}...")
+
+    except Exception as e:
+        print(f"❌ Error during processing: {e}")
+    finally:
+        if os.path.exists(audio_file):
+            os.remove(audio_file)
+
+if __name__ == "__main__":
+    main()

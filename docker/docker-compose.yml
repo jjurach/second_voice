@@ -1,0 +1,57 @@
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      # Map the host's model directory to the container
+      - /usr/share/ollama/.ollama:/root/.ollama
+      # Mount your custom Modelfiles directory
+      - /home/phaedrus/AiSpace/models/Modelfiles:/root/Modelfiles
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_FLASH_ATTENTION=1
+      # Recommended for 8GB cards to keep KV cache small
+      - OLLAMA_KV_CACHE_TYPE=q4_0 
+      #- OLLAMA_HOST=0.0.0.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # Custom faster-whisper service with small.en model
+  # ~5-10s transcription on RTX 2080 (vs 20+ for large)
+  whisper:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.whisper
+    container_name: whisper-server
+    ports:
+      - "8000:8000"
+    environment:
+      - WHISPER_MODEL=small.en
+      - WHISPER__COMPUTE_TYPE=float32
+      - WHISPER__NUM_WORKERS=1
+      - WHISPER_DEVICE=cuda
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  #ollama-proxy:
+  #  image: ollama_proxy:latest
+  #  container_name: ollama_proxy
+  #  command: "python ollama_proxy.py http://ollama:11434 0.0.0.0:11434"

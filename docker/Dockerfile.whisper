@@ -1,0 +1,49 @@
+FROM nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update -y && apt-get install -y \
+    python3.11 \
+    python3-pip \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.11 as default
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+
+# Copy faster-whisper source code
+COPY external/faster-whisper /app/faster-whisper
+
+# Install faster-whisper and its dependencies
+WORKDIR /app/faster-whisper
+RUN pip install --upgrade pip setuptools && \
+    pip install -e . && \
+    pip install flask
+
+# Copy the API service
+WORKDIR /app
+COPY docker/service.py .
+
+# Create cache directory for models
+RUN mkdir -p /root/.cache/huggingface
+
+# Environment configuration
+ENV WHISPER_MODEL=small.en
+ENV WHISPER__COMPUTE_TYPE=float32
+ENV WHISPER__NUM_WORKERS=1
+ENV WHISPER_DEVICE=cuda
+ENV LOG_LEVEL=INFO
+ENV PYTHONUNBUFFERED=1
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"
+
+# Expose port
+EXPOSE 8000
+
+# Run the service
+CMD ["python", "service.py"]
