@@ -9,6 +9,8 @@ class ConfigurationManager:
         'mode': 'auto',  # default mode
         'stt_provider': 'groq',
         'llm_provider': 'openrouter',
+        'openrouter_llm_model': 'openai/gpt-oss-120b:free',
+        'groq_stt_model': 'whisper-large-v3',
         'temp_dir': './tmp',
         'audio_config': {
             'sample_rate': 16000,

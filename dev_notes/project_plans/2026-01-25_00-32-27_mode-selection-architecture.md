@@ -471,8 +471,8 @@ After implementation, verify:
 
 **Created:** 2026-01-25 00:32:27
 **Revised:** 2026-01-25 00:50:00 (switched to sounddevice)
-**Last Updated:** 2026-01-25 01:14:53 (Phase 1 & 2 implementation completed)
-**Status:** Phase 1-2 Complete, Phase 3-4 Pending
+**Last Updated:** 2026-01-25 01:50:00 (All phases complete)
+**Status:** All Phases Complete ✅
 
 ## Implementation Progress
 
@@ -486,26 +486,26 @@ After implementation, verify:
 **Phase 2: Mode Architecture**
 - ✅ M.3: modes/base.py - BaseMode abstract class
 - ✅ M.4: modes/menu_mode.py - MenuMode implementation
-- ✅ M.5: modes/tui_mode.py - TUIMode stub
+- ✅ M.5: modes/tui_mode.py - TUIMode (Rich-based)
+- ✅ M.6: modes/gui_mode.py - GUIMode (Tkinter-based)
 - ✅ M.7: modes/__init__.py - Mode detection & factory
+
+**Phase 3: CLI Integration**
+- ✅ M.8: cli.py update - src/cli/run.py implementation
+- ✅ M.9: dependencies - Updated requirements.txt and created pyproject.toml
+
+**Phase 4: Testing & Documentation**
+- ✅ M.10: test_modes.py - Unit tests for modes and core
+- ✅ M.11: documentation - Updated architecture.md and created README.md
 
 ### Pending ⏳
 
-**Phase 2: Mode Architecture**
-- ❌ M.6: modes/gui_mode.py - Requires existing code extraction
-
-**Phase 3: CLI Integration**
-- ❌ M.8: cli.py update - Depends on M.6
-- ❌ M.9: dependencies - Pending
-
-**Phase 4: Testing & Documentation**
-- ❌ M.10: test_modes.py - Pending
-- ❌ M.11: documentation - Pending
+None.
 
 ### Summary
 
-7 out of 12 tasks completed (58%). All Phase 1 and most Phase 2 tasks implemented.
-Remaining work focuses on GUI mode extraction and CLI integration.
+12 out of 12 tasks completed (100%).
+
 
 ## Revision History
 

@@ -123,6 +123,35 @@ class MenuMode(BaseMode):
         Main menu-driven workflow for Second Voice.
         """
         context = None
+        
+        # Check for input file
+        input_file = self.config.get('input_file')
+        if input_file and os.path.exists(input_file):
+            print(f"Processing input file: {input_file}")
+            # Process the file directly as if option 1 was selected
+            try:
+                self.show_status("⌛ Transcribing...")
+                transcription = self.processor.transcribe(input_file)
+                
+                if transcription:
+                    self.show_transcription(transcription)
+                    
+                    # Process with LLM
+                    self.show_status("⌛ Processing...")
+                    output = self.processor.process_text(transcription, context)
+                    
+                    # Review output
+                    edited_output = self.review_output(output, context)
+                    
+                    # Update context
+                    context = edited_output
+                    self.processor.save_context(context)
+                
+                print("\nInput file processed.")
+                # We don't delete the input file
+                
+            except Exception as e:
+                print(f"Error processing input file: {e}")
 
         while True:
             try:
@@ -151,7 +180,8 @@ class MenuMode(BaseMode):
                             self.processor.save_context(context)
                         
                         # Clean up temporary audio file
-                        os.unlink(audio_path)
+                        if not self.config.get('keep_files'):
+                            os.unlink(audio_path)
 
                 elif choice == '2':  # Show context
                     current_context = context or self.processor.load_context()

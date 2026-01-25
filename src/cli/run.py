@@ -16,6 +16,10 @@ from second_voice.modes import detect_mode, get_mode
 def main():
     parser = argparse.ArgumentParser(description="Second Voice - AI Assistant")
     parser.add_argument('--mode', choices=['auto', 'gui', 'tui', 'menu'], default='auto', help="Interaction mode")
+    parser.add_argument('--keep-files', action='store_true', help="Keep temporary files after execution")
+    parser.add_argument('--file', type=str, help="Input audio file to process (bypasses recording)")
+    parser.add_argument('--debug', action='store_true', help="Enable debug logging")
+    parser.add_argument('--verbose', action='store_true', help="Enable verbose output")
     args = parser.parse_args()
 
     # Init config
@@ -24,6 +28,18 @@ def main():
     # Override config with CLI args if provided
     if args.mode != 'auto':
         config.set('mode', args.mode)
+    
+    if args.keep_files:
+        config.set('keep_files', True)
+        
+    if args.file:
+        config.set('input_file', os.path.abspath(args.file))
+
+    if args.debug:
+        config.set('debug', True)
+        
+    if args.verbose:
+        config.set('verbose', True)
 
     # Init engine
     try:
@@ -52,7 +68,10 @@ def main():
     finally:
         # Cleanup
         if 'recorder' in locals():
-            recorder.cleanup_temp_files()
+            if not config.get('keep_files'):
+                recorder.cleanup_temp_files()
+            else:
+                print(f"Keeping temporary files in {config.get('temp_dir')}")
 
 if __name__ == "__main__":
     main()

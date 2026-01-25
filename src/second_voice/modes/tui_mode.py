@@ -153,6 +153,10 @@ class TUIMode(BaseMode):
 
         context = None
         self.show_status("Ready")
+        
+        # Check for input file from CLI args
+        input_file = self.config.get('input_file')
+        first_run = True
 
         with Live(self.layout, console=self.console, screen=True, refresh_per_second=4):
             while True:
@@ -161,13 +165,21 @@ class TUIMode(BaseMode):
                     # but for this version we'll stick to a sequential flow 
                     # with visual updates.
                     
-                    # Wait for user to be ready for next command (simulated)
-                    # For now, it just auto-starts recording for demonstration 
-                    # or we could wait for a keypress if we had a non-blocking input
+                    audio_path = None
                     
-                    # Record audio
-                    self.show_status("Press Ctrl+C to stop recording...")
-                    audio_path = self.start_recording()
+                    # Handle input file for first run if provided
+                    if first_run and input_file and os.path.exists(input_file):
+                        self.show_status(f"Processing input file: {input_file}")
+                        audio_path = input_file
+                        # Don't set first_run to False yet, we do it after processing to avoid loop
+                    else:
+                        # Wait for user to be ready for next command (simulated)
+                        # For now, it just auto-starts recording for demonstration 
+                        # or we could wait for a keypress if we had a non-blocking input
+                        
+                        # Record audio
+                        self.show_status("Press Ctrl+C to stop recording...")
+                        audio_path = self.start_recording()
                     
                     if audio_path:
                         # Transcribe
@@ -191,13 +203,24 @@ class TUIMode(BaseMode):
                             context = edited_output
                             self.processor.save_context(context)
                         
-                        # Clean up temporary audio file
-                        if os.path.exists(audio_path):
-                            os.unlink(audio_path)
+                        # Clean up temporary audio file (only if it's not the input file)
+                        if audio_path != input_file and os.path.exists(audio_path):
+                            # We still check keep_files in the main cleanup, but for per-loop temp files:
+                            if not self.config.get('keep_files'):
+                                os.unlink(audio_path)
                         
-                        self.show_status("Done. Waiting 2s...")
-                        time.sleep(2)
-                        self.show_status("Ready for next round")
+                        # If we processed an input file, we might want to exit or wait
+                        if first_run and input_file:
+                            first_run = False
+                            # For one-shot file processing, we might want to just exit or pause
+                            self.show_status("Input file processed. Waiting 5s then exiting loop (or switching to mic)...")
+                            time.sleep(5)
+                            # Let's switch to mic for next rounds unless user interrupts
+                            # or just continue loop
+                        else:
+                            self.show_status("Done. Waiting 2s...")
+                            time.sleep(2)
+                            self.show_status("Ready for next round")
 
                 except KeyboardInterrupt:
                     break

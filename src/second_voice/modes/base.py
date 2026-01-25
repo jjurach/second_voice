@@ -107,6 +107,10 @@ class BaseMode(ABC):
         """
         Cleanup temporary files and resources.
         """
+        if self.config.get('keep_files'):
+            print(f"Keeping mode temporary files in {self.temp_dir}")
+            return
+
         # Remove temporary files
         for filename in os.listdir(self.temp_dir):
             file_path = os.path.join(self.temp_dir, filename)

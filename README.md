@@ -41,7 +41,7 @@ python3 src/cli/run.py
 ### Command Line Options
 
 ```bash
-usage: run.py [-h] [--mode {auto,gui,tui,menu}]
+usage: run.py [-h] [--mode {auto,gui,tui,menu}] [--keep-files] [--file FILE]
 
 Second Voice - AI Assistant
 
@@ -49,7 +49,41 @@ optional arguments:
   -h, --help            show this help message and exit
   --mode {auto,gui,tui,menu}
                         Interaction mode (default: auto)
+  --keep-files          Keep temporary files (recordings, transcripts) after execution
+  --file FILE           Process an existing .wav file instead of recording from microphone
 ```
+
+## Testing
+
+For automated testing and debugging, you can use the `samples/test.wav` file (or provide your own) and the `--file` flag to bypass the microphone. This allows for reproducible runs without needing to speak.
+
+### Example: Running with an input file
+
+```bash
+# Process a test file in TUI mode
+python3 src/cli/run.py --mode tui --file samples/test.wav
+
+# Process a test file in Menu mode
+python3 src/cli/run.py --mode menu --file samples/test.wav
+```
+
+### Running the Demo Script
+
+A standalone demo script is available to quickly verify the installation and audio processing without the full recursive loop:
+
+```bash
+python3 scripts/demo_second_voice.py
+```
+
+### Inspecting Intermediate Files
+
+Use the `--keep-files` flag to inspect the recorded audio, intermediate transcripts, and context buffers.
+
+```bash
+python3 src/cli/run.py --keep-files
+```
+
+Temporary files will be preserved in the `tmp/` and `tmp/mode_tmp/` directories.
 
 ## Configuration
 

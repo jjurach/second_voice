@@ -20,10 +20,10 @@ class AIProcessor:
         self.stt_provider = config.get('stt_provider', 'groq')
         self.llm_provider = config.get('llm_provider', 'openrouter')
         
-        # API configurations (to be replaced with actual provider configs)
+        # API configurations
         self.api_keys = {
-            'groq': os.environ.get('GROQ_API_KEY', ''),
-            'openrouter': os.environ.get('OPENROUTER_API_KEY', '')
+            'groq': os.environ.get('GROQ_API_KEY', config.get('groq_api_key', '')),
+            'openrouter': os.environ.get('OPENROUTER_API_KEY', config.get('openrouter_api_key', ''))
         }
 
     def transcribe(self, audio_path: str) -> Optional[str]:
@@ -53,13 +53,18 @@ class AIProcessor:
 
         try:
             with open(audio_path, 'rb') as audio_file:
+                # Use OpenAI-compatible endpoint
                 response = requests.post(
-                    'https://api.groq.com/v1/speech/transcribe',
+                    'https://api.groq.com/openai/v1/audio/transcriptions',
                     headers={
-                        'Authorization': f'Bearer {self.api_keys["groq"]}',
-                        'Content-Type': 'audio/wav'
+                        'Authorization': f'Bearer {self.api_keys["groq"]}'
                     },
-                    data=audio_file
+                    files={
+                        'file': (os.path.basename(audio_path), audio_file, 'audio/wav')
+                    },
+                    data={
+                        'model': self.config.get('groq_stt_model', 'whisper-large-v3')
+                    }
                 )
                 response.raise_for_status()
                 return response.json().get('text', None)
@@ -112,7 +117,7 @@ class AIProcessor:
                     'Content-Type': 'application/json'
                 },
                 json={
-                    'model': 'anthropic/claude-3.5-sonnet',
+                    'model': self.config.get('openrouter_llm_model', self.config.get('llm_model', 'openai/gpt-oss-120b:free')),
                     'messages': messages
                 }
             )
