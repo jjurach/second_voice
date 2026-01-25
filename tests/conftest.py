@@ -191,16 +191,26 @@ def mock_device_list():
 
 
 @pytest.fixture(autouse=True)
-def reset_imports():
-    """Reset module imports before each test to avoid state pollution."""
+def cleanup_audio_resources():
+    """Clean up audio resources before each test to prevent warnings during teardown."""
     yield
-    # Clean up any module-level state after test
-    import sys
-    modules_to_check = [
-        m for m in sys.modules.keys()
-        if m.startswith("second_voice")
-    ]
-    for module_name in modules_to_check:
-        if module_name in sys.modules:
-            # Reset but don't remove to avoid reimport issues
-            pass
+    # Clean up any remaining audio streams or resources
+    try:
+        import sounddevice as sd
+        # Close any remaining streams
+        if hasattr(sd, 'default_speaker') and sd.default_speaker is not None:
+            try:
+                sd.default_speaker.close()
+            except:
+                pass
+        if hasattr(sd, 'default_microphone') and sd.default_microphone is not None:
+            try:
+                sd.default_microphone.close()
+            except:
+                pass
+    except:
+        pass
+
+    # Force garbage collection to clean up __del__ methods
+    import gc
+    gc.collect()
