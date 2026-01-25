@@ -1,163 +1,105 @@
-# Google Gemini - Guide (Experimental)
+# Google Gemini - Guide (Supported)
 
-**Status:** ❓ Experimental - Not yet fully tested with this project
+**Status:** ✅ Supported
 
-This guide is a template for using Google Gemini with AGENTS.md. It will be completed and verified as Gemini support is tested.
+This guide describes how to use **Google Gemini CLI** with the AGENTS.md workflow.
 
-## Current Status
+## Quick Start
 
-- ✅ Gemini can access function calling
-- ✅ Gemini supports code understanding
-- ⚠️ Git integration unknown
-- ⚠️ Approval gate support unknown
-- ⚠️ Task tracking unknown
-- ❓ File I/O capabilities unknown
+1.  **Install/Setup:** Ensure you have the Gemini CLI installed and configured.
+2.  **Configuration:** Create a `GEMINI.md` file in the root of your project (see below).
+3.  **Run:**
+    ```bash
+    gemini
+    ```
 
-## Quick Start (Once Tested)
+## How Gemini Discovers Project Instructions
 
-```bash
-# Install Gemini CLI (when available)
-pip install gemini-cli  # Or equivalent
+Gemini looks for a `GEMINI.md` file in the project root. This file serves the same purpose as `CLAUDE.md`.
 
-# Initialize
-cd /path/to/second_voice
-gemini-cli
+## Workflow Mapping (AGENTS.md)
 
-# Example (TBD)
-> fix the tests
+| AGENTS.md Step | Gemini Action | Tool Used |
+|---|---|---|
+| **A. Analyze** | Analyze request & context | Internal reasoning |
+| **B. Spec** | Write spec file | `write_file` |
+| **C. Plan** | Write plan file | `write_file` |
+| **D. Approval** | Ask user for confirmation | **Conversation** (No explicit tool) |
+| **E. Implement** | Edit files, run commands | `read_file`, `replace`, `run_shell_command` |
+| **F. Verify** | Run tests | `run_shell_command` ("pytest") |
+
+## Key Differences from Claude Code
+
+| Feature | Claude Code | Gemini CLI |
+|---|---|---|
+| **Entry Point** | `CLAUDE.md` | `GEMINI.md` |
+| **Approval** | `ExitPlanMode()` (Explicit) | **Conversational** ("Do you approve?") |
+| **Git** | `Bash(git ...)` | `run_shell_command(git ...)` |
+| **Task Tracking** | Built-in (`TaskCreate`) | **Manual** (via `dev_notes/`) |
+| **Context** | ~200k tokens | ~1M+ tokens (1.5 Pro) |
+
+## Configuration: GEMINI.md
+
+Create a `GEMINI.md` file in your project root with the following content:
+
+```markdown
+# Second Voice - Gemini Instructions
+
+## Core Workflow
+This project follows the **AGENTS.md** workflow.
+- **MANDATORY:** Read `AGENTS.md` before starting any task.
+- **MANDATORY:** Read `docs/definition-of-done.md` before marking tasks complete.
+
+## Development Environment
+- **Language:** Python 3.12+
+- **Testing:** `pytest`
+- **Linting:** Standard Python conventions
+- **Project Structure:**
+  - `src/`: Source code
+  - `tests/`: Unit tests
+  - `dev_notes/`: Documentation & Plans
+
+## Key Commands
+- Run App: `python3 src/cli/run.py`
+- Run Tests: `pytest`
+- Check Types: `mypy .`
 ```
 
-## Known Differences from Claude Code
+## Common Patterns
 
-| Feature | Claude Code | Gemini | Status |
-|---------|---|---|---|
-| Function calling | ✅ Yes | ✅ Likely | ✅ |
-| Code understanding | Good | Good | ? |
-| Git integration | Manual | TBD | ❓ |
-| Web search | ✅ Yes | ✅ Likely | ✅ |
-| MCP servers | ✅ Yes | ❌ Unlikely | ❌ |
-| Context window | 200k tokens | 32k typical | ⚠️ |
-| Tool syntax | Claude-specific | Different | ⚠️ |
-
-## AGENTS.md Compatibility (TBD)
-
-Assuming Gemini supports similar patterns:
-
+### 1. Creating a Plan
 ```
-Step A: Analyze → Likely works
-Step B: Create spec file → Needs function call
-Step C: Create plan → Needs function call
-Step D: Approval → UNKNOWN - may not have approval gates
-Step E: Implement → Likely works
+User: "Refactor the config loader"
+Gemini: "I will analyze the request."
+[Gemini reads files]
+Gemini: "I have created a plan in dev_notes/project_plans/..."
+Gemini: "Do you approve this plan?"
+User: "Yes"
+Gemini: [Proceeds to implementation]
 ```
 
-## Expected Workflow (Once Verified)
-
+### 2. Running Tests
 ```
-1. Start Gemini
-2. Request feature with context
-3. Gemini analyzes scope
-4. Create spec file (via function call)
-5. Create plan (via function call)
-6. Request approval (mechanism TBD)
-7. Implement step-by-step
-8. Create change docs
-9. Commit changes
+Gemini: "I will verify the changes."
+Tool: run_shell_command(command="pytest tests/test_config.py")
 ```
 
-## What Needs Testing
-
-- [ ] Does Gemini detect project instructions automatically?
-- [ ] What's the equivalent of CLAUDE.md for Gemini?
-- [ ] How does Gemini handle file operations?
-- [ ] Can Gemini make git commits?
-- [ ] Does Gemini support approval gates?
-- [ ] What's the context window limit?
-- [ ] How are tool names/syntax different?
-- [ ] Can we use environment detection?
-
-## Configuration (Template)
-
-Once Gemini is tested, create `.gemini-cli.yaml`:
-
-```yaml
-project:
-  # Reference the workflow
-  instructions: |
-    This project follows AGENTS.md workflow.
-    See docs/ for details.
-
-  # Tool integration
-  tools:
-    files: true
-    git: true
-    shell: true
-
-  # Context files
-  context-files:
-    - AGENTS.md
-    - docs/workflow-mapping.md
-    - docs/tool-specific-guides/gemini.md
+### 3. Git Operations
+Gemini uses `run_shell_command` for git operations.
+```
+Tool: run_shell_command(command="git status")
+Tool: run_shell_command(command="git add . && git commit -m '...'")
 ```
 
-## Contributing to This Guide
+## FAQ / Known Issues
 
-**To add Gemini support:**
+1.  **Approval Gates:** Gemini does not have a hard "ExitPlanMode" state. You must explicitly ask the user "Do you approve?" and wait for their text response.
+2.  **Task Tracking:** Gemini does not have a `Task` tool. Use the `dev_notes/` directory to track progress.
+3.  **File Editing:** Gemini uses `replace` which requires unique context. Ensure you provide enough context lines.
 
-1. Test Gemini with simple tasks
-2. Document what works/doesn't work
-3. Update this guide with findings
-4. Create `.gemini-cli.yaml` configuration
-5. Update tools-capabilities.md with actual capabilities
-6. Submit PR with changes
+## Contributing
 
-## For Now
-
-Use **Claude Code** or **Aider** until Gemini support is verified:
-- Claude Code: Best for formal approval gates
-- Aider: Best for collaborative approach
-- Gemini: Coming soon!
-
-## Expected Benefits of Gemini Support
-
-Once tested, Gemini would offer:
-- Multimodal input (images, video, audio)
-- Fast inference for simpler tasks
-- Low-cost alternative to Claude/GPT models
-- Good code understanding (expected)
-
-## Questions to Answer
-
-1. **Approval mechanism:** Does Gemini have built-in approval gates like Claude Code?
-2. **File operations:** How does Gemini interact with files? Function calls? Tools?
-3. **Git workflow:** Can Gemini make commits? How?
-4. **Configuration:** What does a `.gemini-cli.yaml` look like?
-5. **Tool syntax:** Are function calling conventions different?
-6. **Context:** Can Gemini handle ~1300 lines of code per module?
-7. **Testing:** Can Gemini run pytest and interpret results?
-8. **Documentation:** How to reference AGENTS.md from Gemini?
-
-## Related Documents
-
-- AGENTS.md - Core workflow (all tools)
-- tools-capabilities.md - Capability matrix
-- workflow-mapping.md - How AGENTS.md maps to each tool
-- claude-code.md - Verified complete guide
-- aider.md - Verified complete guide
-- file-naming-conventions.md - Which file names matter
-
-## Next Steps
-
-1. Install Gemini CLI when available
-2. Test with simple task
-3. Document findings
-4. Update this guide with actual information
-5. Update tools-capabilities.md
-6. Create .gemini-cli.yaml
-7. Add more examples
-
----
-
-**Status:** ⏳ Awaiting testing and implementation
-**Last Updated:** 2026-01-25
-**Maintainer:** Team (to be assigned)
+To update this guide:
+1.  Verify new Gemini features.
+2.  Update `GEMINI.md` template if needed.
+3.  Update this file.
