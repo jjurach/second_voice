@@ -113,7 +113,7 @@ def docs():
                 <h2>Response</h2>
                 <pre>{"text": "transcribed text"}</pre>
                 <h2>Example</h2>
-                <pre>curl -X POST http://localhost:8000/v1/audio/transcriptions \\
+                <pre>curl -X POST http://localhost:9090/v1/audio/transcriptions \\
   -F "file=@audio.wav" \\
   -F "model=small.en"</pre>
                 <h2>Health Check</h2>
@@ -129,5 +129,5 @@ def docs():
 if __name__ == "__main__":
     # Pre-load model before starting server
     load_model()
-    logger.info(f"Starting Whisper API server on 0.0.0.0:8000")
-    app.run(host="0.0.0.0", port=8000, threaded=True)
+    logger.info(f"Starting Whisper API server on 0.0.0.0:9090")
+    app.run(host="0.0.0.0", port=9090, threaded=True)

@@ -13,7 +13,7 @@ import sys
 
 
 class WhisperTester:
-    def __init__(self, audio_file="test.wav", model="whisper-1", url="http://localhost:8000/v1/audio/transcriptions"):
+    def __init__(self, audio_file="test.wav", model="whisper-1", url="http://localhost:9090/v1/audio/transcriptions"):
         self.audio_file = Path(audio_file)
         self.model = model
         self.url = url
@@ -176,7 +176,7 @@ def main():
     parser = argparse.ArgumentParser(description="Test Whisper transcription server")
     parser.add_argument("--audio", default="test.wav", help="Path to audio file (default: test.wav)")
     parser.add_argument("--model", default="whisper-1", help="Model name (default: whisper-1)")
-    parser.add_argument("--url", default="http://localhost:8000/v1/audio/transcriptions",
+    parser.add_argument("--url", default="http://localhost:9090/v1/audio/transcriptions",
                        help="API endpoint URL")
 
     args = parser.parse_args()

@@ -53,7 +53,7 @@ Settings are stored in `~/.config/second_voice/settings.json`:
 
 ```json
 {
-    "whisper_url": "http://localhost:8000/v1/audio/transcriptions",
+    "whisper_url": "http://localhost:9090/v1/audio/transcriptions",
     "ollama_url": "http://localhost:11434/api/generate",
     "whisper_model": "small.en",
     "ollama_model": "llama-pro",

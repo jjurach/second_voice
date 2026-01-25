@@ -66,7 +66,7 @@ python3 test_whisper_api.py --audio my_recording.wav
 python3 test_whisper_api.py --model Systran/faster-whisper-large-v3
 
 # Custom URL
-python3 test_whisper_api.py --url http://192.168.1.100:8000/v1/audio/transcriptions
+python3 test_whisper_api.py --url http://192.168.1.100:9090/v1/audio/transcriptions
 ```
 
 **Features:**
@@ -80,10 +80,9 @@ python3 test_whisper_api.py --url http://192.168.1.100:8000/v1/audio/transcripti
 
 #### Option C: Simple Curl Command
 ```bash
-curl http://localhost:8000/v1/audio/transcriptions \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@./test.wav" \
-  -F "model=whisper-1"
+curl http://localhost:9090/v1/audio/transcriptions \
+    -F "file=@test_audio.wav" \
+    -F "model=whisper-1"
 ```
 
 ## GPU Monitoring Commands
@@ -183,7 +182,7 @@ docker logs whisper-server | grep -i "cuda\|cpu"
 
 **Example with jq parsing:**
 ```bash
-curl -X POST http://localhost:8000/v1/audio/transcriptions \
+curl -X POST http://localhost:9090/v1/audio/transcriptions \
   -F "file=@test.wav" \
   -F "model=whisper-1" | jq '.text'
 ```

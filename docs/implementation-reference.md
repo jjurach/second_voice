@@ -231,7 +231,7 @@ def load_config(self):
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with open(CONFIG_PATH, 'w') as f:
             json.dump({
-                "whisper_url": "http://localhost:8000/v1/audio/transcriptions",
+                "whisper_url": "http://localhost:9090/v1/audio/transcriptions",
                 "ollama_url": "http://localhost:11434/api/generate",
                 "ollama_model": "llama-pro",
                 "whisper_model": "small.en"
@@ -347,9 +347,9 @@ def submit(self):
 
 Before running the application, verify:
 
-1. **SSH Tunnel:** Confirm ports 8000 and 11434 are mapped to `192.168.0.157`
+1. **SSH Tunnel:** Confirm ports 9090 and 11434 are mapped to `192.168.0.157`
    ```bash
-   lsof -i :8000  # Should show ssh as listener
+   lsof -i :9090  # Should show ssh as listener
    ```
 
 2. **Obsidian:** Ensure `VoiceInbox` exists and Syncthing ignore patterns are set for `.review_buffer.md`

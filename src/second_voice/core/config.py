@@ -7,10 +7,13 @@ class ConfigurationManager:
 
     DEFAULT_CONFIG = {
         'mode': 'auto',  # default mode
-        'stt_provider': 'groq',
-        'llm_provider': 'openrouter',
+        'stt_provider': 'local_whisper',
+        'llm_provider': 'ollama',
         'openrouter_llm_model': 'openai/gpt-oss-120b:free',
         'groq_stt_model': 'whisper-large-v3',
+        'local_whisper_url': 'http://localhost:9090/v1/audio/transcriptions',
+        'ollama_url': 'http://localhost:11434/api/generate',
+        'ollama_model': 'llama3',
         'temp_dir': './tmp',
         'audio_config': {
             'sample_rate': 16000,

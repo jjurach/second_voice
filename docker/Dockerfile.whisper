@@ -40,10 +40,10 @@ ENV PYTHONUNBUFFERED=1
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:9090/health').read()"
 
 # Expose port
-EXPOSE 8000
+EXPOSE 9090
 
 # Run the service
 CMD ["python", "service.py"]

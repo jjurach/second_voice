@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 # --- DEFAULT CONFIGURATION ---
-WHISPER_URL = "http://localhost:8000/v1/audio/transcriptions"
+WHISPER_URL = "http://localhost:9090/v1/audio/transcriptions"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 WHISPER_MODEL = "Systran/faster-whisper-large-v3"
 OLLAMA_MODEL = "llama-pro"

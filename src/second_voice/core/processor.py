@@ -17,8 +17,8 @@ class AIProcessor:
         :param config: Configuration dictionary containing provider settings
         """
         self.config = config
-        self.stt_provider = config.get('stt_provider', 'groq')
-        self.llm_provider = config.get('llm_provider', 'openrouter')
+        self.stt_provider = config.get('stt_provider', 'local_whisper')
+        self.llm_provider = config.get('llm_provider', 'ollama')
         
         # API configurations
         self.api_keys = {
@@ -38,8 +38,31 @@ class AIProcessor:
 
         if self.stt_provider == 'groq':
             return self._transcribe_groq(audio_path)
+        elif self.stt_provider == 'local_whisper':
+            return self._transcribe_local_whisper(audio_path)
         else:
             raise ValueError(f"Unsupported STT provider: {self.stt_provider}")
+
+    def _transcribe_local_whisper(self, audio_path: str) -> Optional[str]:
+        """
+        Transcribe audio using Local Whisper service.
+
+        :param audio_path: Path to the audio file
+        :return: Transcribed text or None
+        """
+        url = self.config.get('local_whisper_url', 'http://localhost:9090/v1/audio/transcriptions')
+        try:
+            with open(audio_path, 'rb') as audio_file:
+                response = requests.post(
+                    url,
+                    files={'file': audio_file},
+                    data={'model': 'whisper-1'} # Default model expected by some local servers
+                )
+                response.raise_for_status()
+                return response.json().get('text', None)
+        except requests.RequestException as e:
+            print(f"Local Whisper transcription error: {e}")
+            return None
 
     def _transcribe_groq(self, audio_path: str) -> Optional[str]:
         """
@@ -82,8 +105,40 @@ class AIProcessor:
         """
         if self.llm_provider == 'openrouter':
             return self._process_openrouter(text, context)
+        elif self.llm_provider == 'ollama':
+            return self._process_ollama(text, context)
         else:
             raise ValueError(f"Unsupported LLM provider: {self.llm_provider}")
+
+    def _process_ollama(self, text: str, context: Optional[str] = None) -> str:
+        """
+        Process text using local Ollama instance.
+
+        :param text: User input/instruction
+        :param context: Optional previous conversation context
+        :return: LLM processed output
+        """
+        url = self.config.get('ollama_url', 'http://localhost:11434/api/generate')
+        model = self.config.get('ollama_model', 'llama3')
+        
+        prompt = text
+        if context:
+            prompt = f"Previous Context:\n{context}\n\nInstruction:\n{text}"
+
+        try:
+            response = requests.post(
+                url,
+                json={
+                    'model': model,
+                    'prompt': prompt,
+                    'stream': False
+                }
+            )
+            response.raise_for_status()
+            return response.json().get('response', '')
+        except requests.RequestException as e:
+            print(f"Ollama processing error: {e}")
+            return f"Error processing request: {e}"
 
     def _process_openrouter(self, text: str, context: Optional[str] = None) -> str:
         """
@@ -158,3 +213,9 @@ class AIProcessor:
                 return f.read()
         except FileNotFoundError:
             return None
+
+    def clear_context(self):
+        """
+        Clear the saved context.
+        """
+        self.save_context('')

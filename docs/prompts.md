@@ -150,7 +150,7 @@ Shows character count of current context:
 
 Before processing, the system checks:
 
-1. **SSH Tunnel:** Ports 8000 and 11434 are mapped
+1. **SSH Tunnel:** Ports 9090 and 11434 are mapped
 2. **Obsidian Vault:** VoiceInbox directory exists
 3. **Syncthing:** Ignore patterns set for `.review_buffer.md`
 4. **Audio Input:** MacBook microphone is selected

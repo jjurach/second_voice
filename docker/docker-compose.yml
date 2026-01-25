@@ -32,7 +32,9 @@ services:
       dockerfile: docker/Dockerfile.whisper
     container_name: whisper-server
     ports:
-      - "8000:8000"
+      - "9090:9090"
+    volumes:
+      - ./models:/app/models
     environment:
       - WHISPER_MODEL=small.en
       - WHISPER__COMPUTE_TYPE=float32

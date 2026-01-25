@@ -50,11 +50,7 @@ Mix and match based on needs:
 - ✅ No internet required (after setup)
 - ✅ Full control over model and performance
 
-**Setup:**
-```json
-{
-  "local_whisper": {
-    "url": "http://localhost:8000/v1/audio/transcriptions",
+    "url": "http://localhost:9090/v1/audio/transcriptions",
     "model": "small.en"
   }
 }
@@ -65,8 +61,7 @@ Mix and match based on needs:
 services:
   whisper:
     image: fedirz/faster-whisper-server:latest-cuda
-    ports: ["8000:8000"]
-    environment:
+          ports: ["9090:9090"]    environment:
       - WHISPER_MODEL=small.en
     deploy:
       resources:
@@ -78,8 +73,7 @@ services:
 
 **SSH Tunnel (for remote GPU):**
 ```bash
-ssh -N -L 8000:localhost:8000 your-server
-```
+    ssh -N -L 9090:localhost:9090 your-server```
 
 **Models:** small.en, medium.en, large-v3 (based on VRAM)
 
@@ -276,7 +270,7 @@ second_voice --stt-provider groq --llm-provider ollama
 ```json
 {
   "local_whisper": {
-    "url": "http://localhost:8000/v1/audio/transcriptions",
+    "url": "http://localhost:9090/v1/audio/transcriptions",
     "model": "medium.en"
   },
   "ollama": {
@@ -328,7 +322,7 @@ second_voice
 ```json
 {
   "local_whisper": {
-    "url": "http://localhost:8000/v1/audio/transcriptions",
+    "url": "http://localhost:9090/v1/audio/transcriptions",
     "model": "small.en"
   }
 }
@@ -436,13 +430,10 @@ second_voice \
 
 **Local Whisper: Connection Refused**
 ```
-STTProviderConnectionError: Cannot connect to http://localhost:8000
-```
+   STTProviderConnectionError: Cannot connect to http://localhost:9090```
 **Solutions:**
-1. Check SSH tunnel: `lsof -i :8000`
-2. Verify Docker: `docker ps | grep whisper`
-3. Test endpoint: `curl http://localhost:8000/health`
-
+   1. Check SSH tunnel: `lsof -i :9090`2. Verify Docker: `docker ps | grep whisper`
+   3. Test endpoint: `curl http://localhost:9090/health`
 **Groq: Authentication Failed**
 ```
 STTProviderAuthError: Invalid API key

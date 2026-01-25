@@ -93,7 +93,7 @@ Example configuration:
 
 ```json
 {
-    "whisper_url": "http://localhost:8000/v1/audio/transcriptions",
+    "whisper_url": "http://localhost:9090/v1/audio/transcriptions",
     "ollama_url": "http://localhost:11434/api/generate",
     "vault_path": "~/Documents/Obsidian/VoiceInbox",
     "mode": "auto"
