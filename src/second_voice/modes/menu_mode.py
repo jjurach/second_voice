@@ -132,24 +132,30 @@ class MenuMode(BaseMode):
             try:
                 self.show_status("⌛ Transcribing...")
                 transcription = self.processor.transcribe(input_file)
-                
+
                 if transcription:
                     self.show_transcription(transcription)
-                    
+
                     # Process with LLM
                     self.show_status("⌛ Processing...")
                     output = self.processor.process_text(transcription, context)
-                    
+
+                    # Skip editor if --no-edit flag is set
+                    if self.config.get('no_edit'):
+                        print(f"📋 Output: {output}")
+                        self.cleanup()
+                        return
+
                     # Review output
                     edited_output = self.review_output(output, context)
-                    
+
                     # Update context
                     context = edited_output
                     self.processor.save_context(context)
-                
+
                 print("\nInput file processed.")
                 # We don't delete the input file
-                
+
             except Exception as e:
                 print(f"Error processing input file: {e}")
 

@@ -20,6 +20,7 @@ def main():
     parser.add_argument('--file', type=str, help="Input audio file to process (bypasses recording)")
     parser.add_argument('--debug', action='store_true', help="Enable debug logging")
     parser.add_argument('--verbose', action='store_true', help="Enable verbose output")
+    parser.add_argument('--no-edit', action='store_true', help="Skip editor after file processing (for testing)")
     args = parser.parse_args()
 
     # Init config
@@ -59,9 +60,12 @@ def main():
 
     if args.debug:
         config.set('debug', True)
-        
+
     if args.verbose:
         config.set('verbose', True)
+
+    if args.no_edit:
+        config.set('no_edit', True)
 
     # Init engine
     try:

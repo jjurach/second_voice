@@ -1,7 +1,12 @@
 import os
 import json
 import requests
+import logging
 from typing import Optional, Dict, Any
+from urllib.parse import urljoin
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 class AIProcessor:
     """
@@ -51,17 +56,54 @@ class AIProcessor:
         :return: Transcribed text or None
         """
         url = self.config.get('local_whisper_url', 'http://localhost:9090/v1/audio/transcriptions')
+        timeout = self.config.get('local_whisper_timeout', 60)
+
+        logger.debug(f"Whisper config - URL: {url}, timeout: {timeout}s")
+
+        # First, check if the service is reachable
+        health_url = url.replace('/v1/audio/transcriptions', '/health')
+        logger.debug(f"Checking Whisper service health at {health_url}...")
         try:
+            health_response = requests.get(health_url, timeout=5)
+            logger.debug(f"Whisper health check: {health_response.status_code}")
+        except requests.RequestException as health_error:
+            logger.warning(f"Whisper service health check failed: {type(health_error).__name__}: {health_error}")
+            print(f"Local Whisper transcription error: Service unavailable ({type(health_error).__name__})")
+            return None
+
+        try:
+            logger.debug(f"Opening audio file: {audio_path}")
+            file_size = os.path.getsize(audio_path)
+            logger.debug(f"Audio file size: {file_size} bytes")
+
             with open(audio_path, 'rb') as audio_file:
+                logger.debug(f"Sending transcription request to {url}")
                 response = requests.post(
                     url,
                     files={'file': audio_file},
-                    data={'model': 'whisper-1'} # Default model expected by some local servers
+                    data={'model': 'whisper-1'},
+                    timeout=timeout
                 )
+                logger.debug(f"Received response: status={response.status_code}")
                 response.raise_for_status()
-                return response.json().get('text', None)
+                result = response.json().get('text', None)
+                logger.debug(f"Transcription successful, text length: {len(result) if result else 0}")
+                return result
+        except requests.Timeout as e:
+            logger.error(f"Whisper request timeout after {timeout}s: {e}")
+            print(f"Local Whisper transcription error: Request timeout (exceeded {timeout}s)")
+            return None
+        except requests.ConnectionError as e:
+            logger.error(f"Whisper connection error: {type(e).__name__}: {e}")
+            print(f"Local Whisper transcription error: Connection failed ({type(e).__name__})")
+            return None
         except requests.RequestException as e:
-            print(f"Local Whisper transcription error: {e}")
+            logger.error(f"Whisper request error: {type(e).__name__}: {e}")
+            print(f"Local Whisper transcription error: {type(e).__name__}: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error during transcription: {type(e).__name__}: {e}")
+            print(f"Local Whisper transcription error: Unexpected error: {type(e).__name__}: {e}")
             return None
 
     def _transcribe_groq(self, audio_path: str) -> Optional[str]:
@@ -74,8 +116,16 @@ class AIProcessor:
         if not self.api_keys['groq']:
             raise ValueError("Groq API key not configured")
 
+        timeout = self.config.get('groq_timeout', 60)
+        model = self.config.get('groq_stt_model', 'whisper-large-v3')
+        logger.debug(f"Groq transcription - model: {model}, timeout: {timeout}s")
+
         try:
+            file_size = os.path.getsize(audio_path)
+            logger.debug(f"Opening audio file: {audio_path} ({file_size} bytes)")
+
             with open(audio_path, 'rb') as audio_file:
+                logger.debug(f"Sending transcription request to Groq API")
                 # Use OpenAI-compatible endpoint
                 response = requests.post(
                     'https://api.groq.com/openai/v1/audio/transcriptions',
@@ -86,12 +136,21 @@ class AIProcessor:
                         'file': (os.path.basename(audio_path), audio_file, 'audio/wav')
                     },
                     data={
-                        'model': self.config.get('groq_stt_model', 'whisper-large-v3')
-                    }
+                        'model': model
+                    },
+                    timeout=timeout
                 )
+                logger.debug(f"Groq response: status={response.status_code}")
                 response.raise_for_status()
-                return response.json().get('text', None)
+                result = response.json().get('text', None)
+                logger.debug(f"Groq transcription successful, text length: {len(result) if result else 0}")
+                return result
+        except requests.Timeout as e:
+            logger.error(f"Groq request timeout after {timeout}s: {e}")
+            print(f"Transcription error: Request timeout (exceeded {timeout}s)")
+            return None
         except requests.RequestException as e:
+            logger.error(f"Groq transcription error: {type(e).__name__}: {e}")
             print(f"Transcription error: {e}")
             return None
 
@@ -120,23 +179,42 @@ class AIProcessor:
         """
         url = self.config.get('ollama_url', 'http://localhost:11434/api/generate')
         model = self.config.get('ollama_model', 'llama3')
-        
+        timeout = self.config.get('ollama_timeout', 300)
+
+        logger.debug(f"Ollama config - URL: {url}, model: {model}, timeout: {timeout}s")
+
         prompt = text
         if context:
             prompt = f"Previous Context:\n{context}\n\nInstruction:\n{text}"
 
         try:
+            logger.debug(f"Sending request to Ollama at {url}")
             response = requests.post(
                 url,
                 json={
                     'model': model,
                     'prompt': prompt,
                     'stream': False
-                }
+                },
+                timeout=timeout
             )
+            logger.debug(f"Ollama response: status={response.status_code}")
             response.raise_for_status()
-            return response.json().get('response', '')
+            result = response.json().get('response', '')
+            logger.debug(f"Ollama processing successful, response length: {len(result)}")
+            return result
+        except requests.Timeout as e:
+            error_msg = f"Ollama request timeout after {timeout}s"
+            logger.error(f"{error_msg}: {e}")
+            print(f"Ollama processing error: {error_msg}")
+            return f"Error: {error_msg}"
+        except requests.ConnectionError as e:
+            error_msg = f"Ollama connection failed ({type(e).__name__})"
+            logger.error(f"{error_msg}: {e}")
+            print(f"Ollama processing error: {error_msg}")
+            return f"Error: {error_msg}"
         except requests.RequestException as e:
+            logger.error(f"Ollama request error: {type(e).__name__}: {e}")
             print(f"Ollama processing error: {e}")
             return f"Error processing request: {e}"
 
@@ -151,6 +229,10 @@ class AIProcessor:
         if not self.api_keys['openrouter']:
             raise ValueError("OpenRouter API key not configured")
 
+        timeout = self.config.get('openrouter_timeout', 60)
+        model = self.config.get('openrouter_llm_model', self.config.get('llm_model', 'openai/gpt-oss-120b:free'))
+        logger.debug(f"OpenRouter LLM config - model: {model}, timeout: {timeout}s")
+
         try:
             # Prepare messages with optional context
             messages = []
@@ -159,12 +241,13 @@ class AIProcessor:
                     "role": "system",
                     "content": f"Previous conversation context: {context}"
                 })
-            
+
             messages.append({
                 "role": "user",
                 "content": text
             })
 
+            logger.debug(f"Sending request to OpenRouter API with model: {model}")
             response = requests.post(
                 'https://openrouter.ai/api/v1/chat/completions',
                 headers={
@@ -172,14 +255,24 @@ class AIProcessor:
                     'Content-Type': 'application/json'
                 },
                 json={
-                    'model': self.config.get('openrouter_llm_model', self.config.get('llm_model', 'openai/gpt-oss-120b:free')),
+                    'model': model,
                     'messages': messages
-                }
+                },
+                timeout=timeout
             )
+            logger.debug(f"OpenRouter response: status={response.status_code}")
             response.raise_for_status()
             result = response.json()
-            return result['choices'][0]['message']['content']
+            content = result['choices'][0]['message']['content']
+            logger.debug(f"OpenRouter processing successful, response length: {len(content)}")
+            return content
+        except requests.Timeout as e:
+            error_msg = f"OpenRouter request timeout after {timeout}s"
+            logger.error(f"{error_msg}: {e}")
+            print(f"LLM processing error: {error_msg}")
+            return f"Error: {error_msg}"
         except requests.RequestException as e:
+            logger.error(f"OpenRouter request error: {type(e).__name__}: {e}")
             print(f"LLM processing error: {e}")
             return f"Error processing request: {e}"
 

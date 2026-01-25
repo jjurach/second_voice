@@ -32,9 +32,10 @@ services:
       dockerfile: docker/Dockerfile.whisper
     container_name: whisper-server
     ports:
-      - "9090:9090"
+      - "9090:8000"
     volumes:
       - ./models:/app/models
+      - ~/.cache/huggingface:/root/.cache/huggingface
     environment:
       - WHISPER_MODEL=small.en
       - WHISPER__COMPUTE_TYPE=float32
@@ -42,8 +43,6 @@ services:
       - WHISPER_DEVICE=cuda
       - LOG_LEVEL=INFO
       - PYTHONUNBUFFERED=1
-    volumes:
-      - ~/.cache/huggingface:/root/.cache/huggingface
     deploy:
       resources:
         reservations:
