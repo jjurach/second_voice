@@ -6,16 +6,16 @@ This document defines the capabilities and constraints of each supported CLI too
 
 | Capability | Claude Code | Aider | Gemini | Codex |
 |-----------|------------|-------|--------|-------|
-| **Git Integration** | ✅ Native | ✅ Native | ❓ Unknown | ❓ Unknown |
-| **Approval Gates** | ✅ Built-in | ❌ Implicit | ❓ Unknown | ❓ Unknown |
-| **Task Tracking** | ✅ TaskCreate | ❌ Manual | ❓ Unknown | ❓ Unknown |
-| **Function Calling** | ✅ Full | ⚠️ Limited | ✅ Full | ❓ Unknown |
-| **File Editing** | ✅ Edit tool | ✅ Direct | ✅ Via tool | ❓ Unknown |
-| **Shell Commands** | ✅ Bash tool | ✅ Shell | ⚠️ Likely | ❓ Unknown |
-| **MCP Servers** | ✅ Yes | ❌ No | ❓ Unknown | ❓ Unknown |
-| **Web Search** | ✅ Yes | ⚠️ Maybe | ✅ Likely | ❓ Unknown |
-| **Context Window** | ~200k tokens | Varies | ~32k tokens | ❓ Unknown |
-| **Agent SDK** | ✅ Yes | ❌ No | ❓ Unknown | ❓ Unknown |
+| **Git Integration** | ✅ Native | ✅ Auto-commit | ⚠️ Via Shell | ✅ Auto-commit |
+| **Approval Gates** | ✅ Built-in | ❌ Conversational | ⚠️ Conversational | ✅ Granular |
+| **Task Tracking** | ✅ TaskCreate | ❌ Manual | ❌ Manual | ❌ Manual |
+| **Function Calling** | ✅ Full | ⚠️ Limited | ✅ Full | ✅ Full |
+| **File Editing** | ✅ Edit tool | ✅ Direct | ✅ Replace tool | ✅ Auto-Edit |
+| **Shell Commands** | ✅ Bash tool | ✅ Shell | ✅ Shell tool | ✅ Shell |
+| **MCP Servers** | ✅ Yes | ❌ No | ✅ Yes | ❌ No |
+| **Web Search** | ✅ Yes | ⚠️ Maybe | ✅ Yes | ⚠️ Maybe |
+| **Context Window** | ~200k | Varies | ~1M+ | Varies |
+| **Entry Point** | `CLAUDE.md` | `.aider.conf.yml` | `GEMINI.md` | `AGENTS.md` |
 
 ---
 
@@ -29,280 +29,119 @@ This document defines the capabilities and constraints of each supported CLI too
 
 **Key Capabilities:**
 - ✅ Full function calling (20+ tools)
-- ✅ Native git integration (commit, push, etc.)
-- ✅ Task tracking (TaskCreate, TaskUpdate, TaskList)
+- ✅ Native git integration
+- ✅ Task tracking (TaskCreate, TaskUpdate)
 - ✅ MCP server support
 - ✅ Web search and fetch
-- ✅ Structured output (JSON, YAML)
-- ✅ Agent SDK for custom agents
-- ✅ Background task execution
+- ✅ Agent SDK
 
 **Approval Workflow:**
-- Mandatory approval for plans via AGENTS.md Step D
-- User must explicitly say "yes", "approved", "proceed", etc.
-- Ambiguous responses require clarification
-- No auto-execution of plans
+- **Explicit:** Mandatory `ExitPlanMode()` step blocks execution until user approves.
 
-**File Operations:**
-- Read, Write, Edit, Glob, Grep tools with full semantics
-- Proper error handling and validation
-- Supports temporary files in current directory
+**File/Git Operations:**
+- Dedicated tools for Read, Write, Edit, Bash.
+- Manual commit workflow (user controls commits).
 
-**Git Operations:**
-- Full Bash integration for git commands
-- Proper commit message handling with heredoc
-- Can create branches, tags, push, pull
-- Pre-commit hooks supported
-
-**Constraints:**
-- Token limit: ~200k (Haiku 4.5)
-- No destructive operations without explicit user request
-- Cannot skip git hooks without user approval
-- Proper quoting required for file paths with spaces
-
-**Entry Point:** `CLAUDE.md` → `AGENTS.md`
-
-**Approval Model:** Explicit (required)
+**Entry Point:** `CLAUDE.md`
 
 ---
 
 ### Aider
 
-**Status:** ⚠️ Partially Supported
+**Status:** ✅ Supported
 
-**Overview:** Collaborative AI coding tool with excellent code awareness and git integration.
+**Overview:** Collaborative AI coding tool with excellent code awareness and auto-commits.
 
 **Key Capabilities:**
-- ✅ Git integration (auto-commits changes)
+- ✅ Auto-commits changes (Granular history)
 - ✅ Code-aware editing (understands diffs)
 - ✅ Excellent context preservation
-- ✅ Shell commands
-- ⚠️ Limited function calling (mostly manual)
-- ⚠️ Web search (depends on model)
+- ⚠️ Conversational approval only
 
 **Approval Workflow:**
-- ❌ **No approval gates** - Aider edits files immediately
-- Implicit approval through conversation
-- Cannot pause for user confirmation mid-task
-- Each response should be reversible (via git)
+- **Implicit/Conversational:** No hard gate. User must review diffs and say "ok" or "go ahead" in chat.
 
-**File Operations:**
-- Direct file editing (no separate Edit tool)
-- Diffs shown before changes
-- Full git awareness (shows uncommitted changes)
-- Can list files and show code context
+**File/Git Operations:**
+- Direct file editing.
+- Automatic commits after every logical change.
 
-**Git Operations:**
-- ✅ Auto-commits after changes
-- Commit messages generated or from prompts
-- Full git access via shell
-- Excellent for showing diffs
-
-**Constraints:**
-- ❌ No task tracking (TaskCreate doesn't exist)
-- ❌ No structured approval (must trust AI judgment)
-- Token limits vary by model
-- Cannot use MCP servers
-- Limited to what the model supports
-
-**Differences from Claude Code:**
-- No "pause for approval" capability
-- Must frame work as guidance, not orders
-- Changes are immediate, not staged for review
-- Git is primary undo mechanism
-
-**Entry Point:** `.aider.conf` → Bridge docs
-
-**Approval Model:** Implicit (trust-based)
+**Entry Point:** `.aider.conf.yml`
 
 ---
 
-### Google Gemini
+### Google Gemini CLI
 
-**Status:** ❓ Experimental
+**Status:** ✅ Supported
 
-**Overview:** Google's latest AI model with multimodal capabilities.
+**Overview:** Google's multimodal AI agent for the terminal.
 
 **Key Capabilities:**
-- ✅ Function calling (though syntax differs from Claude)
-- ✅ Multimodal input (images, audio, video)
-- ✅ Very fast inference
+- ✅ Multimodal input (images, audio)
+- ✅ Fast inference (Flash models)
 - ✅ Web search integration
-- ⚠️ Lower context window (~32k tokens typical)
-- ❓ Git integration (unknown)
-- ❓ Task tracking (unknown)
+- ✅ Large context window (1M+ tokens)
 
 **Approval Workflow:**
-- ❓ Unknown if approval gates possible
-- ❓ May require per-tool approval
-- Implementation TBD
+- **Conversational:** Agent asks "Do you approve?" before taking critical actions.
 
-**File Operations:**
-- Function calling for file operations
-- Tool names likely different from Claude
-- May have different parameter semantics
+**File/Git Operations:**
+- Uses `read_file`, `write_file`, `replace`.
+- Uses `run_shell_command` for git operations.
 
-**Git Operations:**
-- Likely available via shell function call
-- Syntax TBD
-
-**Constraints:**
-- Lower context window (32k typical)
-- Function calling syntax differs from Claude
-- Tool names and parameters may differ
-- Model capabilities less tested for agentic work
-
-**Entry Point:** `.gemini-cli.yaml` (to be created)
-
-**Approval Model:** TBD
+**Entry Point:** `GEMINI.md`
 
 ---
 
-### OpenAI Codex / GPT-4
+### OpenAI Codex CLI
 
-**Status:** ❌ Not Yet Supported
+**Status:** ✅ Supported
 
-**Overview:** OpenAI's code generation and reasoning model.
+**Overview:** Official OpenAI CLI with native support for agentic workflows.
 
 **Key Capabilities:**
-- ✅ Function calling (similar to Claude)
-- ✅ Code understanding
-- ⚠️ Web search (requires separate integration)
-- ❓ Git integration (unknown)
-- ❓ Task tracking (unknown)
-- ❓ MCP server support (unknown)
+- ✅ **Native AGENTS.md support** (Auto-discovery)
+- ✅ Granular approval modes (`suggest`, `auto-edit`, `full-auto`)
+- ✅ OS-level sandboxing (Seatbelt/Docker)
+- ✅ Multi-provider support
 
 **Approval Workflow:**
-- ❓ Unknown
+- **Configurable:** Can be strict (`suggest`) or autonomous (`full-auto`).
 
-**File Operations:**
-- Function calling for file operations
-- Tool names likely different
+**File/Git Operations:**
+- Intelligent file patching.
+- Can automate git operations.
 
-**Git Operations:**
-- Likely available via shell
-- Syntax TBD
-
-**Constraints:**
-- Different function calling conventions
-- Tool parameter semantics differ
-- Less integration with code-specific workflows
-
-**Entry Point:** `.codex-cli.yaml` (to be created)
-
-**Approval Model:** TBD
-
----
-
-## Capability Comparison Table (Detailed)
-
-### Core Features
-| Feature | Claude | Aider | Gemini | Codex |
-|---------|--------|-------|--------|-------|
-| Function calling | ✅ 20+ tools | ❌ No | ✅ Yes | ✅ Yes |
-| Approval gates | ✅ Yes | ❌ No | ❓ TBD | ❓ TBD |
-| Task tracking | ✅ Yes | ❌ No | ❓ TBD | ❓ TBD |
-| Git auto-commit | ⚠️ Manual | ✅ Auto | ❓ TBD | ❓ TBD |
-| Code awareness | ⚠️ Limited | ✅ Excellent | ❌ Lower | ✅ Excellent |
-| Multimodal | ❌ No | ❌ No | ✅ Yes | ❌ No |
-
-### File & Development
-| Feature | Claude | Aider | Gemini | Codex |
-|---------|--------|-------|--------|-------|
-| Read files | ✅ Read tool | ✅ Shell | ✅ Function | ✅ Function |
-| Edit files | ✅ Edit tool | ✅ Direct | ✅ Function | ✅ Function |
-| Create files | ✅ Write tool | ✅ Direct | ✅ Function | ✅ Function |
-| Search files | ✅ Grep/Glob | ✅ Shell | ✅ Function | ✅ Function |
-| Diff viewing | ❌ Manual | ✅ Auto | ❓ TBD | ❓ TBD |
-
-### Integration & Learning
-| Feature | Claude | Aider | Gemini | Codex |
-|---------|--------|-------|--------|-------|
-| MCP servers | ✅ Yes | ❌ No | ❓ TBD | ❌ No |
-| Agent SDK | ✅ Yes | ❌ No | ❓ TBD | ❌ No |
-| Web search | ✅ Yes | ⚠️ Maybe | ✅ Yes | ⚠️ Maybe |
-| Context retention | ✅ Good | ✅ Good | ⚠️ Limited | ⚠️ Limited |
-| Token efficiency | ⚠️ 200k | ✅ Adaptive | ⚠️ 32k | ⚠️ Varies |
-
----
-
-## Constraint Categories
-
-### Approval Constraints
-- **Hard Approval Required:** Claude Code (Step D of AGENTS.md)
-- **Implicit Approval:** Aider (changes applied immediately)
-- **Unknown:** Gemini, Codex
-
-### File Operation Constraints
-- **Dedicated Tools:** Claude (Read, Write, Edit, Glob, Grep)
-- **Shell-Based:** Aider, likely Codex/Gemini
-- **Function Calling:** Gemini, likely Codex
-
-### Git Constraints
-- **Manual:** Claude (user responsible for commits)
-- **Automatic:** Aider (commits after changes)
-- **Unknown:** Gemini, Codex
-
-### Context Constraints
-- **Large:** Claude (200k tokens) - Full repo context possible
-- **Medium:** Aider (varies) - Good for focused work
-- **Small:** Gemini (32k typical) - May need file selection
-
-### Tool Integration
-- **Rich:** Claude (MCP, Agent SDK, web search)
-- **Basic:** Aider (shell only)
-- **Unknown:** Gemini, Codex
+**Entry Point:** `AGENTS.md` (Native discovery)
 
 ---
 
 ## Decision Tree: Choosing a Tool
 
 ```
-Do you need explicit approval gates for plans?
-  YES → Use Claude Code (AGENTS.md required)
+Do you need explicit approval gates?
+  YES → Use Claude Code OR Codex (suggest mode)
   NO  → Consider Aider (implicit approval)
 
 Do you need task tracking?
-  YES → Use Claude Code (TaskCreate/TaskUpdate)
-  NO  → Any tool works
+  YES → Use Claude Code
+  NO  → Any tool (track manually in dev_notes/)
 
 Is the project large (full repo context)?
-  YES → Use Claude Code (200k tokens)
-  NO  → Aider or Gemini acceptable
+  YES → Gemini (1M+) or Claude Code (200k)
+  NO  → Aider or Codex acceptable
 
-Do you need multimodal input (images, etc)?
+Do you need multimodal input?
   YES → Use Gemini
   NO  → Any tool works
 
 Do you need MCP server integration?
-  YES → Use Claude Code
-  NO  → Any tool works
+  YES → Use Claude Code or Gemini
+  NO  → Aider or Codex
 
-Is code awareness critical?
-  YES → Use Aider or Claude Code
+Is code awareness/diff review critical?
+  YES → Use Aider
   NO  → Any tool works
 ```
-
----
-
-## Implementing AGENTS.md for Each Tool
-
-### For Claude Code:
-- ✅ Follow AGENTS.md exactly as written
-- ✅ All features supported
-- ✅ Use entry point: CLAUDE.md
-
-### For Aider:
-- ⚠️ Skip Step D (approval gates) - use implicit approval
-- ⚠️ Skip TaskCreate/TaskUpdate - use dev_notes directly
-- ⚠️ Frame requests as collaborative guidance
-- ✅ Use entry point: WORKFLOW-MAPPING.md → aider guide
-
-### For Gemini/Codex:
-- ⚠️ TBD based on testing
-- ❓ Approval gates unknown
-- ❓ Task tracking unknown
-- 📝 See TOOL-SPECIFIC-GUIDES as they're created
 
 ---
 
@@ -310,36 +149,18 @@ Is code awareness critical?
 
 Regardless of tool, all AGENTS.md-compliant work must:
 
-1. **Create a spec file** in `dev_notes/specs/` with timestamp
-2. **Create a plan file** in `dev_notes/project_plans/` with timestamp (if non-trivial)
-3. **Document changes** in `dev_notes/changes/` after each logical step
-4. **Follow code patterns** - match existing style and conventions
-5. **No secrets in commits** - .env, credentials, keys always .gitignore'd
-6. **Quality first** - Code quality > Speed
-
-These requirements are tool-agnostic and apply to all implementations.
-
----
-
-## Future Tool Support
-
-To add support for a new tool:
-
-1. Create `docs/TOOL-SPECIFIC-GUIDES/{tool-name}.md`
-2. Document capability profile here
-3. Add tool-specific workflow to WORKFLOW-MAPPING.md
-4. Create `.{tool}-config` file if needed
-5. Update README with tool entry points
-6. Test AGENTS.md compliance with tool
+1. **Create a spec file** in `dev_notes/specs/`
+2. **Create a plan file** in `dev_notes/project_plans/`
+3. **Document changes** in `dev_notes/changes/`
+4. **Follow code patterns**
+5. **No secrets in commits**
 
 ---
 
 ## Contributing to This Document
 
-When adding support for a new tool, update:
-- This capabilities matrix
-- WORKFLOW-MAPPING.md
-- TOOL-SPECIFIC-GUIDES/ directory
-- README.md
-
-Keep information current as tool capabilities evolve.
+When adding support for a new tool:
+1. Create `docs/tool-specific-guides/{tool}.md`
+2. Update this matrix
+3. Create entry point config file
+4. Verify AGENTS.md workflow compliance
