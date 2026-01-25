@@ -46,6 +46,7 @@
 ## 2. Documentation & Resources
 
 -   **`docs/definition-of-done.md`**: **MANDATORY READ.** This defines the exact criteria for marking a task as complete. You are expected to follow the "State Machine" protocols defined here (verification proofs, config updates, plan status).
+-   **`docs/file-naming-conventions.md`**: **READ WHEN CREATING NEW DOCS.** All new documentation files in `docs/` must follow `lowercase-kebab.md` naming. When creating new markdown files, consult this document.
 -   **`docs/architecture.md`**: High-level system design.
 -   **`docs/implementation-reference.md`**: Patterns for adding new providers.
 -   **`docs/providers.md`**: User-facing guide to providers.
@@ -58,6 +59,8 @@
 1.  **Approval is Mandatory:** This is the most important rule. Never act on a Project Plan without explicit developer approval.
 2.  **Quality is Mandatory:** You MUST follow the existing code patterns, conventions, style, and typing of the files you are editing. New code should look like the old code.
 3.  **Uncertainty Requires a Full Stop:** If you encounter any error, are confused by a requirement, or are unsure how to proceed, you MUST **STOP** immediately. Document the issue and ask the developer for guidance. Do not try to solve novel problems alone.
-4.  **File Naming is Mandatory:** All Project Plans and Change Documentation in `dev_notes/` MUST use the `YYYY-MM-DD_HH-MM-SS_description.md` format.
+4.  **File Naming is Mandatory:**
+    - All Project Plans and Change Documentation in `dev_notes/` MUST use the `YYYY-MM-DD_HH-MM-SS_description.md` format.
+    - All new documentation files in `docs/` MUST use `lowercase-kebab.md` naming convention (see `docs/file-naming-conventions.md`).
 5.  **Temporary Files:** NEVER use `/tmp` or system temporary directories for temporary files. Always create temporary files in the current working directory using the naming patterns `tmp-*` or `*.tmp` or `tmp/*`. These files should be cleaned up when no longer needed.
 6.  **Slack Notification (If Supported):** Notify using the slack-notifications MCP service each time you commit to the local git repo. **Note:** This rule applies only to agents with MCP support.

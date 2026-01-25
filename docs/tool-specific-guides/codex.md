@@ -100,8 +100,8 @@ project:
 
   context:
     - AGENTS.md
-    - docs/WORKFLOW-MAPPING.md
-    - docs/TOOL-SPECIFIC-GUIDES/codex.md
+    - docs/workflow-mapping.md
+    - docs/tool-specific-guides/codex.md
 ```
 
 ## What Needs Testing
@@ -190,7 +190,7 @@ Find or build a third-party Codex CLI tool that:
 5. Document findings
 6. Update this guide
 7. Create configuration file
-8. Update TOOLS-CAPABILITIES.md
+8. Update tools-capabilities.md
 9. Submit PR
 
 ## For Now
@@ -214,11 +214,11 @@ Use **Claude Code** or **Aider** until Codex support is verified:
 ## Related Documents
 
 - AGENTS.md - Core workflow (all tools)
-- TOOLS-CAPABILITIES.md - Capability matrix
-- WORKFLOW-MAPPING.md - How AGENTS.md maps to each tool
+- tools-capabilities.md - Capability matrix
+- workflow-mapping.md - How AGENTS.md maps to each tool
 - claude-code.md - Verified complete guide
 - aider.md - Verified complete guide
-- FILE-NAMING-CONVENTIONS.md - Which file names matter
+- file-naming-conventions.md - Which file names matter
 
 ## Next Steps
 

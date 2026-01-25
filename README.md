@@ -114,10 +114,10 @@ pytest --cov=src/second_voice
 # Run specific test file
 pytest tests/test_config.py -v
 
-# For more testing options, see TESTING.md
+# For more testing options, see docs/test-guide.md
 ```
 
-For comprehensive testing documentation, see [TESTING.md](TESTING.md).
+For comprehensive testing documentation, see [docs/test-guide.md](docs/test-guide.md).
 
 ### Architecture
 
@@ -132,7 +132,7 @@ This project supports multiple AI tools for development. **All tools follow the 
 **Start here:**
 1. Read [AGENTS.md](AGENTS.md) - Core development workflow (mandatory)
 2. Choose your tool below and read its guide
-3. Reference [docs/PROMPT-PATTERNS.md](docs/PROMPT-PATTERNS.md) for effective prompting
+3. Reference [docs/prompt-patterns.md](docs/prompt-patterns.md) for effective prompting
 
 ### Supported Tools
 
@@ -154,7 +154,7 @@ claude-code
 
 **Documentation:**
 - Entry point: [CLAUDE.md](CLAUDE.md)
-- Complete guide: [docs/TOOL-SPECIFIC-GUIDES/claude-code.md](docs/TOOL-SPECIFIC-GUIDES/claude-code.md)
+- Complete guide: [docs/tool-specific-guides/claude-code.md](docs/tool-specific-guides/claude-code.md)
 
 ---
 
@@ -174,8 +174,8 @@ aider
 ```
 
 **Documentation:**
-- Configuration: `.aider.conf` (create from [docs/TOOL-SPECIFIC-GUIDES/aider.md](docs/TOOL-SPECIFIC-GUIDES/aider.md))
-- Complete guide: [docs/TOOL-SPECIFIC-GUIDES/aider.md](docs/TOOL-SPECIFIC-GUIDES/aider.md)
+- Configuration: `.aider.conf` (create from [docs/tool-specific-guides/aider.md](docs/tool-specific-guides/aider.md))
+- Complete guide: [docs/tool-specific-guides/aider.md](docs/tool-specific-guides/aider.md)
 
 ---
 
@@ -188,7 +188,7 @@ aider
 - Web search integration
 
 **Documentation:**
-- Status & guide: [docs/TOOL-SPECIFIC-GUIDES/gemini.md](docs/TOOL-SPECIFIC-GUIDES/gemini.md)
+- Status & guide: [docs/tool-specific-guides/gemini.md](docs/tool-specific-guides/gemini.md)
 - Help us test! See guide for how to contribute.
 
 ---
@@ -202,7 +202,7 @@ aider
 - Function calling support
 
 **Documentation:**
-- Status & guide: [docs/TOOL-SPECIFIC-GUIDES/codex.md](docs/TOOL-SPECIFIC-GUIDES/codex.md)
+- Status & guide: [docs/tool-specific-guides/codex.md](docs/tool-specific-guides/codex.md)
 - Help us integrate! See guide for how to contribute.
 
 ### All Tools Use the Same Workflow
@@ -222,11 +222,11 @@ Regardless of tool, all development follows **AGENTS.md:**
 |----------|---------|
 | [AGENTS.md](AGENTS.md) | **Core workflow - READ FIRST** |
 | [CLAUDE.md](CLAUDE.md) | Claude Code entry point |
-| [docs/TOOLS-CAPABILITIES.md](docs/TOOLS-CAPABILITIES.md) | What each tool can do |
-| [docs/WORKFLOW-MAPPING.md](docs/WORKFLOW-MAPPING.md) | How AGENTS.md maps to each tool |
-| [docs/PROMPT-PATTERNS.md](docs/PROMPT-PATTERNS.md) | Universal prompt structures |
-| [docs/FILE-NAMING-CONVENTIONS.md](docs/FILE-NAMING-CONVENTIONS.md) | Which file names matter |
-| [docs/TOOL-SPECIFIC-GUIDES/](docs/TOOL-SPECIFIC-GUIDES/) | Per-tool complete guides |
+| [docs/tools-capabilities.md](docs/tools-capabilities.md) | What each tool can do |
+| [docs/workflow-mapping.md](docs/workflow-mapping.md) | How AGENTS.md maps to each tool |
+| [docs/prompt-patterns.md](docs/prompt-patterns.md) | Universal prompt structures |
+| [docs/file-naming-conventions.md](docs/file-naming-conventions.md) | Which file names matter |
+| [docs/tool-specific-guides/](docs/tool-specific-guides/) | Per-tool complete guides |
 
 ### Quick Decision Tree
 
@@ -259,8 +259,8 @@ Need MCP server integration?
 To add or improve tool support:
 
 1. **Test** - Use tool on a simple task
-2. **Document** - Update guide in `docs/TOOL-SPECIFIC-GUIDES/`
-3. **Reference** - Update [docs/TOOLS-CAPABILITIES.md](docs/TOOLS-CAPABILITIES.md)
+2. **Document** - Update guide in `docs/tool-specific-guides/`
+3. **Reference** - Update [docs/tools-capabilities.md](docs/tools-capabilities.md)
 4. **Configure** - Create tool config file (e.g., `.aider.conf`)
 5. **Submit** - PR with documentation and config
 

@@ -521,11 +521,11 @@ CLAUDE.md or README
   ↓
 AGENTS.md (core workflow)
   ↓
-WORKFLOW-MAPPING.md (how it maps to Aider)
+workflow-mapping.md (how it maps to Aider)
   ↓
 This document (Aider specifics)
   ↓
-PROMPT-PATTERNS.md (general request patterns)
+prompt-patterns.md (general request patterns)
 ```
 
 ## Examples
@@ -631,4 +631,4 @@ You: "Review diffs"
 - You want tight git integration
 - Working solo or in small teams
 
-**Both can follow AGENTS.md** with appropriate adaptations shown in WORKFLOW-MAPPING.md.
+**Both can follow AGENTS.md** with appropriate adaptations shown in workflow-mapping.md.

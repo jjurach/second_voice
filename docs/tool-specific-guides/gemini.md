@@ -96,8 +96,8 @@ project:
   # Context files
   context-files:
     - AGENTS.md
-    - docs/WORKFLOW-MAPPING.md
-    - docs/TOOL-SPECIFIC-GUIDES/gemini.md
+    - docs/workflow-mapping.md
+    - docs/tool-specific-guides/gemini.md
 ```
 
 ## Contributing to This Guide
@@ -108,7 +108,7 @@ project:
 2. Document what works/doesn't work
 3. Update this guide with findings
 4. Create `.gemini-cli.yaml` configuration
-5. Update TOOLS-CAPABILITIES.md with actual capabilities
+5. Update tools-capabilities.md with actual capabilities
 6. Submit PR with changes
 
 ## For Now
@@ -140,11 +140,11 @@ Once tested, Gemini would offer:
 ## Related Documents
 
 - AGENTS.md - Core workflow (all tools)
-- TOOLS-CAPABILITIES.md - Capability matrix
-- WORKFLOW-MAPPING.md - How AGENTS.md maps to each tool
+- tools-capabilities.md - Capability matrix
+- workflow-mapping.md - How AGENTS.md maps to each tool
 - claude-code.md - Verified complete guide
 - aider.md - Verified complete guide
-- FILE-NAMING-CONVENTIONS.md - Which file names matter
+- file-naming-conventions.md - Which file names matter
 
 ## Next Steps
 
@@ -152,7 +152,7 @@ Once tested, Gemini would offer:
 2. Test with simple task
 3. Document findings
 4. Update this guide with actual information
-5. Update TOOLS-CAPABILITIES.md
+5. Update tools-capabilities.md
 6. Create .gemini-cli.yaml
 7. Add more examples
 

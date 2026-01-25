@@ -475,11 +475,11 @@ CLAUDE.md (entry point for this tool)
 ↓
 AGENTS.md (core workflow - all projects)
 ↓
-TOOLS-CAPABILITIES.md (what each tool can do)
+tools-capabilities.md (what each tool can do)
 ↓
-WORKFLOW-MAPPING.md (how AGENTS.md maps to Claude Code)
+workflow-mapping.md (how AGENTS.md maps to Claude Code)
 ↓
-PROMPT-PATTERNS.md (prompt structures that work)
+prompt-patterns.md (prompt structures that work)
 ↓
 This document (Claude Code specifics)
 ```
@@ -488,14 +488,14 @@ This document (Claude Code specifics)
 1. Look at your request
 2. Follow AGENTS.md Step A-E
 3. Use Claude Code tools as shown above
-4. Reference PROMPT-PATTERNS.md for request phrasing
+4. Reference prompt-patterns.md for request phrasing
 
 ## Getting Help
 
 **Questions about:**
-- **AGENTS.md workflow?** → Read AGENTS.md + WORKFLOW-MAPPING.md
-- **Tool capabilities?** → Read TOOLS-CAPABILITIES.md
-- **How to phrase requests?** → Read PROMPT-PATTERNS.md
+- **AGENTS.md workflow?** → Read AGENTS.md + workflow-mapping.md
+- **Tool capabilities?** → Read tools-capabilities.md
+- **How to phrase requests?** → Read prompt-patterns.md
 - **Claude Code specifics?** → You're reading it now!
 
 ## Examples
@@ -516,12 +516,12 @@ Claude Code follows AGENTS.md:
 
 ### Example 2: Quick Bug Fix
 ```
-User: "Fix the typo in TESTING.md"
+User: "Fix the typo in docs/test-guide.md"
 
 Claude Code analyzes:
 1. Analyze: This is trivial (typo fix)
 2. Execute immediately: Edit(...) with old/new strings
-3. Commit: git commit -m "Fix typo in TESTING.md"
+3. Commit: git commit -m "Fix typo in docs/test-guide.md"
 4. Done: No plan or approval needed
 ```
 
@@ -574,4 +574,4 @@ Claude Code:
 
 ---
 
-Start using Claude Code with confidence! Follow AGENTS.md, use this guide for Claude Code specifics, and reference PROMPT-PATTERNS.md for phrasing your requests.
+Start using Claude Code with confidence! Follow AGENTS.md, use this guide for Claude Code specifics, and reference prompt-patterns.md for phrasing your requests.

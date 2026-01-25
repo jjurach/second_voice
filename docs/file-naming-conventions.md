@@ -2,6 +2,28 @@
 
 This document clarifies which file names are **tool-specific standards**, which are **just for linking/reference**, and which names can be changed.
 
+## Universal Naming Rule for Documentation
+
+**Files NOT auto-discovered by any tooling must:**
+1. **Location:** Be in `docs/` directory (not project root)
+2. **Naming:** Use `lowercase-kebab.md` style (no spaces, no UPPERCASE)
+3. **Discovery:** Be linked from other documents (not auto-discovered by tools)
+
+**Examples:**
+- ✅ `docs/tools-capabilities.md` - Not auto-discovered, in docs/, correct naming
+- ✅ `docs/workflow-mapping.md` - Not auto-discovered, in docs/, correct naming
+- ✅ `docs/prompt-patterns.md` - Not auto-discovered, in docs/, correct naming
+- ✅ `docs/file-naming-conventions.md` - Not auto-discovered, in docs/, correct naming
+- ❌ `docs/TOOLS-CAPABILITIES.md` - UPPERCASE not allowed
+- ❌ `TOOLS-CAPABILITIES.md` - Must be in docs/
+- ❌ `docs/Tools_Capabilities.md` - Underscores not allowed, use kebab-case
+- ❌ `docs/Tools Capabilities.md` - Spaces not allowed, use kebab-case
+
+**Rationale:**
+- **docs/ folder:** Keeps all reference documentation organized
+- **lowercase-kebab:** Easy to reference in markdown links, works across all platforms, no case-sensitivity issues
+- **No auto-discovery:** These are human-readable guides, not tool configuration
+
 ## TL;DR
 
 | File/Pattern | Auto-Discovered? | Required? | Can Rename? | Purpose |
@@ -10,10 +32,11 @@ This document clarifies which file names are **tool-specific standards**, which 
 | `.aider.conf` | ✅ Aider | Yes for aider | No | Aider config |
 | `pytest.ini` | ✅ pytest | Recommended | No | Test configuration |
 | `AGENTS.md` | ❌ No | Core principle | Yes, but update links | Workflow definition |
-| `docs/TOOLS-CAPABILITIES.md` | ❌ No | No (reference only) | ✅ YES - just update links | Capability matrix |
-| `docs/WORKFLOW-MAPPING.md` | ❌ No | No (reference only) | ✅ YES - just update links | Workflow guide |
-| `docs/PROMPT-PATTERNS.md` | ❌ No | No (reference only) | ✅ YES - just update links | Prompt examples |
-| `docs/TOOL-SPECIFIC-GUIDES/` | ❌ No | No (reference only) | ✅ YES - just update links | Per-tool guides |
+| `docs/tools-capabilities.md` | ❌ No | No (reference only) | ✅ YES - just update links | Capability matrix |
+| `docs/workflow-mapping.md` | ❌ No | No (reference only) | ✅ YES - just update links | Workflow guide |
+| `docs/prompt-patterns.md` | ❌ No | No (reference only) | ✅ YES - just update links | Prompt examples |
+| `docs/file-naming-conventions.md` | ❌ No | No (reference only) | ✅ YES - just update links | Naming guidelines |
+| `docs/tool-specific-guides/` | ❌ No | No (reference only) | ✅ YES - just update links | Per-tool guides |
 | `dev_notes/specs/` | ❌ No | Core principle | No (timestamp format) | Spec files |
 | `dev_notes/project_plans/` | ❌ No | Core principle | No (timestamp format) | Plan files |
 | `dev_notes/changes/` | ❌ No | Core principle | No (timestamp format) | Change docs |
@@ -78,47 +101,49 @@ auto-commits = true
 
 These files are **NOT automatically discovered**. They exist only because other documents **link to them**. **You can rename them as long as you update the links.**
 
-### docs/TOOLS-CAPABILITIES.md
+### docs/tools-capabilities.md
 - **Auto-discovered:** ❌ No
-- **Referenced by:** README.md, AGENTS.md, WORKFLOW-MAPPING.md
+- **Location:** docs/ folder ✅
+- **Naming:** lowercase-kebab.md ✅
+- **Referenced by:** README.md, AGENTS.md, workflow-mapping.md
 - **Can rename:** ✅ YES - if you update links everywhere
-- **Suggested names if renaming:**
-  - `docs/tool-capabilities-matrix.md`
-  - `docs/CAPABILITY-MATRIX.md`
-  - `docs/supported-tools.md`
+- **Follow convention:** Already follows lowercase-kebab style
 
-### docs/WORKFLOW-MAPPING.md
+### docs/workflow-mapping.md
 - **Auto-discovered:** ❌ No
-- **Referenced by:** AGENTS.md, README.md, TOOLS-CAPABILITIES.md
+- **Location:** docs/ folder ✅
+- **Naming:** lowercase-kebab.md ✅
+- **Referenced by:** AGENTS.md, README.md, tools-capabilities.md
 - **Can rename:** ✅ YES - if you update links everywhere
-- **Suggested names if renaming:**
-  - `docs/tool-workflow-mapping.md`
-  - `docs/TOOL-WORKFLOWS.md`
-  - `docs/IMPLEMENTATION-BY-TOOL.md`
+- **Follow convention:** Already follows lowercase-kebab style
 
-### docs/PROMPT-PATTERNS.md
+### docs/prompt-patterns.md
 - **Auto-discovered:** ❌ No
-- **Referenced by:** README.md, AGENTS.md, TOOL-SPECIFIC-GUIDES/
+- **Location:** docs/ folder ✅
+- **Naming:** lowercase-kebab.md ✅
+- **Referenced by:** README.md, AGENTS.md, tool-specific-guides/
 - **Can rename:** ✅ YES - if you update links everywhere
-- **Suggested names if renaming:**
-  - `docs/PROMPT-TEMPLATES.md`
-  - `docs/prompt-best-practices.md`
-  - `docs/REQUEST-PATTERNS.md`
+- **Follow convention:** Already follows lowercase-kebab style
 
-### docs/TOOL-SPECIFIC-GUIDES/ (directory + files)
+### docs/file-naming-conventions.md
 - **Auto-discovered:** ❌ No
-- **Referenced by:** README.md, TOOLS-CAPABILITIES.md
+- **Location:** docs/ folder ✅
+- **Naming:** lowercase-kebab.md ✅
+- **Referenced by:** README.md, AGENTS.md
+- **Purpose:** Define naming conventions (this document)
+- **Follow convention:** Already follows lowercase-kebab style
+
+### docs/tool-specific-guides/ (directory + files)
+- **Auto-discovered:** ❌ No
+- **Location:** docs/ folder ✅
+- **Naming:** directory and files use lowercase-kebab ✅
+- **Referenced by:** README.md, tools-capabilities.md
 - **Can rename:** ✅ YES (directory and files) - if you update links everywhere
-- **Suggested alternatives:**
-  - `docs/tools/` (shorter)
-  - `docs/per-tool-guides/` (more explicit)
-  - `docs/guides/` (simpler)
-
-**Files in this directory:**
-- `claude-code.md` - Can rename to `claude-code-guide.md`
-- `aider.md` - Can rename to `aider-guide.md`
-- `gemini.md` - Can rename to `gemini-guide.md`
-- `codex.md` - Can rename to `codex-guide.md`
+- **Current files (all correct naming):**
+  - `claude-code.md` - ✅ Correct
+  - `aider.md` - ✅ Correct
+  - `gemini.md` - ✅ Correct
+  - `codex.md` - ✅ Correct
 
 ---
 
@@ -250,8 +275,8 @@ Create `CLAUDE.md`:
 This project uses the AGENTS.md workflow for all development.
 
 See: [AGENTS.md](./AGENTS.md) - Core development workflow
-See: [TOOLS-CAPABILITIES.md](./docs/TOOLS-CAPABILITIES.md) - Tool support matrix
-See: [WORKFLOW-MAPPING.md](./docs/WORKFLOW-MAPPING.md) - How workflow maps to each tool
+See: [tools-capabilities.md](./docs/tools-capabilities.md) - Tool support matrix
+See: [workflow-mapping.md](./docs/workflow-mapping.md) - How workflow maps to each tool
 ```
 
 ### For Aider
@@ -273,9 +298,9 @@ project:
   instructions: AGENTS.md
   tools: gemini
   context-files:
-    - docs/TOOLS-CAPABILITIES.md
-    - docs/WORKFLOW-MAPPING.md
-    - docs/TOOL-SPECIFIC-GUIDES/gemini.md
+    - docs/tools-capabilities.md
+    - docs/workflow-mapping.md
+    - docs/tool-specific-guides/gemini.md
 ```
 
 ---
@@ -290,13 +315,15 @@ project:
 ✅ `dev_notes/project_plans/` - AGENTS.md standard
 ✅ `dev_notes/changes/` - AGENTS.md standard
 
-### Reference Files (Can Rename, But Keep Current Names)
-⚠️ `docs/TOOLS-CAPABILITIES.md` - Clear name, leave as is
-⚠️ `docs/WORKFLOW-MAPPING.md` - Clear name, leave as is
-⚠️ `docs/PROMPT-PATTERNS.md` - Clear name, leave as is
-⚠️ `docs/TOOL-SPECIFIC-GUIDES/` - Clear name, leave as is
+### Reference Files (Following Convention)
+✅ `docs/tools-capabilities.md` - Follows lowercase-kebab convention
+✅ `docs/workflow-mapping.md` - Follows lowercase-kebab convention
+✅ `docs/prompt-patterns.md` - Follows lowercase-kebab convention
+✅ `docs/file-naming-conventions.md` - Follows lowercase-kebab convention
+✅ `docs/tool-specific-guides/` - Follows lowercase-kebab convention
 
-**Recommendation:** Use the current names. They're clear and unlikely to cause confusion.
+**Recommendation:** All reference files now follow the universal convention. Consistent!
+
 
 ---
 
@@ -308,10 +335,11 @@ project:
 | .aider.conf | ✅ Aider | ❌ No | ⚠️ Optional |
 | pytest.ini | ✅ pytest | ❌ No | ✅ Created |
 | AGENTS.md | ❌ No | ✅ Yes (but don't) | ✅ Created |
-| docs/TOOLS-CAPABILITIES.md | ❌ No | ✅ Yes (but don't) | ✅ Created |
-| docs/WORKFLOW-MAPPING.md | ❌ No | ✅ Yes (but don't) | ✅ Created |
-| docs/PROMPT-PATTERNS.md | ❌ No | ✅ Yes (but don't) | ✅ Created |
-| docs/TOOL-SPECIFIC-GUIDES/ | ❌ No | ✅ Yes (but don't) | 🔄 Creating |
+| docs/tools-capabilities.md | ❌ No | ✅ Yes (but don't) | ✅ Created |
+| docs/workflow-mapping.md | ❌ No | ✅ Yes (but don't) | ✅ Created |
+| docs/prompt-patterns.md | ❌ No | ✅ Yes (but don't) | ✅ Created |
+| docs/file-naming-conventions.md | ❌ No | ✅ Yes (but don't) | ✅ Created |
+| docs/tool-specific-guides/ | ❌ No | ✅ Yes (but don't) | ✅ Created |
 | dev_notes/specs/ | ❌ No | ✅ Yes (but don't) | ✅ Standard |
 | dev_notes/project_plans/ | ❌ No | ✅ Yes (but don't) | ✅ Standard |
 | dev_notes/changes/ | ❌ No | ✅ Yes (but don't) | ✅ Standard |
