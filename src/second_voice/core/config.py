@@ -13,7 +13,7 @@ class ConfigurationManager:
         'groq_stt_model': 'whisper-large-v3',
         'local_whisper_url': 'http://localhost:9090/v1/audio/transcriptions',
         'ollama_url': 'http://localhost:11434/api/generate',
-        'ollama_model': 'llama3',
+        'ollama_model': 'llama-pro:latest',
         'temp_dir': './tmp',
         'audio_config': {
             'sample_rate': 16000,
