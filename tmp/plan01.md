@@ -39,6 +39,7 @@ second_voice/
 ├── pyproject.toml                   # Modern Python packaging
 ├── requirements.txt                 # Dependencies (venv required)
 ├── .gitignore                       # Python-specific ignores
+├── tmp/                             # Temporary files (crash logs, audio)
 ├── src/
 │   └── second_voice/
 │       ├── __init__.py             # Package initialization
@@ -47,7 +48,12 @@ second_voice/
 │       ├── engine/
 │       │   ├── __init__.py
 │       │   ├── recorder.py         # Audio recording + RMS analysis
-│       │   └── processor.py        # API communication (Whisper/Ollama)
+│       │   ├── processor.py        # Orchestrates STT + LLM processing
+│       │   └── providers/
+│       │       ├── __init__.py
+│       │       ├── base.py         # BaseLLMProvider (abstract)
+│       │       ├── ollama.py       # OllamaProvider implementation
+│       │       └── openrouter.py   # OpenRouterProvider implementation
 │       └── ui/
 │           ├── __init__.py
 │           ├── main_window.py      # Main Tkinter application
@@ -58,13 +64,16 @@ second_voice/
 │   ├── __init__.py
 │   ├── test_config.py              # Configuration tests
 │   ├── test_processor.py           # API processing tests
-│   └── test_recorder.py            # Audio recording tests
+│   ├── test_recorder.py            # Audio recording tests
+│   └── test_providers.py           # LLM provider tests
 ├── samples/
 │   └── test.wav                    # Sample audio for testing
 ├── docs/
 │   ├── architecture.md             # System architecture (created)
 │   ├── gui-design.md               # GUI specifications (created)
-│   └── prompts.md                  # AI prompts reference (created)
+│   ├── prompts.md                  # AI prompts reference (created)
+│   ├── implementation-reference.md # Code templates (created)
+│   └── providers.md                # LLM provider guide (to be created)
 └── dev_notes/
     ├── specs/
     ├── project_plans/
@@ -100,6 +109,12 @@ second_voice/
 - [ ] Add IDE ignores (.vscode/, .idea/)
 - [ ] Add build artifacts (dist/, build/, *.egg-info/)
 - [ ] Add tmp files (tmp/*, *.tmp, tmp-*)
+- [ ] Add crash logs pattern (tmp-crash-*.txt)
+
+#### Task 1.2b: Create tmp/ directory structure
+- [ ] Create tmp/ directory in project root
+- [ ] Add tmp/.gitkeep to ensure directory exists in git
+- [ ] Verify .gitignore properly excludes tmp/* contents but keeps directory
 
 #### Task 1.3: Create pyproject.toml
 - [ ] Configure build system (setuptools)
@@ -128,11 +143,14 @@ second_voice/
 - [ ] Extract configuration loading logic from current script
 - [ ] Create Config class with methods:
   - `load_config()` - Load from ~/.config/second_voice/settings.json
-  - `get_default_config()` - Return default configuration dict
+  - `get_default_config()` - Return default configuration dict with both providers
   - `save_config(config)` - Save configuration
   - `validate_config(config)` - Validate required fields
+  - `get_llm_provider()` - Auto-detect provider (OpenRouter if API key, else Ollama)
 - [ ] Add configuration path constants
-- [ ] Support environment variable overrides
+- [ ] Support environment variable substitution (e.g., ${OPENROUTER_API_KEY})
+- [ ] Default config structure includes both ollama and openrouter sections
+- [ ] Add helper to check if provider is configured
 
 #### Task 2.2: Create src/second_voice/engine/recorder.py
 - [ ] Extract audio recording logic from current script
@@ -146,17 +164,66 @@ second_voice/
 - [ ] Implement thread-safe volume queue for VU meter
 - [ ] Add proper resource cleanup
 
-#### Task 2.3: Create src/second_voice/engine/processor.py
-- [ ] Extract API communication logic
-- [ ] Create AudioProcessor class with methods:
-  - `__init__(config)` - Initialize with configuration
-  - `transcribe(audio_frames, rate=16000)` - Send to Whisper API
-  - `process_with_llm(text, context="", system_prompt="")` - Send to Ollama
-  - `_build_recursive_prompt(context, new_text)` - Build prompt with context
-- [ ] **CRITICAL:** Use `tmp-audio.wav` (not `/tmp/`) for temporary audio files per AGENTS.md Rule #5
+#### Task 2.3: Create LLM Provider Architecture
+
+This task is broken into subtasks for the provider pattern implementation.
+
+##### Task 2.3a: Create src/second_voice/engine/providers/base.py
+- [ ] Create BaseLLMProvider abstract class with methods:
+  - `process(prompt, system_prompt="", context="")` - Abstract method
+  - `validate_config()` - Abstract method to check configuration
+  - `is_available()` - Abstract method to test connectivity
+  - `get_provider_name()` - Return provider name string
+- [ ] Define standard exception classes:
+  - `ProviderError` - Base exception
+  - `ProviderConfigError` - Configuration issues
+  - `ProviderConnectionError` - Network/connection issues
+  - `ProviderAuthError` - Authentication failures
+- [ ] Add docstrings explaining the contract
+
+##### Task 2.3b: Create src/second_voice/engine/providers/ollama.py
+- [ ] Create OllamaProvider(BaseLLMProvider) class
+- [ ] Implement `__init__(config)` - Extract ollama config section
+- [ ] Implement `process(prompt, system_prompt, context)`:
+  - Build recursive prompt if context exists
+  - POST to Ollama API (/api/generate endpoint)
+  - Handle streaming vs non-streaming
+  - Extract response from Ollama's JSON format
+- [ ] Implement `validate_config()` - Check url and model are set
+- [ ] Implement `is_available()` - Test connection to Ollama URL
 - [ ] Add timeout handling (120s default)
 - [ ] Add connection error handling
-- [ ] Add response validation
+- [ ] Support verbose/debug output modes
+
+##### Task 2.3c: Create src/second_voice/engine/providers/openrouter.py
+- [ ] Create OpenRouterProvider(BaseLLMProvider) class
+- [ ] Implement `__init__(config)` - Extract openrouter config section
+- [ ] Implement `process(prompt, system_prompt, context)`:
+  - Build recursive prompt if context exists
+  - Use OpenAI-compatible format (chat/completions)
+  - Add API key to Authorization header
+  - Handle response in OpenAI format
+- [ ] Implement `validate_config()` - Check API key and model are set
+- [ ] Implement `is_available()` - Test connection to OpenRouter
+- [ ] Add timeout handling (120s default)
+- [ ] Add authentication error handling
+- [ ] Add rate limit error handling
+- [ ] Support verbose/debug output modes
+
+##### Task 2.3d: Create provider factory and processor
+- [ ] Create `get_provider(config, provider_name=None)` factory function:
+  - If provider_name specified, use that
+  - Else auto-detect: OpenRouter if API key exists, else Ollama
+  - Instantiate and return appropriate provider
+- [ ] Create src/second_voice/engine/processor.py:
+  - `__init__(config)` - Initialize with configuration
+  - `transcribe(audio_frames, rate=16000)` - Send to Whisper API
+  - `process_with_llm(text, context="")` - Delegate to LLM provider
+  - `_save_crash_log(stt_text, error)` - Save to tmp-crash-{timestamp}.txt
+  - `_build_recursive_prompt(context, new_text)` - Shared prompt logic
+- [ ] **CRITICAL:** Use `tmp-audio.wav` (not `/tmp/`) for temporary audio files per AGENTS.md Rule #5
+- [ ] Wrap LLM calls with try/except, save crash log on failure
+- [ ] Include original STT text, error details, and stack trace in crash log
 - [ ] Support verbose/debug output modes
 
 #### Task 2.4: Create src/second_voice/ui/components.py
@@ -186,11 +253,14 @@ second_voice/
   - `--verbose` - Show detailed information (URLs, responses, timings)
   - `--debug` - Show debug information (payloads, full traces)
   - `--config PATH` - Override default config file path
+  - `--provider {ollama,openrouter}` - Override auto-detected provider
+  - `--model MODEL` - Override model name for selected provider
+  - `--api-key KEY` - Override OpenRouter API key
   - `--whisper-url URL` - Override Whisper API URL
-  - `--ollama-url URL` - Override Ollama API URL
   - `--vault-path PATH` - Override Obsidian vault path
-  - `--model MODEL` - Override Ollama model name
 - [ ] Initialize configuration with CLI overrides
+- [ ] Validate provider configuration before launching GUI
+- [ ] Display provider info in verbose mode (which provider, which model)
 - [ ] Launch GUI (MainWindow)
 - [ ] Add logging configuration based on verbose/debug flags
 
@@ -210,10 +280,14 @@ second_voice/
   - `--audio PATH` - Path to audio file (default: samples/test.wav)
   - `--verbose` - Show detailed information
   - `--debug` - Show debug information
-  - `--whisper-url URL` - Override Whisper API URL
+  - `--provider {ollama,openrouter}` - Override auto-detected provider
   - `--model MODEL` - Override model name
+  - `--api-key KEY` - Override OpenRouter API key
+  - `--whisper-url URL` - Override Whisper API URL
 - [ ] Add timing measurements (start time, end time, duration)
+- [ ] Display active provider and model in output
 - [ ] Add detailed output for verbose mode:
+  - Active LLM provider
   - Request URL
   - Request payload/files
   - Response status code
@@ -223,9 +297,10 @@ second_voice/
   - Full request headers
   - Full response headers
   - Raw response content
-- [ ] Add GPU status checks (if nvidia-smi available)
-- [ ] Ensure demo uses refactored AudioProcessor module
+- [ ] Add GPU status checks (if nvidia-smi available, for Ollama)
+- [ ] Ensure demo uses refactored AudioProcessor module with provider pattern
 - [ ] Add error handling and user-friendly messages
+- [ ] Test with both Ollama and OpenRouter if configured
 
 ---
 
@@ -239,17 +314,42 @@ second_voice/
 - [ ] Mock file system operations
 - [ ] Test error handling for invalid configs
 
-#### Task 4.2: Create tests/test_processor.py
-- [ ] Test AudioProcessor initialization
-- [ ] Mock API requests (Whisper and Ollama)
+#### Task 4.2: Create tests/test_providers.py
+- [ ] Test BaseLLMProvider interface
+- [ ] Test OllamaProvider:
+  - Mock Ollama API requests
+  - Test successful LLM processing
+  - Test recursive prompt building with context
+  - Test timeout handling
+  - Test connection error handling
+  - Test response validation
+  - Test is_available() check
+- [ ] Test OpenRouterProvider:
+  - Mock OpenRouter API requests
+  - Test successful LLM processing with OpenAI format
+  - Test recursive prompt building with context
+  - Test API key authentication
+  - Test auth error handling
+  - Test rate limit handling
+  - Test is_available() check
+- [ ] Test provider factory (get_provider):
+  - Test auto-detection with OPENROUTER_API_KEY env var
+  - Test auto-detection without API key (defaults to Ollama)
+  - Test explicit provider selection
+  - Test invalid provider name handling
+
+#### Task 4.3: Create tests/test_processor.py
+- [ ] Test AudioProcessor initialization with different providers
+- [ ] Mock Whisper API requests
 - [ ] Test successful transcription
-- [ ] Test successful LLM processing
-- [ ] Test recursive prompt building
+- [ ] Test LLM processing delegates to provider correctly
+- [ ] Test crash log creation on LLM failure
+- [ ] Verify crash log contains STT text, error, and stack trace
+- [ ] Test crash log file naming (tmp-crash-{timestamp}.txt)
 - [ ] Test timeout handling
 - [ ] Test connection error handling
-- [ ] Test response validation
 
-#### Task 4.3: Create tests/test_recorder.py
+#### Task 4.4: Create tests/test_recorder.py
 - [ ] Test AudioRecorder initialization
 - [ ] Test RMS calculation with sample data
 - [ ] Mock PyAudio interactions
@@ -257,7 +357,7 @@ second_voice/
 - [ ] Test start/stop recording
 - [ ] Test resource cleanup
 
-#### Task 4.4: Setup pytest configuration
+#### Task 4.5: Setup pytest configuration
 - [ ] Create pytest.ini or add to pyproject.toml
 - [ ] Configure test discovery
 - [ ] Configure coverage reporting
@@ -269,26 +369,55 @@ second_voice/
 
 #### Task 5.1: Create README.md
 - [ ] Project title and description
-- [ ] Features list (remote compute, recursive context, Obsidian integration, etc.)
+- [ ] Features list (multi-provider LLM, remote compute, recursive context, Obsidian integration, etc.)
 - [ ] System requirements
 - [ ] Installation instructions:
   - Mention brew install python-tk for macOS
   - venv creation and activation
   - pip install -e .
-- [ ] Configuration section (settings.json location and format)
-- [ ] Server setup section (Docker compose reference)
-- [ ] SSH tunnel setup
+- [ ] Configuration section:
+  - settings.json location and format
+  - Both Ollama and OpenRouter configuration
+  - Environment variable usage for API keys
+  - Provider auto-detection explanation
+- [ ] Provider setup:
+  - Ollama setup (Docker compose, SSH tunnel)
+  - OpenRouter setup (API key acquisition)
+  - How to switch between providers
 - [ ] Usage examples:
-  - Basic usage: `second_voice`
-  - With options: `second_voice --verbose --model llama-pro`
+  - Basic usage: `second_voice` (auto-detects provider)
+  - With Ollama: `second_voice --provider ollama --model llama-pro`
+  - With OpenRouter: `second_voice --provider openrouter --model anthropic/claude-3.5-sonnet`
   - Demo script: `demo_second_voice --audio samples/test.wav --verbose`
-- [ ] Architecture overview (reference docs/architecture.md)
+- [ ] Crash log recovery section
+- [ ] Architecture overview (reference docs/architecture.md and docs/providers.md)
 - [ ] Development section:
   - Running tests: `pytest`
   - Running with coverage: `pytest --cov`
-- [ ] Troubleshooting section
+- [ ] Troubleshooting section:
+  - Provider connection issues
+  - API key problems
+  - Crash log interpretation
 - [ ] License section (MIT)
 - [ ] Contributing guidelines (if applicable)
+
+#### Task 5.1b: Create docs/providers.md
+- [ ] Overview of provider architecture
+- [ ] Ollama provider documentation:
+  - Configuration options
+  - Setup instructions
+  - Model selection
+  - Troubleshooting
+- [ ] OpenRouter provider documentation:
+  - Configuration options
+  - API key setup
+  - Model selection (link to OpenRouter model list)
+  - Cost considerations
+  - Rate limits
+  - Troubleshooting
+- [ ] Provider auto-detection logic explanation
+- [ ] How to add new providers (for contributors)
+- [ ] Comparison table (Ollama vs OpenRouter)
 
 #### Task 5.2: Add docstrings to all modules
 - [ ] Add module-level docstrings
@@ -370,9 +499,12 @@ second_voice/
 ### Runtime Dependencies
 - Python >= 3.8
 - pyaudio (audio recording)
-- requests (API communication)
+- requests (API communication with Whisper, Ollama, OpenRouter)
 - numpy (RMS calculation)
 - tkinter (GUI - standard library but requires system package on macOS)
+
+### Optional Runtime Dependencies
+- None (both Ollama and OpenRouter use standard requests library)
 
 ### System Dependencies (macOS)
 ```bash
@@ -392,13 +524,17 @@ The project is considered complete when:
 1. ✅ All tasks above are marked complete
 2. ✅ Package can be installed via `pip install -e .`
 3. ✅ Both CLI commands (`second_voice` and `demo_second_voice`) are available
-4. ✅ All pytest tests pass
-5. ✅ Demo script successfully transcribes samples/test.wav
-6. ✅ GUI launches and responds to user input
-7. ✅ VU meter displays real-time audio levels
-8. ✅ Verbose and debug modes show expected output
-9. ✅ README.md provides clear installation and usage instructions
-10. ✅ Code follows consistent style and includes proper documentation
+4. ✅ All pytest tests pass (including provider-specific tests)
+5. ✅ Demo script successfully transcribes samples/test.wav with both providers
+6. ✅ Provider auto-detection works correctly (OpenRouter if API key, else Ollama)
+7. ✅ GUI launches and responds to user input
+8. ✅ VU meter displays real-time audio levels
+9. ✅ Crash logs are created correctly on LLM failure
+10. ✅ Both Ollama and OpenRouter providers work when configured
+11. ✅ Verbose and debug modes show provider information
+12. ✅ README.md provides clear installation and usage instructions for both providers
+13. ✅ Code follows consistent style and includes proper documentation
+14. ✅ CLI flags for provider selection work correctly
 
 ---
 
@@ -408,11 +544,18 @@ The project is considered complete when:
 - Configuration management refactoring
 - Documentation creation
 - Test writing
+- Crash log implementation
 
 ### Medium Risk
 - GUI refactoring (ensure VU meter performance on Intel MacBook)
 - Audio recording module (PyAudio threading complexity)
 - Entry point configuration (pyproject.toml setup)
+- Provider abstraction (ensuring both providers work correctly)
+- Auto-detection logic (API key detection, fallback behavior)
+
+### Higher Risk (but manageable)
+- OpenRouter API integration (new external dependency, requires testing without local setup)
+- API key security (ensure keys aren't logged or exposed)
 
 ### Mitigation Strategies
 - Test VU meter performance early with 30ms refresh rate
@@ -420,6 +563,12 @@ The project is considered complete when:
 - Verify entry points work immediately after pyproject.toml creation
 - Keep existing working code as reference during refactoring
 - Test on actual hardware (MacBook) throughout development
+- **Provider-specific:**
+  - Mock both providers thoroughly in tests
+  - Test provider switching manually with both services
+  - Document API key handling clearly
+  - Add warnings if API keys appear in verbose output
+  - Test auto-detection with and without API keys
 
 ---
 
@@ -442,13 +591,23 @@ This is an informational breakdown only (no time estimates per policy):
 
 1. **CRITICAL:** Phase 0 must complete first - fixes temporary file location violation in current code
 2. The existing code is working and will serve as the reference implementation
-3. Refactoring should maintain all existing functionality
+3. Refactoring should maintain all existing functionality (currently Ollama-only)
 4. Hard-coded values should become CLI options with current values as defaults
 5. The VU meter is a new visual enhancement to be added
-6. Testing focuses on core logic (config, processor, recorder) rather than GUI
+6. Testing focuses on core logic (config, processor, recorder, **providers**) rather than GUI
 7. Documentation references should point to consolidated docs/ files
 8. Final validation requires clean test and demo runs
 9. All refactored code must use `tmp-*` or `*.tmp` patterns, never `/tmp/`
+10. **Provider architecture:**
+    - Default behavior: auto-detect (OpenRouter if API key exists, else Ollama)
+    - Both providers must be fully implemented in initial refactor
+    - Crash logs save unprocessed STT text when LLM fails
+    - API keys can be in config file or environment variables
+    - No API keys should appear in logs (even verbose mode should mask them)
+11. **Configuration migration:**
+    - Old single-provider config will be migrated to new dual-provider format
+    - Existing Ollama users will continue to work without changes
+    - OpenRouter is opt-in via API key configuration
 
 ---
 
