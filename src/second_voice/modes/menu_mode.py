@@ -27,7 +27,7 @@ class MenuMode(BaseMode):
 
     def start_recording(self) -> Optional[str]:
         """
-        Start audio recording with a text countdown.
+        Start audio recording with a text countdown and VU meter.
 
         :return: Path to recorded audio file or None
         """
@@ -39,10 +39,19 @@ class MenuMode(BaseMode):
                 raise KeyboardInterrupt("Recording stopped by user")
             signal.signal(signal.SIGINT, sigint_handler)
             
-            audio_path = self.recorder.start_recording()
-            signal.pause()  # Wait for interrupt
+            self.recorder.start_recording()
+            
+            while True:
+                amp = self.recorder.get_amplitude()
+                bar_len = int(amp * 10)
+                vu_bar = "#" * bar_len + "-" * (10 - bar_len)
+                sys.stdout.write(f"\rLevel: [{vu_bar}] ")
+                sys.stdout.flush()
+                time.sleep(0.1)
+                
         except KeyboardInterrupt:
             audio_path = self.recorder.stop_recording()
+            print("\nRecording stopped.")
             
         finally:
             # Restore original signal handler
@@ -52,6 +61,7 @@ class MenuMode(BaseMode):
             self.show_status(f"✓ Recorded audio: {os.path.basename(audio_path)}")
         
         return audio_path
+
 
     def show_transcription(self, text: str):
         """

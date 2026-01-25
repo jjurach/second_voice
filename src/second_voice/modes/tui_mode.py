@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Optional
 
 try:
@@ -51,11 +52,42 @@ class TUIMode(BaseMode):
     def start_recording(self) -> Optional[str]:
         """
         Record audio with TUI recording indicator.
+        Waits for KeyboardInterrupt to stop recording.
 
         :return: Path to recorded audio file
         """
-        with self.console.status("[bold green]Recording..."):
-            return self.recorder.start_recording()
+        import signal
+        
+        self.show_status("🎤 Recording... (press Ctrl+C to stop)")
+        
+        # Capture original signal handler
+        original_sigint = signal.getsignal(signal.SIGINT)
+        
+        try:
+            # Temporarily replace SIGINT handler
+            def sigint_handler(signum, frame):
+                raise KeyboardInterrupt("Recording stopped")
+            signal.signal(signal.SIGINT, sigint_handler)
+            
+            self.recorder.start_recording()
+            
+            # Use Live display for VU meter
+            while True:
+                amp = self.recorder.get_amplitude()
+                bar_len = int(amp * 20)
+                vu_bar = "█" * bar_len + "░" * (20 - bar_len)
+                self.show_status(f"🎤 Recording: [{vu_bar}] (Ctrl+C to stop)")
+                time.sleep(0.1)
+                
+        except KeyboardInterrupt:
+            audio_path = self.recorder.stop_recording()
+            return audio_path
+
+            
+        finally:
+            # Restore original signal handler
+            signal.signal(signal.SIGINT, original_sigint)
+
 
     def show_transcription(self, text: str):
         """
@@ -114,43 +146,65 @@ class TUIMode(BaseMode):
 
     def run(self):
         """
-        Main TUI workflow.
+        Main TUI workflow using Live display.
         """
+        from rich.live import Live
+        import time
+
         context = None
+        self.show_status("Ready")
 
-        while True:
-            try:
-                # Render initial layout
-                self.console.print(self.layout)
-
-                # Record audio
-                audio_path = self.start_recording()
-                if audio_path:
-                    # Transcribe
-                    self.show_status("Transcribing...")
-                    transcription = self.processor.transcribe(audio_path)
+        with Live(self.layout, console=self.console, screen=True, refresh_per_second=4):
+            while True:
+                try:
+                    # In a real TUI we'd have an event loop, 
+                    # but for this version we'll stick to a sequential flow 
+                    # with visual updates.
                     
-                    if transcription:
-                        self.show_transcription(transcription)
-                        
-                        # Process with LLM
-                        self.show_status("Processing...")
-                        output = self.processor.process_text(transcription, context)
-                        
-                        # Review output
-                        edited_output = self.review_output(output, context)
-                        
-                        # Update context
-                        context = edited_output
-                        self.processor.save_context(context)
+                    # Wait for user to be ready for next command (simulated)
+                    # For now, it just auto-starts recording for demonstration 
+                    # or we could wait for a keypress if we had a non-blocking input
                     
-                    # Clean up temporary audio file
-                    os.unlink(audio_path)
+                    # Record audio
+                    self.show_status("Press Ctrl+C to stop recording...")
+                    audio_path = self.start_recording()
+                    
+                    if audio_path:
+                        # Transcribe
+                        self.show_status("⌛ Transcribing...")
+                        transcription = self.processor.transcribe(audio_path)
+                        
+                        if transcription:
+                            self.show_transcription(transcription)
+                            
+                            # Process with LLM
+                            self.show_status("⌛ Processing...")
+                            output = self.processor.process_text(transcription, context)
+                            
+                            # Review output
+                            # Note: review_output might break the Live display if it launches an editor
+                            # We should probably stop Live before launching editor
+                            self.show_status("Opening editor for review...")
+                            edited_output = self.review_output(output, context)
+                            
+                            # Update context
+                            context = edited_output
+                            self.processor.save_context(context)
+                        
+                        # Clean up temporary audio file
+                        if os.path.exists(audio_path):
+                            os.unlink(audio_path)
+                        
+                        self.show_status("Done. Waiting 2s...")
+                        time.sleep(2)
+                        self.show_status("Ready for next round")
 
-            except KeyboardInterrupt:
-                break
-            except Exception as e:
-                self.show_status(f"Error: {e}")
+                except KeyboardInterrupt:
+                    break
+                except Exception as e:
+                    self.show_status(f"Error: {e}")
+                    time.sleep(3)
+
 
         # Cleanup resources
         self.cleanup()

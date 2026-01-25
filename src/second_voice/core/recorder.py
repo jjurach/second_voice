@@ -34,8 +34,34 @@ class AudioRecorder:
         self._recording = False
         self._audio_data = []
         self._record_thread = None
+        self._current_amplitude = 0.0
+
+    def get_amplitude(self) -> float:
+        """
+        Get the latest calculated RMS amplitude (0.0 to 1.0).
+        
+        :return: Normalized amplitude
+        """
+        return self._current_amplitude
+
+    def _calculate_rms(self, audio_data):
+        """
+        Calculates Root Mean Square (RMS) amplitude from NumPy array.
+        Returns a float between 0 and 1 (normalized).
+        """
+        if len(audio_data) == 0:
+            return 0.0
+        
+        # RMS Formula: sqrt(mean(s^2))
+        rms = np.sqrt(np.mean(audio_data**2))
+        
+        # Normalize based on typical max (e.g., 0.1 to 0.3 for normal speech with float32)
+        # We'll use a sensitivity factor to make it reactive
+        normalized = min(1.0, rms * 5.0)
+        return float(normalized)
 
     def _create_temp_audio_path(self, extension='wav'):
+
         """
         Create a unique temporary audio file path.
 
@@ -63,23 +89,22 @@ class AudioRecorder:
                 print(f"Recording status: {status}")
             if self._recording:
                 self._audio_data.append(indata.copy())
+                self._current_amplitude = self._calculate_rms(indata)
 
         try:
             # Start the stream
-            stream = sd.InputStream(
+            self.stream = sd.InputStream(
                 samplerate=self.sample_rate,
                 channels=self.channels,
                 device=self.device,
                 callback=callback
             )
-            stream.start()
+            self.stream.start()
 
             # If duration specified, stop after that time
             if duration:
                 time.sleep(duration)
                 self.stop_recording()
-                stream.stop()
-                stream.close()
 
             return temp_path
         except Exception as e:
@@ -93,6 +118,11 @@ class AudioRecorder:
 
         :return: Absolute path to saved audio file, or None if no recording
         """
+        if hasattr(self, 'stream') and self.stream:
+            self.stream.stop()
+            self.stream.close()
+            self.stream = None
+
         if not self._recording:
             return None
 

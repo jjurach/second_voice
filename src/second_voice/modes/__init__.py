@@ -47,7 +47,7 @@ def detect_mode(config):
     """
     # Explicit mode override
     if config.get('mode', 'auto') != 'auto':
-        return config['mode']
+        return config.get('mode')
 
     # Check for GUI capability
     if os.environ.get('DISPLAY') and supports_gui() and GUIMode:

@@ -1,2 +1,5 @@
-pyaudio
 requests
+sounddevice
+soundfile
+numpy
+rich

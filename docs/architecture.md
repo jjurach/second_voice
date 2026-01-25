@@ -6,10 +6,13 @@ Second Voice follows a **Local Capture / Remote Compute / Local Edit** pattern t
 
 ## System Components
 
-### Client (MacBook)
-- **Audio Capture:** Records audio using PyAudio
-- **GUI:** Tkinter-based interface with VU meter visual feedback
-- **Local Editing:** Obsidian integration for human review
+### Client (Any Machine)
+- **Audio Capture:** Records audio using `sounddevice` + `soundfile` (NumPy based)
+- **Interface Modes:** 
+  - **GUI:** Tkinter-based interface (requires DISPLAY)
+  - **TUI:** Rich-based terminal UI (SSH-friendly)
+  - **Menu:** Simple text menu (minimal dependencies, SSH-friendly)
+- **Local Editing:** Obsidian integration (GUI) or $EDITOR ($EDITOR)
 - **LLM Processing:** Multi-provider architecture (Ollama or OpenRouter)
 - **Network:** SSH tunnel for Ollama (optional), direct internet for OpenRouter
 
@@ -18,73 +21,30 @@ Second Voice follows a **Local Capture / Remote Compute / Local Edit** pattern t
 - **LLM Processing:** Ollama running `llama-pro` model (or other local models)
 - **Deployment:** Docker containers with GPU access
 
-### Cloud Services - Optional for OpenRouter
-- **LLM Processing:** OpenRouter API with access to multiple models
-- **Models:** Claude, GPT-4, and 100+ other models
-- **Authentication:** API key-based
-
-### Bridge/Integration
-- **SSH Tunnel:** Ports 8000 (Whisper) and 11434 (Ollama)
-- **Storage:** Syncthing for Obsidian vault synchronization
-- **Workflow:** Volatile edits in shadow buffer, permanent notes in vault
-
-## Network Configuration
-
-### Port Mapping
-- **Port 8000:** Whisper transcription service
-- **Port 11434:** Ollama LLM service
-- **SSH Tunnel:** `ssh -N -L 8000:localhost:8000 -L 11434:localhost:11434 james.jurach@192.168.0.157`
-
-### Docker Services
-
-The Ubuntu server runs two containerized services sharing the GPU:
-
-```yaml
-services:
-  whisper:
-    image: fedirz/faster-whisper-server:latest-cuda
-    ports: ["8000:8000"]
-    environment:
-      - WHISPER_MODEL=small.en
-      - MODEL_MAP=whisper-1:small.en
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-
-  ollama:
-    image: ollama/ollama:latest
-    ports: ["11434:11434"]
-    volumes: ["./ollama:/root/.ollama"]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-```
+### Cloud Services - Optional for OpenRouter / Groq
+- **STT Processing:** Groq Whisper API or local Whisper
+- **LLM Processing:** OpenRouter API or Ollama
+- **Models:** Claude, GPT-4, Llama 3, etc.
 
 ## Module Structure
 
 The application is organized into functional modules:
 
 ```
-second_voice/
-├── __init__.py
-├── cli.py                # CLI entry point
-├── config.py             # Configuration management
-├── engine/
-│   ├── __init__.py
-│   ├── recorder.py       # Audio recording + RMS analysis
-│   └── processor.py      # API communication (Whisper/Ollama)
-└── ui/
-    ├── __init__.py
-    ├── main_window.py    # Main Tkinter application
-    └── components.py     # VU meter and visual components
+src/
+├── cli/
+│   └── run.py            # CLI entry point
+└── second_voice/
+    ├── core/
+    │   ├── config.py     # Configuration management
+    │   ├── recorder.py   # Audio recording (sounddevice)
+    │   └── processor.py  # AI processing (STT/LLM)
+    └── modes/
+        ├── __init__.py   # Mode factory & detection
+        ├── base.py       # BaseMode abstract class
+        ├── gui_mode.py   # GUI interface
+        ├── tui_mode.py   # TUI interface
+        └── menu_mode.py  # Menu interface
 ```
 
 ## Configuration
@@ -98,9 +58,11 @@ Settings are stored in `~/.config/second_voice/settings.json`:
     "whisper_model": "small.en",
     "ollama_model": "llama-pro",
     "vault_path": "~/Documents/Obsidian/VoiceInbox",
-    "landing_editor": "obsidian"
+    "landing_editor": "obsidian",
+    "mode": "auto"
 }
 ```
+
 
 ## LLM Provider Architecture
 
