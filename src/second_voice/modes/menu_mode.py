@@ -179,9 +179,11 @@ class MenuMode(BaseMode):
                             context = edited_output
                             self.processor.save_context(context)
                         
-                        # Clean up temporary audio file
+                        # Clean up temporary audio file (but protect user-provided input files)
+                        input_file = self.config.get('input_file')
                         if not self.config.get('keep_files'):
-                            os.unlink(audio_path)
+                            if audio_path != input_file:
+                                os.unlink(audio_path)
 
                 elif choice == '2':  # Show context
                     current_context = context or self.processor.load_context()

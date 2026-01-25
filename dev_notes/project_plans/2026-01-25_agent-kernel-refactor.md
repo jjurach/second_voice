@@ -1,5 +1,7 @@
 # Project Plan: Agent Kernel Refactoring & Bootstrap Tool
 
+**Status:** ⏳ Awaiting Approval
+
 ## Goal
 Establish a reusable "Agent Kernel" structure in `docs/system-prompts/` to standardize agentic workflows across projects. Implement a `bootstrap.py` tool to manage the injection and maintenance of these standard files using a template-based approach with conflict detection.
 

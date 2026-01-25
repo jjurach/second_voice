@@ -33,7 +33,29 @@ def main():
         config.set('keep_files', True)
         
     if args.file:
-        config.set('input_file', os.path.abspath(args.file))
+        input_file_path = os.path.abspath(args.file)
+
+        # Validate file exists
+        if not os.path.exists(input_file_path):
+            print(f"Error: Input file not found: {input_file_path}")
+            sys.exit(1)
+
+        # Validate file is readable
+        if not os.access(input_file_path, os.R_OK):
+            print(f"Error: Input file not readable: {input_file_path}")
+            sys.exit(1)
+
+        # Validate file format (try to open with soundfile)
+        try:
+            import soundfile as sf
+            info = sf.info(input_file_path)
+            if args.verbose:
+                print(f"Detected audio: {info.samplerate}Hz, {info.channels}ch, {info.duration:.1f}s")
+        except Exception as e:
+            print(f"Error: Invalid audio file: {e}")
+            sys.exit(1)
+
+        config.set('input_file', input_file_path)
 
     if args.debug:
         config.set('debug', True)
@@ -57,6 +79,12 @@ def main():
         print(f"Error detecting mode: {e}")
         mode_name = 'menu' # Fallback
         print(f"Falling back to {mode_name} mode...")
+
+    # GUI mode doesn't support --file input
+    if mode_name == 'gui' and config.get('input_file'):
+        print("Warning: --file not supported in GUI mode. Falling back to menu mode...")
+        mode_name = 'menu'
+        config.set('mode', 'menu')
 
     # Run mode
     try:

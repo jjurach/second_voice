@@ -81,6 +81,20 @@ pytest tests/test_recorder.py -v
 - Menu mode detection
 - Mode instantiation
 
+### CLI Integration Tests (`tests/test_cli_integration.py`)
+Integration tests for file input and cleanup functionality:
+- Input file validation (exists, readable, valid audio format)
+- File protection during processing
+- `--keep-files` flag behavior
+- `--file` with different modes (menu, tui, gui)
+- Verbose audio file info output
+- Corrupt file detection
+
+Run with:
+```bash
+pytest tests/test_cli_integration.py -v
+```
+
 ## Mocking Strategy
 
 All external services are mocked by default for fast, offline testing:
@@ -230,6 +244,78 @@ Tests should complete in < 2 seconds. If slower:
 - Check for accidental live API calls
 - Verify mocks are working
 - Profile with `pytest --profile` (requires pytest-profiling)
+
+## Testing --file Workflow
+
+The `--file` flag allows processing of pre-recorded audio files for reproducible testing.
+
+### Audio File Support
+
+Supported formats (via `soundfile` library):
+- WAV (primary format)
+- FLAC, OGG, MP3
+- AIFF, AU, CAF
+- And 25+ additional formats
+
+List available formats:
+```bash
+python -c "import soundfile; print(soundfile.available_formats())"
+```
+
+### Test Commands
+
+#### Test file validation
+```bash
+# File not found error
+python src/cli/run.py --file nonexistent.wav
+
+# File info in verbose mode
+python src/cli/run.py --file samples/test.wav --verbose
+```
+
+#### Test with different modes
+```bash
+# Menu mode
+python src/cli/run.py --file samples/test.wav --mode menu
+
+# TUI mode
+python src/cli/run.py --file samples/test.wav --mode tui
+
+# GUI mode (should fallback with warning)
+python src/cli/run.py --file samples/test.wav --mode gui
+```
+
+#### Test file protection
+```bash
+# Run without --keep-files, then verify samples/test.wav still exists
+python src/cli/run.py --file samples/test.wav --mode menu
+
+# Run with --keep-files to preserve all temp files
+python src/cli/run.py --keep-files
+```
+
+### Audio File Validation
+
+The CLI validates input files before processing:
+1. **File exists**: Checked with `os.path.exists()`
+2. **File readable**: Checked with `os.access(file, os.R_OK)`
+3. **Valid audio format**: Checked with `soundfile.info()`
+
+Invalid files produce clear error messages:
+```
+Error: Input file not found: /path/to/file.wav
+Error: Input file not readable: /path/to/file.wav
+Error: Invalid audio file: [soundfile error message]
+```
+
+### Editor Compatibility
+
+Some editors may not support `--file` argument. Test your `$EDITOR` with:
+```bash
+EDITOR=your_editor python src/cli/run.py --file samples/test.wav --mode menu
+```
+
+If the editor doesn't open, check that it supports file arguments in its documentation.
 
 ## Development Workflow
 

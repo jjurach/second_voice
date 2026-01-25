@@ -59,13 +59,25 @@ For automated testing and debugging, you can use the `samples/test.wav` file (or
 
 ### Example: Running with an input file
 
+A test audio file is included at `samples/test.wav`:
+
 ```bash
-# Process a test file in TUI mode
+# Process the test file in TUI mode
 python3 src/cli/run.py --mode tui --file samples/test.wav
 
-# Process a test file in Menu mode
+# Process the test file in Menu mode
 python3 src/cli/run.py --mode menu --file samples/test.wav
+
+# Display audio info in verbose mode
+python3 src/cli/run.py --file samples/test.wav --verbose
 ```
+
+**Supported Audio Formats:**
+- WAV, FLAC, OGG, MP3 (common formats)
+- AIFF, AU, CAF (legacy formats)
+- And 25+ additional formats supported by `soundfile`
+
+See `TESTING.md` for comprehensive testing documentation.
 
 ### Running the Demo Script
 

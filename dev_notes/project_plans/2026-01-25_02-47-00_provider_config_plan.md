@@ -1,5 +1,7 @@
 # Project Plan: Provider-Specific Configuration
 
+**Status:** ✅ COMPLETE (Already implemented in Mode Selection Architecture)
+
 ## Goal
 Refactor configuration to use provider-specific keys (`openrouter_llm_model`, `groq_stt_model`) for better clarity and flexibility.
 
