@@ -458,7 +458,7 @@ To use in a new project:
 
 ## Understanding the System
 
-**Start here:** `docs/system-prompts/REFERENCE-ARCHITECTURE.md`
+**Start here:** `docs/system-prompts/reference-architecture.md`
 - Explains how all files reference each other
 - Documents safety guardrails for logs-first workflow
 - Shows what happens when logs-first is enabled vs disabled
