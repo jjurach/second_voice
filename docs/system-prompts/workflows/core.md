@@ -12,19 +12,19 @@
 5.  **Is it anything else?** → Announce you will create a **Project Plan**.
 
 > **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting.
-> **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in your project's planning directory.
+> **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in `dev_notes`.
 
 **Step B: Process Spec File (If Required)**
-- When a prompt involves planning, represent the planning in your project's planning directory (e.g., `dev_notes/specs/`, `docs/planning/`, `.ai-plans/`)
-- Create a summary of what the user is asking for in `[PLANNING_DIR]/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md` (using the timestamp-based filename format)
-- If the prompt involves processing user intentions from a un-timestamped file already in your planning directory, rename it to match the filename format based on the file's last modified time.
+- When a prompt involves planning, represent the planning in `dev_notes/specs`
+- Create a summary of what the user is asking for in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md` (using the timestamp-based filename format)
+- If the prompt involves processing user intentions from a un-timestamped file already in `dev_notes/specs`, then rename it to match the filename format based on the file's last modified time.
   - Add any additional context as developed over follow-up conversations about the spec.
 - Spec files signify user intentions and goals, and are typically used to create or update project plans.
 
 **Step C: Create a Project Plan (If Required)**
 - Use the **Project Plan Structure** defined in `docs/system-prompts/templates/structure.md`.
 - The plan must be detailed enough for another agent to execute.
-- Save the plan to `[PLANNING_DIR]/project_plans/YYYY-MM-DD_HH-MM-SS_description.md`.
+- Save the plan to `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md`.
 
 **Step D: AWAIT DEVELOPER APPROVAL**
 - **NEVER EXECUTE A PLAN WITHOUT EXPLICIT APPROVAL.**
@@ -35,7 +35,7 @@
 
 **Step E: Implement & Document Concurrently**
 - Execute the approved plan step-by-step.
-- After each logical change, create or update a **Change Documentation** entry in `[PLANNING_DIR]/changes/`. Use the structure from your project's templates documentation.
+- After each logical change, create or update a **Change Documentation** entry in `dev_notes/changes/`. Use the structure from your project's templates documentation.
 
 ## 2. The Unbreakable Rules
 

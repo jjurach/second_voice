@@ -170,18 +170,18 @@ You must verify your documentation changes against these requirements before mar
 4.  **Is it a Research/Documentation Change?** → Make the change directly. No extra documentation required.
 5.  **Is it anything else?** → Announce you will create a **Project Plan**.
 
-> **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting. The full definition and examples are in `docs/overview.md`.
+> **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting.
 > **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in `dev_notes`.
 
 **Step B: Process Spec File (If Required)**
 - When a prompt involves planning, represent the planning in `dev_notes/specs`
-- Create a summary of what the user is asking for or what they want in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md`
-- If the prompt involves processing user intentions from a un-timestamped file already in `dev_notes/specs`, then rename it to have the correct filename layout based on the file's last modified time.
+- Create a summary of what the user is asking for in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md` (using the timestamp-based filename format)
+- If the prompt involves processing user intentions from a un-timestamped file already in `dev_notes/specs`, then rename it to match the filename format based on the file's last modified time.
   - Add any additional context as developed over follow-up conversations about the spec.
 - Spec files signify user intentions and goals, and are typically used to create or update project plans.
 
 **Step C: Create a Project Plan (If Required)**
-- Use the **Project Plan Structure** defined in `docs/templates.md`.
+- Use the **Project Plan Structure** defined in `docs/system-prompts/templates/structure.md`.
 - The plan must be detailed enough for another agent to execute.
 - Save the plan to `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md`.
 
@@ -194,7 +194,7 @@ You must verify your documentation changes against these requirements before mar
 
 **Step E: Implement & Document Concurrently**
 - Execute the approved plan step-by-step.
-- After each logical change, create or update a **Change Documentation** entry in `dev_notes/changes/`. Use the structure from `docs/templates.md`.
+- After each logical change, create or update a **Change Documentation** entry in `dev_notes/changes/`. Use the structure from your project's templates documentation.
 
 ## 2. The Unbreakable Rules
 
@@ -202,8 +202,8 @@ You must verify your documentation changes against these requirements before mar
 2.  **Quality is Mandatory:** You MUST follow the existing code patterns, conventions, style, and typing of the files you are editing. New code should look like the old code.
 3.  **Uncertainty Requires a Full Stop:** If you encounter any error, are confused by a requirement, or are unsure how to proceed, you MUST **STOP** immediately. Document the issue and ask the developer for guidance. Do not try to solve novel problems alone.
 4.  **File Naming is Mandatory:**
-    - All Project Plans and Change Documentation in `dev_notes/` MUST use the `YYYY-MM-DD_HH-MM-SS_description.md` format.
-    - All new documentation files in `docs/` MUST use `lowercase-kebab.md` naming convention (see `docs/file-naming-conventions.md`).
+    - All Project Plans and Change Documentation MUST use the `YYYY-MM-DD_HH-MM-SS_description.md` filename format. (See your project's documentation for the directory location.)
+    - All new documentation files in `docs/` MUST use `lowercase-kebab.md` naming convention.
 5.  **Temporary Files:** NEVER use `/tmp` or system temporary directories for temporary files. Always create temporary files in the current working directory using the naming patterns `tmp-*` or `*.tmp` or `tmp/*`. These files should be cleaned up when no longer needed.
 6.  **Slack Notification (If Supported):** Notify using the slack-notifications MCP service each time you commit to the local git repo. **Note:** This rule applies only to agents with MCP support.
 <!-- END-SECTION -->
@@ -240,12 +240,12 @@ You must verify your documentation changes against these requirements before mar
 ## 3. Codebase State Integrity
 
 *   **Dependencies:**
-    *   If any new library is imported, the task is **NOT DONE** until both `requirements.txt` AND `pyproject.toml` are updated.
+    *   If any new library is imported, follow your language-specific Definition of Done for dependency management (see language-specific guidance below).
 *   **Configuration Drift:**
-    *   If you add or modify a configuration key (e.g., `openrouter_llm_model`):
-        1.  Update `docs/implementation-reference.md` (or relevant doc).
-        2.  Update `config.example.json` to include the new key with a safe default or placeholder.
-    *   **Secrets:** Never hardcode secrets. Ensure they are read from env vars or config, and documented in `config.example.json`.
+    *   If you add or modify a configuration key (e.g., `api_timeout`, `max_retries`):
+        1.  Update your project's implementation documentation (e.g., `docs/implementation-reference.md`, `docs/config.md`).
+        2.  Update your project's configuration example/template file (e.g., `config.example.json`, `.env.example`, `config.sample.yaml`) to include the new key with a safe default or placeholder.
+    *   **Secrets:** Never hardcode secrets. Ensure they are read from env vars or config, and documented in your configuration example/template file.
 
 ## 4. The Agent Handoff
 
@@ -260,16 +260,28 @@ You must verify your documentation changes against these requirements before mar
 - [ ] `dev_notes/changes/` entry created.
 - [ ] Verification command and output included in change log.
 - [ ] Temporary test scripts content saved to log and file deleted.
-- [ ] `requirements.txt` & `pyproject.toml` updated (if applicable).
-- [ ] `config.example.json` updated (if applicable).
+- [ ] Dependencies updated (language-specific; see language sections below).
+- [ ] Configuration example file updated (if applicable).
 - [ ] `docs/` updated for new config/features.
 - [ ] "Known Issues" documented.
+
+---
+
+## Language-Specific Requirements
+
+### Python Projects
+
+See `docs/system-prompts/languages/python/definition-of-done.md` for Python-specific requirements including:
+- pytest test framework setup
+- `requirements.txt` and `pyproject.toml` management
+- Type hints and docstrings
+- Test coverage requirements
 <!-- END-SECTION -->
 
 <!-- SECTION: PYTHON-DOD -->
 # Definition of Done: Python Specifics
 
-This document extends the universal Definition of Done with Python-specific criteria and tools.
+This document extends the universal Definition of Done (see `docs/system-prompts/principles/definition-of-done.md`) with Python-specific criteria and tools.
 
 ## 1. Python Environment & Dependencies
 

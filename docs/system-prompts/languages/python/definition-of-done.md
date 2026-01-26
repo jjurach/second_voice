@@ -137,7 +137,7 @@ def mock_api(mocker):
 
 **If You Create Test Scripts:**
 1. Create in a temporary directory: `tmp-verify-*.py`
-2. Include the full script content in your change documentation
+2. Include the full script content in `dev_notes/changes/` documentation
 3. Delete the script after verification:
    ```bash
    rm tmp-verify-*.py
