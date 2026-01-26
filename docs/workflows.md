@@ -4,34 +4,51 @@
 
 ---
 
-## Quick Start
+## Quick Start: Opt-In Per Task
 
-### Check Your Project's Workflow
+### For Simple Tasks
 
-```bash
-python3 docs/system-prompts/bootstrap.py --analyze-workflow
+Just create a spec file without any special marker:
+
+```markdown
+# Spec: Fix button color
+
+Fix the primary button to match brand colors.
 ```
 
-You'll see:
-- What workflow is recommended for your project
-- Current workflow state (enabled/disabled)
-- Commands to enable/disable workflows
+Standard workflow applies - faster, less documentation.
 
-### Enable Logs-First Workflow
+### For Complex Tasks
+
+Add `@logs-first` marker to trigger structured planning:
+
+```markdown
+# Spec: Implement Authentication System
+
+**Workflow:** @logs-first
+
+This system will handle user login, session management, and API key validation...
+```
+
+Agent will now:
+1. Create a Project Plan
+2. Wait for approval before implementing
+3. Track all changes in dev_notes/
+4. Verify completion rigorously
+
+### Project-Level Configuration (Optional)
+
+For teams that want logs-first by default:
 
 ```bash
 python3 docs/system-prompts/bootstrap.py --enable-logs-first --commit
 ```
 
-This injects comprehensive development instructions into AGENTS.md.
-
-### Disable Workflow
+For teams that want to disable it entirely:
 
 ```bash
 python3 docs/system-prompts/bootstrap.py --disable-logs-first --commit
 ```
-
-Removes workflow instructions from AGENTS.md.
 
 ---
 
@@ -109,49 +126,93 @@ When you disable a workflow, bootstrap.py:
 
 ---
 
-## Choosing a Workflow
+## When to Use the Logs-First Marker
+
+### Use `@logs-first` for:
+
+✅ **Architectural decisions** - Changes that affect multiple systems
+✅ **New major features** - Authentication, payment systems, etc.
+✅ **Security/compliance work** - API design, encryption, permissions
+✅ **Refactoring** - Large-scale restructuring that affects many files
+✅ **Infrastructure changes** - Database schema, deployment pipeline
+✅ **When you want structured review** - Get explicit approval before coding
+
+### Skip the marker for:
+
+⏩ **Bug fixes** - Simple patches and corrections
+⏩ **UI polish** - Minor style/UX improvements
+⏩ **Documentation updates** - README, docstrings, comments
+⏩ **Dependency updates** - Routine library upgrades
+⏩ **When you know the approach** - Straightforward implementations
 
 ### Decision Tree
 
-**Is your project small (< 200 files) and actively developed?**
-→ logs-first workflow recommended
+**Is this a significant architectural change?**
+→ Use `@logs-first` marker
 
-**Is your team > 10 people or project > 50K lines?**
-→ Consider a lightweight or custom workflow
+**Will this change affect multiple systems?**
+→ Use `@logs-first` marker
 
-**Do you need heavy compliance/approval processes?**
-→ Create custom enterprise workflow
+**Do you want structured approval before coding?**
+→ Use `@logs-first` marker
 
-**Is this a one-off script or experiment?**
-→ No workflow needed (or very lightweight)
+**Is this a simple, focused task?**
+→ Skip the marker (use standard workflow)
 
 ---
 
 ## Workflow Philosophy
 
-### Why Workflows Matter
+### Why Per-Task Opt-In?
 
-Different projects have different needs:
-- **Small startups** need speed and flexibility
-- **Enterprise teams** need process and accountability
-- **Research projects** need exploration room
-- **Open-source** needs community engagement
+**Gradual adoption:** Introduce the workflow naturally, one feature at a time.
 
-One-size-fits-all doesn't work. Workflows let you choose.
+**No surprises:** Developers see the `@logs-first` marker and know what's expected.
 
-### The Logs-First Philosophy
+**Flexible rigor:** Different tasks get different levels of structure based on complexity.
 
-The logs-first workflow emphasizes:
-- **Clarity:** Document what you're building and why
-- **Accountability:** Prove the work was done correctly
-- **Continuity:** New team members understand the history
-- **Quality:** Multi-step approval before execution
+**Team learning:** New team members encounter the workflow when it matters most.
 
-This works well for small teams where every decision matters.
+**Low barrier:** Simple tasks stay fast; complex ones get the rigor they need.
+
+### The Logs-First Approach
+
+When you include `@logs-first`:
+- **Clarity:** Explicit planning before building
+- **Accountability:** Documented decisions and proof of work
+- **Continuity:** Future maintainers understand the reasoning
+- **Quality:** Structured review gate before implementation
+- **Flexibility:** Only triggered when needed
+
+This opt-in model works well for teams gradually adopting structured practices.
 
 ---
 
-## Managing Workflow State
+## Project-Level Configuration (Optional)
+
+### Default Behavior
+
+By default, logs-first is **not** enabled project-wide. Individual tasks opt-in via the `@logs-first` marker in their spec file.
+
+This is intentional: it lets teams experience the workflow per-task without forcing it on everyone.
+
+### Enabling Project-Wide
+
+If your entire team wants logs-first by default:
+
+```bash
+python3 docs/system-prompts/bootstrap.py --enable-logs-first --commit
+```
+
+This injects the full workflow into AGENTS.md, so all tasks follow it unless explicitly exempted.
+
+### Disabling Project-Wide
+
+To remove logs-first even from opt-in specs:
+
+```bash
+python3 docs/system-prompts/bootstrap.py --disable-logs-first --commit
+```
 
 ### Viewing Current State
 
@@ -161,41 +222,12 @@ python3 docs/system-prompts/bootstrap.py --analyze-workflow
 
 Shows:
 - Recommended workflow for your project
-- Current workflow state
+- Current project-level state
 - Available commands
-
-### Changing Workflow
-
-```bash
-# Enable
-python3 docs/system-prompts/bootstrap.py --enable-logs-first --commit
-
-# Disable
-python3 docs/system-prompts/bootstrap.py --disable-logs-first --commit
-
-# Check (no changes)
-python3 docs/system-prompts/bootstrap.py --analyze-workflow
-```
 
 ### How State Persists
 
-Once you enable a workflow:
-- It stays enabled across subsequent runs
-- Explicit commands override prior state
-- State is stored in AGENTS.md (no separate config files)
-
-**Example:**
-```bash
-# First run: enable logs-first
-python3 bootstrap.py --enable-logs-first --commit
-
-# Days later: state is preserved
-python3 bootstrap.py --analyze-workflow
-# Output: "Current state: logs_first=enabled"
-
-# Can disable if needed
-python3 bootstrap.py --disable-logs-first --commit
-```
+Project-level workflow state is stored in AGENTS.md and persists across runs, so your choice is remembered.
 
 ---
 

@@ -125,70 +125,87 @@ The **logs-first workflow** emphasizes documentation and accountability through 
 - Less structured development allowed
 - Suitable for large projects or teams with different needs
 
-### Using Logs-First Even When Not Enabled
+### Opt-In Logs-First Per-Task
 
-You can follow the logs-first workflow **manually** at any time, regardless of whether it's enabled in AGENTS.md:
+Even when logs-first is **not** enabled project-wide, you can opt-in to the workflow for specific tasks by including a special marker in your spec file.
 
-1. **Create a Spec File** (optional)
-   - Location: `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_what-you-want.md`
-   - Format: Brief description of what you're asking for
-   - Timing: Write before the Project Plan
+**When to use:** For complex features, architectural changes, or cross-cutting concerns where you want structured planning and approval gates.
 
-   **Example:**
-   ```markdown
-   # Spec: Add Dark Mode Support
+**How to opt-in:** Add this marker to your spec file:
 
-   **Date:** 2026-01-26
+```markdown
+# Spec: Add Dark Mode Support
 
-   ## User Request
-   - Add dark mode toggle to GUI
-   - Save preference to config
-   - Auto-detect system theme on startup
+**Workflow:** @logs-first
 
-   ## Goals
-   - Improve UX for users in dark environments
-   - Follow existing config patterns
+**Date:** 2026-01-26
 
-   ## Acceptance Criteria
-   - [ ] Dark mode toggle appears in settings
-   - [ ] Preference persists between sessions
-   - [ ] All UI elements are readable in dark mode
-   - [ ] Tests verify toggle functionality
-   ```
+## User Request
+- Add dark mode toggle to GUI
+- Save preference to config
+- Auto-detect system theme on startup
 
-2. **Create a Project Plan** (recommended for non-trivial tasks)
-   - Location: `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_plan-name.md`
-   - Format: See `docs/templates.md` for template
-   - Timing: Submit for approval BEFORE implementing
+## Goals
+- Improve UX for users in dark environments
+- Follow existing config patterns
 
-   **What to include:**
-   - Overview of what you're building
-   - Detailed phases with specific tasks
-   - Files that will be created/modified
-   - Success criteria
-   - Risk assessment
+## Acceptance Criteria
+- [ ] Dark mode toggle appears in settings
+- [ ] Preference persists between sessions
+- [ ] All UI elements are readable in dark mode
+- [ ] Tests verify toggle functionality
+```
 
-3. **Present to Developers**
-   - Share the plan and ask for approval
-   - Wait for explicit "yes" or "approved"
-   - Document feedback and iterate if needed
+**What the `@logs-first` marker does:**
+- Signals to agents that this task requires the full logs-first workflow
+- Agent will ask you to create a Project Plan before implementing
+- Agent will wait for explicit approval before starting work
+- Agent will track changes in Change Documentation files
+- Ensures structured decision-making for this specific feature
 
-4. **Implement with Tracking**
-   - Execute the approved plan step-by-step
-   - After each major milestone, create a Change Documentation entry
+**Without the marker:**
+- Agents use standard workflow (Steps A-E)
+- Less structured documentation required
+- Faster path to implementation
+- Still follows quality standards
 
-5. **Create Change Documentation**
-   - Location: `dev_notes/changes/YYYY-MM-DD_HH-MM-SS_what-changed.md`
-   - Format: See `docs/templates.md` for template
-   - Include: What was changed, test results, metrics
+**Benefits of opt-in approach:**
+- ✅ Gradual team adoption - no forced complexity
+- ✅ Per-task control - use for important features only
+- ✅ Natural learning - team sees the workflow in action
+- ✅ Flexibility - different features can have different rigor
+- ✅ No surprises - developers see the marker and know what to expect
 
-   **What to include:**
-   - Summary of work completed
-   - Detailed changes per component
-   - Test execution results (actual output)
-   - Coverage metrics
-   - Verification against Definition of Done
-   - Known issues or limitations
+**Example workflow with opt-in:**
+
+```markdown
+# Spec: Add Dark Mode Support
+
+**Workflow:** @logs-first
+
+[rest of spec...]
+```
+
+When the agent sees `@logs-first`, it will:
+1. Acknowledge the marker
+2. Ask you to approve the approach
+3. Request a Project Plan before implementation
+4. Track all changes in dev_notes/changes/
+5. Verify completion against Definition of Done
+
+**For simple tasks, skip the marker:**
+
+```markdown
+# Spec: Fix typo in README
+
+[rest of spec...]
+```
+
+No `@logs-first` marker means:
+- Standard workflow applies
+- Faster iteration
+- Less documentation overhead
+- Still maintains quality standards
 
 ### Decision Tree: To Enable or Not?
 

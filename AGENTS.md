@@ -4,22 +4,52 @@
 
 ## Workflow Configuration
 
-**Current Workflow:** logs-first (documentation-driven development)
+**Opt-In Logs-First Workflow:** Tasks can opt-in to structured planning and documentation via the `@logs-first` marker.
 
-This project uses the logs-first workflow, which emphasizes detailed documentation and accountability through three connected documents: Spec → Project Plan → Change Documentation. This workflow is enabled and injected into this file via bootstrap.py.
+This project supports the logs-first workflow on a **per-task basis**. Individual tasks can include a special marker in their spec file to trigger the full workflow:
+- Detailed specification documents
+- Approved project plans before implementation
+- Comprehensive change documentation with verification
 
-### Managing Workflow
+### How to Use
 
-To check current state or change workflows:
+**For complex features or architectural changes:**
+
+```markdown
+# Spec: Implement Authentication System
+
+**Workflow:** @logs-first
+
+Detailed description of the feature...
+```
+
+When an agent sees `@logs-first`, it will:
+1. Create and request approval for a Project Plan
+2. Wait for explicit "yes" before implementation
+3. Track all changes in dev_notes/changes/
+4. Verify completion against Definition of Done
+
+**For simple tasks, skip the marker:**
+
+```markdown
+# Spec: Fix button color
+
+Simple description...
+```
+
+Standard workflow applies - faster iteration, less documentation overhead.
+
+### Project-Level Configuration
+
+To make logs-first the default for all tasks:
 
 ```bash
-# Analyze workflow configuration
-python3 docs/system-prompts/bootstrap.py --analyze-workflow
-
-# Enable logs-first workflow
 python3 docs/system-prompts/bootstrap.py --enable-logs-first --commit
+```
 
-# Disable logs-first workflow
+To disable it entirely:
+
+```bash
 python3 docs/system-prompts/bootstrap.py --disable-logs-first --commit
 ```
 
