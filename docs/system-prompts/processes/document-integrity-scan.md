@@ -68,7 +68,7 @@ Resolution:
 1. Identify all files in `docs/system-prompts/` and subdirectories
 2. For each file, extract all markdown links
 3. Categorize links:
-   - ✅ **Safe:** External URLs, anchors, other system-prompts files, entry points (AGENTS.md, CLAUDE.md, GEMINI.md, AIDER.md)
+   - ✅ **Safe:** External URLs, anchors, other system-prompts files, entry points (AGENTS.md, CLAUDE.md, GEMINI.md, AIDER.md, CLINE.md)
    - ⚠️ **Conditional:** Links outside system-prompts that are marked with "(if present)" or similar
    - ❌ **Problematic:** Links outside system-prompts without conditional marking
 4. Report problematic references
@@ -189,7 +189,7 @@ must contain text indicating they are conditional:
   - "(if exists)"
   - Similar conditional language
 
-Exception: Links to entry points (AGENTS.md, CLAUDE.md, GEMINI.md, AIDER.md)
+Exception: Links to entry points (AGENTS.md, CLAUDE.md, GEMINI.md, AIDER.md, CLINE.md)
 are always safe (these files must exist in projects using AGENTS.md)
 ```
 
@@ -215,7 +215,7 @@ Documentation files in docs/ directory:
 Auto-discovered entry points:
   Pattern: {TOOL}.md (uppercase)
   Location: Project root
-  Examples: CLAUDE.md, GEMINI.md, AIDER.md, AGENTS.md
+  Examples: AGENTS.md, CLAUDE.md, AIDER.md, CLINE.md, GEMINI.md
 
 Timestamped files (dev_notes/):
   Pattern: YYYY-MM-DD_HH-MM-SS_description.md
