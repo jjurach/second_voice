@@ -4,6 +4,48 @@
 
 Second Voice follows a **Local Capture / Remote Compute / Local Edit** pattern to bypass Intel MacBook performance bottlenecks by offloading heavy AI computation to a remote Ubuntu server with an RTX 2080 GPU.
 
+## Agent Kernel & Workflow Layer
+
+This project uses the **Agent Kernel** pattern with optional **Workflows** to govern how AI agents approach development tasks.
+
+### Workflow System
+
+**What it is:** A set of instructions that define how agents should handle requests (documentation requirements, approval processes, verification standards).
+
+**How it works:**
+- Workflows are stored as markdown documents in `docs/system-prompts/workflows/`
+- The `bootstrap.py` tool injects workflow content into `AGENTS.md` based on project preference
+- Each project can enable/disable workflows independently
+
+**Current Project:** This project uses the **logs-first workflow**, which emphasizes:
+- Detailed specification documents (user intentions)
+- Approved project plans before implementation
+- Comprehensive change documentation with verification
+- Complete audit trail (intention → design → implementation)
+
+**Flexibility:** Projects can:
+- Enable/disable logs-first workflow via `python3 docs/system-prompts/bootstrap.py --enable-logs-first`
+- Create custom workflows for different project needs
+- Switch workflows as project characteristics change
+
+See `docs/workflows.md` for detailed workflow information.
+
+### Bootstrap Tool
+
+The `docs/system-prompts/bootstrap.py` tool:
+- **Auto-detects** recommended workflows based on project size, git history, structure
+- **Manages state** by storing preferences as HTML comments in AGENTS.md
+- **Injects/removes** workflow content as needed
+- **Persists** workflow selection across runs
+
+Example usage:
+```bash
+python3 docs/system-prompts/bootstrap.py --analyze-workflow
+python3 docs/system-prompts/bootstrap.py --enable-logs-first --commit
+```
+
+---
+
 ## System Components
 
 ### Client (Any Machine)
