@@ -300,16 +300,14 @@ class Bootstrap:
         """
         # Read current AGENTS.md
         agents_content = self._read_file(self.agents_file)
+        changed = False
         if not agents_content:
-            print(
-                f"ERROR: Could not read {self.agents_file}"
-            )
-            return False
+            print(f"Initializing new {self.agents_file}")
+            agents_content = "# Project Agents\n\nTODO: describe whatever here\n"
+            changed = True
 
         language = self._detect_language()
-        changed = False
 
-        # Sections to sync
         # Sections to sync
         sections = [
             ("CORE-WORKFLOW", "workflows/core.md"),
@@ -335,6 +333,25 @@ class Bootstrap:
                 changed = True
                 print(f"✓ Updated section: {section_name}")
 
+        # Ensure definition-of-done.md exists
+        dod_path = os.path.join(self.project_root, "docs", "definition-of-done.md")
+        if not os.path.exists(dod_path):
+            dod_content = "# Definition of Done\n\nTODO: define project-specific completion criteria\n"
+            self._write_file(dod_path, dod_content)
+            changed = True
+
+        # Ensure workflows.md exists
+        workflows_path = os.path.join(self.project_root, "docs", "workflows.md")
+        if not os.path.exists(workflows_path):
+            workflows_content = "# Project Workflows\n\nTODO: describe project-specific workflows\n"
+            self._write_file(workflows_path, workflows_content)
+            changed = True
+
+        # Ensure tool entry points exist
+        tool_changed = self.regenerate_tool_entries(only_if_missing=True)
+        if tool_changed:
+            changed = True
+
         # Write result
         if changed:
             self._write_file(self.agents_file, agents_content)
@@ -345,158 +362,143 @@ class Bootstrap:
         else:
             print("No changes needed.")
 
+        # Check for gaps
+        self.report_gaps()
+
         return changed
 
-    def analyze_workflow(self) -> None:
-        """Analyze and display workflow configuration."""
-        agents_content = self._read_file(self.agents_file)
-        language = self._detect_language()
-        state = self.read_workflow_state(agents_content)
-
-        print(f"Project language: {language}")
-        print(f"Project root: {self.project_root}")
-        print(f"AGENTS.md path: {self.agents_file}")
-
-        # Get recommendation
-        recommended = self.detect_recommended_workflow()
-        print(f"\n📊 Workflow Analysis:")
-        print(f"  Recommended: {recommended}")
-
-        # Show current state
-        logs_first_state = state.get("logs_first", "disabled")
-        print(f"  Current state: logs_first={logs_first_state}")
-
-        # Show available workflows
-        print(f"\n📋 Available workflows:")
-        print(f"  • logs-first (documented development)")
-        print(f"  • custom (create your own - see custom-template.md)")
-
-        # Show commands
-        print(f"\n💡 Commands:")
-        if logs_first_state == "enabled":
-            print(f"  Enable: Already enabled")
-            print(f"  Disable: python3 bootstrap.py --disable-logs-first --commit")
-        else:
-            print(f"  Enable: python3 bootstrap.py --enable-logs-first --commit")
-            print(f"  Disable: Already disabled")
-
-    def show_diff(self) -> None:
-        """Show what would change (dry run mode)."""
-        # This is a simplified version - a full diff would be more complex
-        agents_content = self._read_file(self.agents_file)
-        language = self._detect_language()
-
-        print(f"Project language: {language}")
-        print(f"Project root: {self.project_root}")
-        print(f"AGENTS.md path: {self.agents_file}")
-        print(f"System prompts dir: {self.system_prompts_dir}")
-
-        # Sections to sync
-        sections = [
-            ("CORE-WORKFLOW", "workflows/core.md"),
-            ("PRINCIPLES", "principles/definition-of-done.md"),
+    def report_gaps(self) -> None:
+        """Check for TODO/GAP markers in managed files and report them."""
+        files_to_check = [
+            self.agents_file,
+            os.path.join(self.project_root, "docs", "definition-of-done.md"),
+            os.path.join(self.project_root, "docs", "workflows.md"),
+            os.path.join(self.project_root, "AIDER.md"),
+            os.path.join(self.project_root, "CLAUDE.md"),
+            os.path.join(self.project_root, "CLINE.md"),
+            os.path.join(self.project_root, "GEMINI.md"),
         ]
 
-        if language == "python":
-            sections.append(("PYTHON-DOD", "languages/python/definition-of-done.md"))
+        gaps_found = []
+        for file_path in files_to_check:
+            if os.path.exists(file_path):
+                content = self._read_file(file_path)
+                if "TODO" in content or "GAP" in content or "describe whatever here" in content:
+                    gaps_found.append(file_path)
 
-        print(f"\nSections to sync ({len(sections)}):")
-        for section_name, file_path in sections:
-            exists = (
-                Path(self.system_prompts_dir) / file_path
-            ).exists()
-            current = self._extract_section(agents_content, section_name)
-            status = "✓ Found" if current else "✗ Missing"
-            file_status = "✓ Exists" if exists else "✗ Missing"
-            print(f"  - {section_name}: {status} in AGENTS.md, {file_status} in system-prompts")
+        if gaps_found:
+            print("\n⚠️  Gaps (TODOs) found in the following files:")
+            for gap in gaps_found:
+                print(f"   - {gap}")
+
+    def regenerate_tool_entries(self, only_if_missing: bool = False) -> bool:
+        """Regenerate tool entry point files from templates."""
+        tools = ["aider", "claude", "cline", "gemini"]
+        changed = False
+
+        if not only_if_missing:
+            print("Regenerating tool entry point files...")
+        
+        for tool in tools:
+            file_path = os.path.join(self.project_root, f"{tool.upper()}.md")
+            if only_if_missing and os.path.exists(file_path):
+                continue
+                
+            template = self.get_tool_entry_point_template(tool)
+            if not template:
+                print(f"ERROR: No template for {tool}")
+                continue
+
+            self._write_file(file_path, template)
+            changed = True
+
+        if not self.dry_run:
+            if not only_if_missing:
+                print(f"\n✓ Successfully regenerated tool entry points")
+        else:
+            if not only_if_missing:
+                print(f"\n[DRY RUN] Would regenerate tool entry points. Use --commit to apply.")
+
+        return changed
 
     def get_tool_entry_point_template(self, tool_name: str) -> str:
         """Generate anemic tool entry point template."""
         templates = {
             "claude": """# Claude Code Instructions
 
-This project follows the **AGENTS.md** workflow for all development.
+This project follows the **AGENTS.md** workflow.
 
 ## Quick Links
 
-- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
-- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
-- **Tool Guide:** [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md) - Complete guide
-- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+- **Read First:** [AGENTS.md](AGENTS.md)
+- **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
+- **Tool Guide:** [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)
+- **Workflows:** [docs/workflows.md](docs/workflows.md)
 
 ## For Claude Code Users
 
 The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)** guide covers:
-- Quick start and installation
-- How Claude Code discovers project instructions
+- Installation and discovery
 - Workflow mapping to AGENTS.md
-- All available tools and their usage
-- Task tracking and approval gates
+- All tools and approval gates
 - Common patterns and examples
-- Troubleshooting and limitations
 """,
             "aider": """# Aider Instructions
 
-This project follows the **AGENTS.md** workflow for all development.
+This project follows the **AGENTS.md** workflow.
 
 ## Quick Links
 
-- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
-- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
-- **Tool Guide:** [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md) - Complete guide
-- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+- **Read First:** [AGENTS.md](AGENTS.md)
+- **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
+- **Tool Guide:** [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)
+- **Workflows:** [docs/workflows.md](docs/workflows.md)
 
 ## For Aider Users
 
 The **[docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)** guide covers:
-- Quick start and installation
-- How Aider discovers project instructions
-- Workflow mapping to AGENTS.md (with conversational approval)
+- Installation and discovery
+- Workflow mapping to AGENTS.md
 - Auto-commit and git integration
 - Common patterns and examples
-- Troubleshooting and limitations
 """,
             "cline": """# Cline Instructions
 
-This project follows the **AGENTS.md** workflow for all development.
+This project follows the **AGENTS.md** workflow.
 
 ## Quick Links
 
-- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
-- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
-- **Tool Guide:** [docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md) - Complete guide
-- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+- **Read First:** [AGENTS.md](AGENTS.md)
+- **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
+- **Tool Guide:** [docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)
+- **Workflows:** [docs/workflows.md](docs/workflows.md)
 
 ## For Cline Users
 
 The **[docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)** guide covers:
-- Quick start and installation
-- How Cline discovers project instructions
+- Installation and discovery
 - Workflow mapping to AGENTS.md
 - Multi-file editing and auto-commit
 - Common patterns and examples
-- Troubleshooting and limitations
 """,
             "gemini": """# Gemini Instructions
 
-This project follows the **AGENTS.md** workflow for all development.
+This project follows the **AGENTS.md** workflow.
 
 ## Quick Links
 
-- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
-- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
-- **Tool Guide:** [docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md) - Complete guide
-- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+- **Read First:** [AGENTS.md](AGENTS.md)
+- **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
+- **Tool Guide:** [docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)
+- **Workflows:** [docs/workflows.md](docs/workflows.md)
 
 ## For Gemini Users
 
 The **[docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)** guide covers:
-- Quick start and setup
-- How Gemini discovers project instructions
+- Setup and discovery
 - Workflow mapping to AGENTS.md
 - Multimodal capabilities and ReAct loop
 - Common patterns and examples
-- Troubleshooting and limitations
 """,
         }
         return templates.get(tool_name, "")
@@ -609,26 +611,68 @@ The **[docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)
 
         return 0 if all_valid else 1
 
-    def regenerate_tool_entries(self) -> int:
-        """Regenerate tool entry point files from templates."""
-        tools = ["claude", "aider", "cline", "gemini"]
+    def analyze_workflow(self) -> None:
+        """Analyze and display workflow configuration."""
+        agents_content = self._read_file(self.agents_file)
+        language = self._detect_language()
+        state = self.read_workflow_state(agents_content)
 
-        print("Regenerating tool entry point files...")
-        for tool in tools:
-            template = self.get_tool_entry_point_template(tool)
-            if not template:
-                print(f"ERROR: No template for {tool}")
-                continue
+        print(f"Project language: {language}")
+        print(f"Project root: {self.project_root}")
+        print(f"AGENTS.md path: {self.agents_file}")
 
-            file_path = os.path.join(self.project_root, f"{tool.upper()}.md")
-            self._write_file(file_path, template)
+        # Get recommendation
+        recommended = self.detect_recommended_workflow()
+        print(f"\n📊 Workflow Analysis:")
+        print(f"  Recommended: {recommended}")
 
-        if not self.dry_run:
-            print(f"\n✓ Successfully regenerated tool entry points")
+        # Show current state
+        logs_first_state = state.get("logs_first", "disabled")
+        print(f"  Current state: logs_first={logs_first_state}")
+
+        # Show available workflows
+        print(f"\n📋 Available workflows:")
+        print(f"  • logs-first (documented development)")
+        print(f"  • custom (create your own - see custom-template.md)")
+
+        # Show commands
+        print(f"\n💡 Commands:")
+        if logs_first_state == "enabled":
+            print(f"  Enable: Already enabled")
+            print(f"  Disable: python3 bootstrap.py --disable-logs-first --commit")
         else:
-            print(f"\n[DRY RUN] Would regenerate tool entry points. Use --commit to apply.")
+            print(f"  Enable: python3 bootstrap.py --enable-logs-first --commit")
+            print(f"  Disable: Already disabled")
 
-        return 0
+    def show_diff(self) -> None:
+        """Show what would change (dry run mode)."""
+        # This is a simplified version - a full diff would be more complex
+        agents_content = self._read_file(self.agents_file)
+        language = self._detect_language()
+
+        print(f"Project language: {language}")
+        print(f"Project root: {self.project_root}")
+        print(f"AGENTS.md path: {self.agents_file}")
+        print(f"System prompts dir: {self.system_prompts_dir}")
+
+        # Sections to sync
+        sections = [
+            ("CORE-WORKFLOW", "workflows/core.md"),
+            ("PRINCIPLES", "principles/definition-of-done.md"),
+        ]
+
+        if language == "python":
+            sections.append(("PYTHON-DOD", "languages/python/definition-of-done.md"))
+
+        print(f"\nSections to sync ({len(sections)}):")
+        for section_name, file_path in sections:
+            exists = (
+                Path(self.system_prompts_dir) / file_path
+            ).exists()
+            current = self._extract_section(agents_content, section_name)
+            status = "✓ Found" if current else "✗ Missing"
+            file_status = "✓ Exists" if exists else "✗ Missing"
+            print(f"  - {section_name}: {status} in AGENTS.md, {file_status} in system-prompts")
 
 
 def main():

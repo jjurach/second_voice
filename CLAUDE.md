@@ -1,20 +1,18 @@
 # Claude Code Instructions
 
-This project follows the **AGENTS.md** workflow for all development.
+This project follows the **AGENTS.md** workflow.
 
 ## Quick Links
 
-- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
-- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
-- **Tool Guide:** [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md) - Complete guide
-- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+- **Read First:** [AGENTS.md](AGENTS.md)
+- **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
+- **Tool Guide:** [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)
+- **Workflows:** [docs/workflows.md](docs/workflows.md)
 
 ## For Claude Code Users
 
 The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)** guide covers:
-- Quick start and installation
-- How Claude Code discovers project instructions
+- Installation and discovery
 - Workflow mapping to AGENTS.md
-- All tools and task tracking
-- Approval gates and common patterns
-- Troubleshooting
+- All tools and approval gates
+- Common patterns and examples

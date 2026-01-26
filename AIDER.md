@@ -1,20 +1,18 @@
 # Aider Instructions
 
-This project follows the **AGENTS.md** workflow for all development.
+This project follows the **AGENTS.md** workflow.
 
 ## Quick Links
 
-- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
-- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
-- **Tool Guide:** [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md) - Complete guide
-- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+- **Read First:** [AGENTS.md](AGENTS.md)
+- **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
+- **Tool Guide:** [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)
+- **Workflows:** [docs/workflows.md](docs/workflows.md)
 
 ## For Aider Users
 
 The **[docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)** guide covers:
-- Quick start and installation
-- How Aider discovers project instructions
-- Workflow mapping to AGENTS.md (with conversational approval)
+- Installation and discovery
+- Workflow mapping to AGENTS.md
 - Auto-commit and git integration
 - Common patterns and examples
-- Troubleshooting and limitations

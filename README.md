@@ -260,7 +260,6 @@ Regardless of tool, all development follows **AGENTS.md:**
 | [docs/prompt-patterns.md](docs/prompt-patterns.md) | Universal prompt structures |
 | [docs/file-naming-conventions.md](docs/file-naming-conventions.md) | Which file names matter |
 | [docs/system-prompts/tools/](docs/system-prompts/tools/) | Generic tool workflow guides |
-| [docs/tool-specific-guides/](docs/tool-specific-guides/) | Project-specific tool integration |
 
 ### Quick Decision Tree
 
