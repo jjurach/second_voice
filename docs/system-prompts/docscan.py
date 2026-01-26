@@ -9,14 +9,16 @@ Checks:
 1. Referential Correctness - All links point to existing files
 2. Architectural Constraints - system-prompts doesn't reference back to project files
 3. Reference Formatting - All file references use hyperlinks or backticks (not plain text)
-4. Naming Conventions - Files follow established patterns
-5. Directory Structure - Tool guides in correct locations
-6. Coverage - All documentation relationships captured
+4. Tool Entry Points - Entry files (CLAUDE.md, AIDER.md, etc.) are anemic format
+5. Naming Conventions - Files follow established patterns
+6. Directory Structure - Tool guides in correct locations
+7. Coverage - All documentation relationships captured
 
 Usage:
     python3 docscan.py                              # Run full scan
     python3 docscan.py --check broken-links         # Only broken links
     python3 docscan.py --check reference-formatting # Only reference formatting
+    python3 docscan.py --check tool-entries         # Only tool entry points
     python3 docscan.py --check back-references      # Only back-references
     python3 docscan.py --verbose                    # Verbose output
     python3 docscan.py --strict                     # Fail on warnings
@@ -71,6 +73,9 @@ class DocumentScanner:
 
         if not self.options.check or "reference-formatting" in self.options.check:
             self._check_reference_formatting()
+
+        if not self.options.check or "tool-entries" in self.options.check:
+            self._check_tool_entry_points()
 
         if not self.options.check or "tool-organization" in self.options.check:
             self._check_tool_organization()
@@ -286,6 +291,104 @@ class DocumentScanner:
                     if self.options.verbose:
                         print(f"  ⚠️  {relative_path}:{line_num}: '{ref}' (plain text, not formatted)")
 
+    def _check_tool_entry_points(self):
+        """Layer 4: Validate tool entry point files (CLAUDE.md, AIDER.md, etc.)."""
+        print("\n### Checking Tool Entry Point Files...")
+
+        tools = {
+            "CLAUDE.md": "claude-code.md",
+            "AIDER.md": "aider.md",
+            "CLINE.md": "cline.md",
+            "GEMINI.md": "gemini.md",
+        }
+
+        required_links = {
+            "AGENTS.md": "[AGENTS.md]",
+            "definition-of-done.md": "definition-of-done.md",
+            "workflows.md": "workflows.md",
+        }
+
+        for entry_file, tool_guide in tools.items():
+            entry_path = self.project_root / entry_file
+
+            if not entry_path.exists():
+                self.violations.append(
+                    {
+                        "file": entry_file,
+                        "type": "missing-tool-entry",
+                        "severity": "error",
+                        "message": f"Missing tool entry point file",
+                    }
+                )
+                if self.options.verbose:
+                    print(f"  ❌ {entry_file}: Missing")
+                continue
+
+            with open(entry_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            relative_path = str(entry_path.relative_to(self.project_root))
+            line_count = len(content.strip().split("\n"))
+
+            # Check line count (should be anemic: ≤20 lines)
+            if line_count > 20:
+                self.violations.append(
+                    {
+                        "file": relative_path,
+                        "type": "tool-entry-bloated",
+                        "severity": "warning",
+                        "message": f"Entry file is {line_count} lines (should be ≤20 for anemic format)",
+                    }
+                )
+
+            # Check for required links
+            for link_name, link_text in required_links.items():
+                if link_text not in content:
+                    self.violations.append(
+                        {
+                            "file": relative_path,
+                            "type": "missing-tool-link",
+                            "severity": "error",
+                            "message": f"Missing link to {link_name}",
+                        }
+                    )
+
+            # Check for tool-specific guide link
+            if f"system-prompts/tools/{tool_guide}" not in content:
+                self.violations.append(
+                    {
+                        "file": relative_path,
+                        "type": "missing-tool-guide-link",
+                        "severity": "error",
+                        "message": f"Missing link to tool guide (docs/system-prompts/tools/{tool_guide})",
+                    }
+                )
+
+            # Check for forbidden patterns (content that should be in tool guide)
+            forbidden_patterns = [
+                (r"## Available Tools", "Tool lists should be in tool guide, not entry point"),
+                (r"## Development Environment", "Dev environment details belong in README"),
+                (r"## Key Concepts", "Key Concepts should reference AGENTS.md"),
+                (r"### File Operations", "File operation details belong in tool guide"),
+                (r"## Key Commands", "Commands should be in tool guide, not entry point"),
+            ]
+
+            for pattern, reason in forbidden_patterns:
+                if re.search(pattern, content):
+                    self.violations.append(
+                        {
+                            "file": relative_path,
+                            "type": "tool-entry-bloated-content",
+                            "severity": "warning",
+                            "message": f"Contains section '{pattern.strip('#')}' - {reason}",
+                        }
+                    )
+
+            if self.options.verbose and not any(
+                v["file"] == relative_path for v in self.violations if v["severity"] == "error"
+            ):
+                print(f"  ✓ {entry_file}: Valid ({line_count} lines)")
+
     def _check_tool_organization(self):
         """Check Layer 3: Tool guides in correct locations."""
         print("\n### Checking Tool Guide Organization...")
@@ -447,7 +550,7 @@ def main():
     parser.add_argument(
         "--check",
         action="append",
-        choices=["broken-links", "back-references", "reference-formatting", "tool-organization", "naming", "coverage"],
+        choices=["broken-links", "back-references", "reference-formatting", "tool-entries", "tool-organization", "naming", "coverage"],
         help="Run specific checks (default: run all)",
     )
 

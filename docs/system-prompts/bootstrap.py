@@ -408,6 +408,226 @@ class Bootstrap:
             file_status = "✓ Exists" if exists else "✗ Missing"
             print(f"  - {section_name}: {status} in AGENTS.md, {file_status} in system-prompts")
 
+    def get_tool_entry_point_template(self, tool_name: str) -> str:
+        """Generate anemic tool entry point template."""
+        templates = {
+            "claude": """# Claude Code Instructions
+
+This project follows the **AGENTS.md** workflow for all development.
+
+## Quick Links
+
+- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
+- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
+- **Tool Guide:** [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md) - Complete guide
+- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+
+## For Claude Code Users
+
+The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)** guide covers:
+- Quick start and installation
+- How Claude Code discovers project instructions
+- Workflow mapping to AGENTS.md
+- All available tools and their usage
+- Task tracking and approval gates
+- Common patterns and examples
+- Troubleshooting and limitations
+""",
+            "aider": """# Aider Instructions
+
+This project follows the **AGENTS.md** workflow for all development.
+
+## Quick Links
+
+- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
+- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
+- **Tool Guide:** [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md) - Complete guide
+- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+
+## For Aider Users
+
+The **[docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)** guide covers:
+- Quick start and installation
+- How Aider discovers project instructions
+- Workflow mapping to AGENTS.md (with conversational approval)
+- Auto-commit and git integration
+- Common patterns and examples
+- Troubleshooting and limitations
+""",
+            "cline": """# Cline Instructions
+
+This project follows the **AGENTS.md** workflow for all development.
+
+## Quick Links
+
+- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
+- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
+- **Tool Guide:** [docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md) - Complete guide
+- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+
+## For Cline Users
+
+The **[docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)** guide covers:
+- Quick start and installation
+- How Cline discovers project instructions
+- Workflow mapping to AGENTS.md
+- Multi-file editing and auto-commit
+- Common patterns and examples
+- Troubleshooting and limitations
+""",
+            "gemini": """# Gemini Instructions
+
+This project follows the **AGENTS.md** workflow for all development.
+
+## Quick Links
+
+- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
+- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
+- **Tool Guide:** [docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md) - Complete guide
+- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
+
+## For Gemini Users
+
+The **[docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)** guide covers:
+- Quick start and setup
+- How Gemini discovers project instructions
+- Workflow mapping to AGENTS.md
+- Multimodal capabilities and ReAct loop
+- Common patterns and examples
+- Troubleshooting and limitations
+""",
+        }
+        return templates.get(tool_name, "")
+
+    def validate_tool_entry_point(self, tool_name: str) -> dict:
+        """Validate tool entry point file meets anemic requirements."""
+        # Map entry point names to tool guide names
+        tool_guide_map = {
+            "claude": "claude-code",
+            "aider": "aider",
+            "cline": "cline",
+            "gemini": "gemini",
+        }
+        tool_guide_name = tool_guide_map.get(tool_name, tool_name)
+
+        entry_file = os.path.join(self.project_root, f"{tool_name.upper()}.md")
+
+        validations = {
+            "file_exists": False,
+            "has_header": False,
+            "has_agents_link": False,
+            "has_definition_link": False,
+            "has_tool_guide_link": False,
+            "has_workflows_link": False,
+            "line_count": 0,
+            "is_anemic": False,
+            "issues": [],
+        }
+
+        # Check if file exists
+        if not os.path.exists(entry_file):
+            validations["issues"].append(f"File not found: {entry_file}")
+            return validations
+
+        validations["file_exists"] = True
+
+        # Read file
+        content = self._read_file(entry_file)
+        validations["line_count"] = len(content.strip().split("\n"))
+
+        # Check header
+        if f"# {tool_name.capitalize()}" in content or f"# {tool_name.upper()}" in content:
+            validations["has_header"] = True
+        else:
+            validations["issues"].append("Missing proper header (e.g., '# Claude Code Instructions')")
+
+        # Check required links
+        if "[AGENTS.md]" in content and "(AGENTS.md)" in content:
+            validations["has_agents_link"] = True
+        else:
+            validations["issues"].append("Missing link to AGENTS.md")
+
+        if "definition-of-done.md" in content:
+            validations["has_definition_link"] = True
+        else:
+            validations["issues"].append("Missing link to definition-of-done.md")
+
+        if f"system-prompts/tools/{tool_guide_name}.md" in content:
+            validations["has_tool_guide_link"] = True
+        else:
+            validations["issues"].append(f"Missing link to tool guide (docs/system-prompts/tools/{tool_guide_name}.md)")
+
+        if "docs/workflows.md" in content:
+            validations["has_workflows_link"] = True
+        else:
+            validations["issues"].append("Missing link to workflows.md")
+
+        # Check line count (should be anemic: 10-20 lines)
+        if validations["line_count"] <= 20:
+            validations["is_anemic"] = True
+        else:
+            validations["issues"].append(f"File is {validations['line_count']} lines (should be ≤20 for anemic format)")
+
+        # Check for forbidden patterns
+        forbidden = [
+            ("## Available Tools", "Tool lists should be in tool guide"),
+            ("## Development Environment", "Dev environment details belong in README"),
+            ("## Key Concepts", "Key Concepts should reference AGENTS.md"),
+            ("## Key Commands", "Commands should be in tool guide"),
+            ("### File Operations", "File operation details belong in tool guide"),
+        ]
+
+        for pattern, reason in forbidden:
+            if pattern in content:
+                validations["issues"].append(f"Contains '{pattern}' section - {reason}")
+
+        return validations
+
+    def validate_all_tool_entries(self) -> int:
+        """Validate all tool entry points meet anemic requirements."""
+        tools = ["claude", "aider", "cline", "gemini"]
+        all_valid = True
+
+        print("Validating tool entry points...")
+        for tool in tools:
+            result = self.validate_tool_entry_point(tool)
+
+            if result["issues"]:
+                all_valid = False
+                print(f"\n⚠️  {tool.upper()}.md:")
+                for issue in result["issues"]:
+                    print(f"   - {issue}")
+            else:
+                print(f"✓ {tool.upper()}.md: Valid anemic format ({result['line_count']} lines)")
+
+        if all_valid:
+            print("\n✅ All tool entry points are valid!")
+        else:
+            print("\n❌ Some tool entry points need fixes")
+
+        return 0 if all_valid else 1
+
+    def regenerate_tool_entries(self) -> int:
+        """Regenerate tool entry point files from templates."""
+        tools = ["claude", "aider", "cline", "gemini"]
+
+        print("Regenerating tool entry point files...")
+        for tool in tools:
+            template = self.get_tool_entry_point_template(tool)
+            if not template:
+                print(f"ERROR: No template for {tool}")
+                continue
+
+            file_path = os.path.join(self.project_root, f"{tool.upper()}.md")
+            self._write_file(file_path, template)
+
+        if not self.dry_run:
+            print(f"\n✓ Successfully regenerated tool entry points")
+        else:
+            print(f"\n[DRY RUN] Would regenerate tool entry points. Use --commit to apply.")
+
+        return 0
+
 
 def main():
     """Command-line entry point."""
@@ -473,6 +693,16 @@ Examples:
         "--root",
         help="Project root directory (auto-detected if not specified)",
     )
+    parser.add_argument(
+        "--validate-tool-entries",
+        action="store_true",
+        help="Validate all tool entry point files meet anemic requirements",
+    )
+    parser.add_argument(
+        "--regenerate-tool-entries",
+        action="store_true",
+        help="Regenerate anemic tool entry point files from canonical templates",
+    )
 
     args = parser.parse_args()
 
@@ -484,6 +714,15 @@ Examples:
     if not os.path.exists(bootstrap.system_prompts_dir):
         print(f"ERROR: System prompts directory not found: {bootstrap.system_prompts_dir}")
         sys.exit(1)
+
+    # Handle tool entry point commands
+    if args.validate_tool_entries:
+        exit_code = bootstrap.validate_all_tool_entries()
+        sys.exit(exit_code)
+
+    if args.regenerate_tool_entries:
+        exit_code = bootstrap.regenerate_tool_entries()
+        sys.exit(exit_code)
 
     # Handle workflow commands
     if args.analyze_workflow:

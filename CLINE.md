@@ -2,33 +2,19 @@
 
 This project follows the **AGENTS.md** workflow for all development.
 
-## Using Cline with This Project
+## Quick Links
 
-1. **Read AGENTS.md first** - Understand the core development workflow
-2. **Understand logs-first (optional)** - See `docs/workflows.md` if you want to use structured planning
-3. **See CLINE.md specifics below** - How to use Cline with this project's patterns
-
-## Entry Point Configuration
-
-Create `CLINE.md` in your project root (this file) and reference your main development instructions:
-
-```markdown
-# Project - Cline Instructions
-
-This project follows the AGENTS.md workflow.
-```
+- **Read First:** [AGENTS.md](AGENTS.md) - Core workflow (mandatory)
+- **Completion Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md) - Definition of done
+- **Tool Guide:** [docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md) - Complete guide
+- **Workflows:** [docs/workflows.md](docs/workflows.md) - Optional structured planning
 
 ## For Cline Users
 
-See **[docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)** for:
-- Complete workflow integration guide
-- Configuration options
+The **[docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)** guide covers:
+- Quick start and installation
+- How Cline discovers project instructions
+- Workflow mapping to AGENTS.md
+- Multi-file editing and auto-commit
 - Common patterns and examples
-- Troubleshooting
-
-## Key Resources
-
-- **AGENTS.md** - Core workflow (mandatory)
-- **docs/definition-of-done.md** - Completion criteria
-- **docs/system-prompts/tools/cline.md** - Cline-specific guide
-- **docs/workflows.md** - Optional logs-first workflow
+- Troubleshooting and limitations
