@@ -456,13 +456,20 @@ To use in a new project:
 4. Customize with project-specific rules
 5. Commit the updated `AGENTS.md`
 
+## Understanding the System
+
+**Start here:** `docs/system-prompts/REFERENCE-ARCHITECTURE.md`
+- Explains how all files reference each other
+- Documents safety guardrails for logs-first workflow
+- Shows what happens when logs-first is enabled vs disabled
+
 ## Related Resources
 
 - `docs/system-prompts/principles/definition-of-done.md` - Detailed universal DoD
 - `docs/system-prompts/languages/python/definition-of-done.md` - Python-specific requirements
 - `docs/system-prompts/templates/structure.md` - Templates for specs, plans, and changes
 - `docs/system-prompts/patterns/prompt-patterns.md` - Universal prompt patterns
-- `docs/system-prompts/workflows/logs-first.md` - Complete logs-first workflow documentation
+- `docs/system-prompts/workflows/logs-first.md` - Complete logs-first workflow documentation (conditional)
 - `docs/system-prompts/workflows/custom-template.md` - Template for creating custom workflows
 - `docs/system-prompts/workflows/README.md` - Workflows directory guide
 - `docs/workflows.md` - User guide for managing workflows

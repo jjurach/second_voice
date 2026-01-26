@@ -4,7 +4,7 @@
 
 ## Workflow Configuration
 
-**Opt-In Logs-First Workflow:** Tasks can opt-in to structured planning and documentation via the `@logs-first` marker.
+**Opt-In Logs-First Workflow:** Tasks can opt-in to structured planning and documentation via the `@logs-first` marker **(only if the LOGS-FIRST-WORKFLOW section is present below)**.
 
 This project supports the logs-first workflow on a **per-task basis**. Individual tasks can include a special marker in their spec file to trigger the full workflow:
 - Detailed specification documents
