@@ -24,6 +24,10 @@ docs/system-prompts/
 ├── templates/
 │   ├── README.md                # Templates directory guide
 │   └── structure.md             # Documentation templates (specs, plans, changes)
+├── workflows/                   # Optional workflow patterns
+│   ├── README.md                # Workflows directory guide
+│   ├── logs-first.md            # Documented development workflow
+│   └── custom-template.md       # Template for creating custom workflows
 └── languages/
     └── python/
         └── definition-of-done.md # Python-specific DoD (pytest, venv, etc.)
@@ -68,6 +72,11 @@ python3 bootstrap.py --analyze
 
 # Specify a different project root
 python3 bootstrap.py --root /path/to/project --commit
+
+# Workflow Commands (Optional Workflows)
+python3 bootstrap.py --analyze-workflow        # Show workflow state and recommendation
+python3 bootstrap.py --enable-logs-first --commit   # Enable logs-first workflow
+python3 bootstrap.py --disable-logs-first --commit  # Disable logs-first workflow
 ```
 
 ### How It Works
@@ -79,6 +88,139 @@ python3 bootstrap.py --root /path/to/project --commit
    - **Modified sections:** Warns and skips (unless `--force` used)
    - **Missing sections:** Adds them
 4. **Safe by Default:** Dry-run mode is the default; use `--commit` to write
+
+## Understanding Workflows
+
+The Agent Kernel includes optional **Workflows**—sets of instructions that govern how AI agents approach development tasks. Projects can enable, disable, or create custom workflows.
+
+### What is Logs-First Workflow?
+
+The **logs-first workflow** emphasizes documentation and accountability through three connected documents:
+
+1. **Spec File** (`dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-*.md`)
+   - Documents user intentions and requirements
+   - Example: "Add user authentication to the app"
+   - Simple outline with acceptance criteria
+
+2. **Project Plan** (`dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_plan-*.md`)
+   - Details the implementation strategy
+   - Broken into phases with specific tasks
+   - Requires explicit developer approval before work begins
+
+3. **Change Documentation** (`dev_notes/changes/YYYY-MM-DD_HH-MM-SS_change-*.md`)
+   - Proof that work was completed correctly
+   - Includes actual test output, coverage metrics
+   - References the approved plan
+
+**When Logs-First is Enabled:**
+- AGENTS.md includes the complete logs-first workflow (inserted between `<!-- SECTION: LOGS-FIRST-WORKFLOW -->` markers)
+- AI agents automatically follow the three-document pattern for non-trivial tasks
+- The workflow state is tracked in AGENTS.md via `<!-- BOOTSTRAP-STATE: logs_first=enabled -->`
+- Developers expect agents to ask for approval before implementing plans
+- Definition of Done checklist includes verification requirements
+
+**When Logs-First is Disabled:**
+- The LOGS-FIRST-WORKFLOW section is removed from AGENTS.md
+- Agents fall back to basic guidelines (core workflow, universal DoD)
+- Less structured development allowed
+- Suitable for large projects or teams with different needs
+
+### Using Logs-First Even When Not Enabled
+
+You can follow the logs-first workflow **manually** at any time, regardless of whether it's enabled in AGENTS.md:
+
+1. **Create a Spec File** (optional)
+   - Location: `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_what-you-want.md`
+   - Format: Brief description of what you're asking for
+   - Timing: Write before the Project Plan
+
+   **Example:**
+   ```markdown
+   # Spec: Add Dark Mode Support
+
+   **Date:** 2026-01-26
+
+   ## User Request
+   - Add dark mode toggle to GUI
+   - Save preference to config
+   - Auto-detect system theme on startup
+
+   ## Goals
+   - Improve UX for users in dark environments
+   - Follow existing config patterns
+
+   ## Acceptance Criteria
+   - [ ] Dark mode toggle appears in settings
+   - [ ] Preference persists between sessions
+   - [ ] All UI elements are readable in dark mode
+   - [ ] Tests verify toggle functionality
+   ```
+
+2. **Create a Project Plan** (recommended for non-trivial tasks)
+   - Location: `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_plan-name.md`
+   - Format: See `docs/templates.md` for template
+   - Timing: Submit for approval BEFORE implementing
+
+   **What to include:**
+   - Overview of what you're building
+   - Detailed phases with specific tasks
+   - Files that will be created/modified
+   - Success criteria
+   - Risk assessment
+
+3. **Present to Developers**
+   - Share the plan and ask for approval
+   - Wait for explicit "yes" or "approved"
+   - Document feedback and iterate if needed
+
+4. **Implement with Tracking**
+   - Execute the approved plan step-by-step
+   - After each major milestone, create a Change Documentation entry
+
+5. **Create Change Documentation**
+   - Location: `dev_notes/changes/YYYY-MM-DD_HH-MM-SS_what-changed.md`
+   - Format: See `docs/templates.md` for template
+   - Include: What was changed, test results, metrics
+
+   **What to include:**
+   - Summary of work completed
+   - Detailed changes per component
+   - Test execution results (actual output)
+   - Coverage metrics
+   - Verification against Definition of Done
+   - Known issues or limitations
+
+### Decision Tree: To Enable or Not?
+
+- **Is the project small (< 200 files)?** → Consider enabling logs-first
+- **Are you value detailed decision history?** → Enable logs-first
+- **Is the team > 10 people?** → Consider disabling or custom workflow
+- **Do you just want the option to use logs-first sometimes?** → Leave disabled and use manually
+
+### Logs-First Benefits
+
+When used (enabled or manually):
+- ✅ Complete audit trail of decisions
+- ✅ Prevents miscommunication via formal plans
+- ✅ Makes onboarding easier (new devs understand the "why")
+- ✅ Reduces rework when plans are discussed upfront
+- ✅ Proof of correctness via verification in change docs
+
+### Logs-First Trade-offs
+
+- ⚠️ More documentation overhead (3 documents per feature)
+- ⚠️ Slower time-to-first-code (planning before implementation)
+- ⚠️ Not ideal for rapid prototyping or one-off scripts
+- ⚠️ Requires discipline from team to follow patterns
+
+### Custom Workflows
+
+You can create custom workflows (lighter, heavier, or specialized) using the template:
+- See `docs/system-prompts/workflows/custom-template.md`
+- Register in `bootstrap.py`
+- Enable/disable like logs-first
+
+---
 
 ## Section Markers
 
@@ -303,6 +445,10 @@ To use in a new project:
 - `docs/system-prompts/languages/python/definition-of-done.md` - Python-specific requirements
 - `docs/system-prompts/templates/structure.md` - Templates for specs, plans, and changes
 - `docs/system-prompts/patterns/prompt-patterns.md` - Universal prompt patterns
+- `docs/system-prompts/workflows/logs-first.md` - Complete logs-first workflow documentation
+- `docs/system-prompts/workflows/custom-template.md` - Template for creating custom workflows
+- `docs/system-prompts/workflows/README.md` - Workflows directory guide
+- `docs/workflows.md` - User guide for managing workflows
 - `AGENTS.md` - Your project's customized agent instructions (generated by bootstrap.py)
 
 ## Version
