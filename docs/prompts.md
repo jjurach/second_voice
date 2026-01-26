@@ -2,163 +2,161 @@
 
 ## System Prompts
 
-### Initial "Clean & Form" Prompt
+### Primary Mode: Speech Cleanup Assistant
 
-Used for the first pass or when context is cleared:
-
-```
-Clean up the following STT transcript. Remove stutters, filler words, and fix grammar.
-Format as professional Markdown with logical headers.
-```
-
-### "Retry/Redo" Recursive Prompt
-
-Used when `last_output` context exists:
+All LLM providers now use a unified speech cleanup prompt:
 
 ```
-ORIGINAL_TEXT: {last_output}
+You are a speech cleanup assistant. Your job is to clean up transcribed speech by:
+1. Removing stutters and repeated phrases
+2. Consolidating similar ideas into coherent statements
+3. Fixing grammar and improving sentence structure
+4. Maintaining the original meaning and intent
 
-NEW_INSTRUCTION: {new_stt}
-
-Logic: If NEW_INSTRUCTION references the ORIGINAL_TEXT (e.g. 'it', 'shorter', 'bullets'),
-modify ORIGINAL_TEXT. If not, treat as a fresh request and ignore ORIGINAL_TEXT.
-Output only the final result.
+IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language.
 ```
 
-## Current Implementation
+### Meta-Operation Exception
 
-The current system prompt used in the application:
+If the user's text contains keywords indicating a transformation request, the LLM allows meta-operations:
 
-```python
-system_rules = (
-    "If the NEW INSTRUCTION mentions the ORIGINAL TEXT (using 'it', 'this', 'that', "
-    "'bullets', 'shorter', etc.), transform the ORIGINAL TEXT accordingly. "
-    "If it does not, ignore the ORIGINAL TEXT and process a fresh answer."
-)
-
-combined_prompt = f"ORIGINAL TEXT: {self.last_output}\n\nNEW INSTRUCTION: {new_text}"
+```
+EXCEPTION: If the user's text contains a request to transform their own words
+(keywords: outline, summarize, reorder, rearrange, list, bullets, organize),
+perform that transformation instead.
 ```
 
-## LLM Request Format
+## LLM Provider Implementation
 
-### Ollama API Call
+### Ollama
 
-```python
-requests.post(ollama_url, json={
-    "model": "llama-pro",
-    "prompt": combined_prompt,
-    "stream": False,
-    "system": system_rules
-})
+System prompt is prepended to the input. The full prompt structure:
+
+```
+{system_prompt}
+
+Previous Context:
+{context}
+
+User's transcribed speech:
+{text}
 ```
 
-### Whisper API Call
+### OpenRouter
 
-```python
-requests.post(whisper_url,
-    files={'file': audio_file},
-    data={'model': 'small.en'}
-)
+System prompt is sent as a separate message with role="system":
+
+```json
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "{system_prompt}"
+    },
+    {
+      "role": "system",
+      "content": "Previous conversation context: {context}"
+    },
+    {
+      "role": "user",
+      "content": "{text}"
+    }
+  ]
+}
 ```
 
-## Iterative Workflow Examples
+### Cline CLI
 
-### Example 1: Fresh Content
+System prompt is prepended to the `--input` parameter:
 
-**Recording 1:**
-- Input: "Write a python function to calculate fibonacci numbers"
-- Context: Empty
-- Output: Complete fibonacci function
-- Context after: Stored function code
+```bash
+cline generate --model {model} --input "{system_prompt}\n\n{text}"
+```
 
-**Recording 2:**
-- Input: "Write a test for binary search"
-- Context: Previous fibonacci function
-- Detected: No reference to previous content
-- Output: New binary search test (ignores fibonacci context)
+## Meta-Operation Detection
 
-### Example 2: Iterative Refinement
+The `_detect_meta_operation()` method checks for these keywords:
+- `outline` - Create a bulleted or numbered outline
+- `summarize` - Provide a summary of the text
+- `reorder` - Rearrange ideas in a different order
+- `rearrange` - Same as reorder
+- `list` - Convert to a list format
+- `bullets` - Convert to bullet points
+- `organize` - Reorganize or structure the content
 
-**Recording 1:**
-- Input: "Write a python function to calculate fibonacci numbers"
-- Context: Empty
-- Output: Complete fibonacci function
-- Context after: Stored function code
+When any of these keywords are detected, the LLM is told it may perform the transformation as an exception to the cleanup-only rule.
 
-**Recording 2:**
-- Input: "Convert that to use a class"
-- Context: Previous fibonacci function
-- Detected: "that" references previous content
-- Output: Class-based fibonacci implementation
-- Context after: New class version stored
+## Examples
 
-**Recording 3:**
-- Input: "Add error handling for negative inputs"
-- Context: Class-based version
-- Detected: Implicit reference to previous content
-- Output: Enhanced class with error handling
-- Context after: Updated class stored
+### Example 1: Basic Cleanup (No Meta-Operation)
 
-### Example 3: Mixed Usage
+**Input:**
+```
+Is this a test? Is this working? Is this a working test? Is this gonna work?
+Is this just gonna go for 10 seconds, I think?
+```
 
-**Recording 1:**
-- Input: "Create a shopping list: milk, bread, eggs"
-- Output: Formatted markdown list
-- Context after: Shopping list
+**Expected Output:**
+```
+Is this a working test? Will it last for 10 seconds?
+```
 
-**Recording 2:**
-- Input: "Make it shorter"
-- Detected: "it" references previous
-- Output: Abbreviated list (e.g., bullet points without descriptions)
+### Example 2: Meta-Operation - Outline
 
-**Recording 3:**
-- Input: "What's the weather like?"
-- Detected: No reference to shopping list
-- Output: Fresh response about weather (context ignored)
+**Input:**
+```
+The project has multiple components. First there's the frontend which handles the UI.
+Then there's the backend API. And we also have the database layer. We need to make sure
+they all communicate properly. Let me organize this as an outline.
+```
 
-## Detection Keywords
+**Expected Output:**
+```
+- Frontend (UI handling)
+- Backend (API)
+- Database layer
+- Communication between components
+```
 
-The LLM is trained to detect these reference patterns:
+### Example 3: Meta-Operation - Summarize
 
-- **Pronouns:** it, this, that, those, these
-- **Modification verbs:** change, update, modify, transform, convert
-- **Style instructions:** shorter, longer, bullets, numbered, format
-- **Actions on previous:** add to, remove from, expand, condense
+**Input:**
+```
+I talked about how we need better error handling, more unit tests, and improved documentation.
+Could you summarize what I said?
+```
+
+**Expected Output:**
+```
+Three key improvements needed:
+1. Better error handling
+2. More unit tests
+3. Improved documentation
+```
 
 ## Context Management
 
-### Clear Context Button
+### Context Preservation
 
-Resets `last_output = ""` to start fresh without references to previous iterations.
+Previous conversation context is maintained across iterations using:
+- `save_context()` - Saves the current output to `tmp-context.txt`
+- `load_context()` - Loads saved context from `tmp-context.txt`
+- `clear_context()` - Clears saved context
 
-### Context Indicator
+Context is passed to the LLM to maintain conversational continuity.
 
-Shows character count of current context:
-- "Context: Empty" (gray) when no context
-- "Context: 1240 chars" (blue) when context exists
+### Context Flow
 
-## Output Handling
+1. User transcribes speech → `process_text(transcription, context)`
+2. LLM receives context (if available) + transcription
+3. LLM outputs cleaned speech or transformation
+4. Output is saved as new context for next iteration
 
-1. **LLM Response:** Received from Ollama
-2. **Buffer Write:** Written to `.review_buffer.md`
-3. **Human Edit:** User edits in Obsidian
-4. **Context Update:** Edited version becomes new `last_output`
-5. **STDOUT:** Final version printed for CLI integration
-6. **Archive:** Moved to `voice_note_<timestamp>.md`
+## API Endpoint Summary
 
-## Pre-Flight Validation
-
-Before processing, the system checks:
-
-1. **SSH Tunnel:** Ports 9090 and 11434 are mapped
-2. **Obsidian Vault:** VoiceInbox directory exists
-3. **Syncthing:** Ignore patterns set for `.review_buffer.md`
-4. **Audio Input:** MacBook microphone is selected
-5. **Docker Services:** whisper-server and ollama are running
-
-## Error Handling
-
-- **Connection errors:** Display error dialog with connection details
-- **Timeout:** 120s timeout for transcription requests
-- **GPU OOM:** Model selection ensures `small.en` + `llama-pro` fit in 8GB VRAM
-- **File errors:** Graceful handling of missing vault directory
+| Provider | Endpoint | Method | Key Parameter |
+|----------|----------|--------|----------------|
+| Ollama | `http://localhost:11434/api/generate` | POST | `prompt` |
+| OpenRouter | `https://openrouter.ai/api/v1/chat/completions` | POST | `messages` |
+| Groq (STT) | `https://api.groq.com/openai/v1/audio/transcriptions` | POST | `file` |
+| Local Whisper | `http://localhost:9090/v1/audio/transcriptions` | POST | `file` |

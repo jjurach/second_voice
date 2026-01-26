@@ -31,6 +31,20 @@ class AIProcessor:
             'openrouter': os.environ.get('OPENROUTER_API_KEY', config.get('openrouter_api_key', ''))
         }
 
+    def _detect_meta_operation(self, text: str) -> bool:
+        """
+        Detect if user is asking for a transformation of their own text.
+
+        Returns True if keywords indicating meta-operations are detected:
+        outline, summarize, reorder, rearrange, list, bullets, organize
+
+        :param text: User input text
+        :return: True if meta-operation keywords detected
+        """
+        keywords = {'outline', 'summarize', 'reorder', 'rearrange', 'list', 'bullets', 'organize'}
+        text_lower = text.lower()
+        return any(keyword in text_lower for keyword in keywords)
+
     def transcribe(self, audio_path: str) -> Optional[str]:
         """
         Transcribe audio using configured STT provider.
@@ -188,6 +202,29 @@ class AIProcessor:
 
         logger.debug(f"Cline CLI config - model: {model}, timeout: {timeout}s")
 
+        # Build system prompt for cleanup operations
+        system_prompt = (
+            "You are a speech cleanup assistant. Your job is to clean up transcribed speech by:\n"
+            "1. Removing stutters and repeated phrases\n"
+            "2. Consolidating similar ideas into coherent statements\n"
+            "3. Fixing grammar and improving sentence structure\n"
+            "4. Maintaining the original meaning and intent\n\n"
+            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language."
+        )
+
+        # Check for meta-operations (outline, summarize, etc.)
+        if self._detect_meta_operation(text):
+            system_prompt += (
+                "\n\nEXCEPTION: If the user's text contains a request to transform their own words "
+                "(keywords: outline, summarize, reorder, rearrange, list, bullets, organize), "
+                "perform that transformation instead."
+            )
+
+        # Build the input with system prompt prepended
+        full_input = f"{system_prompt}\n\nUser's transcribed speech:\n{text}"
+        if context:
+            full_input = f"{system_prompt}\n\nPrevious Context:\n{context}\n\nUser's transcribed speech:\n{text}"
+
         # Prepare the full CLI command
         cmd_parts = [
             'cline', 'generate',
@@ -198,15 +235,11 @@ class AIProcessor:
         if api_key:
             cmd_parts.extend(['--api-key', api_key])
 
-        # Add context if available
-        if context:
-            cmd_parts.extend(['--context', context])
-
-        # Add the input text
-        cmd_parts.extend(['--input', text])
+        # Add the input text with system prompt
+        cmd_parts.extend(['--input', full_input])
 
         try:
-            logger.debug(f"Running Cline CLI command: {' '.join(shlex.quote(part) for part in cmd_parts)}")
+            logger.debug(f"Running Cline CLI command with system prompt")
             result = subprocess.run(
                 cmd_parts,
                 capture_output=True,
@@ -248,9 +281,29 @@ class AIProcessor:
 
         logger.debug(f"Ollama config - URL: {url}, model: {model}, timeout: {timeout}s")
 
-        prompt = text
+        # Build system prompt for cleanup operations
+        system_prompt = (
+            "You are a speech cleanup assistant. Your job is to clean up transcribed speech by:\n"
+            "1. Removing stutters and repeated phrases\n"
+            "2. Consolidating similar ideas into coherent statements\n"
+            "3. Fixing grammar and improving sentence structure\n"
+            "4. Maintaining the original meaning and intent\n\n"
+            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language.\n"
+        )
+
+        # Check for meta-operations (outline, summarize, etc.)
+        if self._detect_meta_operation(text):
+            system_prompt += (
+                "EXCEPTION: If the user's text contains a request to transform their own words "
+                "(keywords: outline, summarize, reorder, rearrange, list, bullets, organize), "
+                "perform that transformation instead.\n"
+            )
+
+        # Build the full prompt
         if context:
-            prompt = f"Previous Context:\n{context}\n\nInstruction:\n{text}"
+            prompt = f"{system_prompt}\nPrevious Context:\n{context}\n\nUser's transcribed speech:\n{text}"
+        else:
+            prompt = f"{system_prompt}\nUser's transcribed speech:\n{text}"
 
         try:
             logger.debug(f"Sending request to Ollama at {url}")
@@ -298,9 +351,33 @@ class AIProcessor:
         model = self.config.get('openrouter_llm_model', self.config.get('llm_model', 'openai/gpt-oss-120b:free'))
         logger.debug(f"OpenRouter LLM config - model: {model}, timeout: {timeout}s")
 
+        # Build system prompt for cleanup operations
+        system_prompt = (
+            "You are a speech cleanup assistant. Your job is to clean up transcribed speech by:\n"
+            "1. Removing stutters and repeated phrases\n"
+            "2. Consolidating similar ideas into coherent statements\n"
+            "3. Fixing grammar and improving sentence structure\n"
+            "4. Maintaining the original meaning and intent\n\n"
+            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language."
+        )
+
+        # Check for meta-operations (outline, summarize, etc.)
+        if self._detect_meta_operation(text):
+            system_prompt += (
+                "\n\nEXCEPTION: If the user's text contains a request to transform their own words "
+                "(keywords: outline, summarize, reorder, rearrange, list, bullets, organize), "
+                "perform that transformation instead."
+            )
+
         try:
-            # Prepare messages with optional context
-            messages = []
+            # Prepare messages with cleanup system prompt and optional context
+            messages = [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                }
+            ]
+
             if context:
                 messages.append({
                     "role": "system",
