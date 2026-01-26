@@ -14,6 +14,8 @@ class ConfigurationManager:
         'local_whisper_url': 'http://localhost:9090/v1/audio/transcriptions',
         'ollama_url': 'http://localhost:11434/api/generate',
         'ollama_model': 'llama-pro:latest',
+        'cline_llm_model': 'default-model',  # Added Cline CLI model config
+        'cline_api_key': None,  # Optional API key for Cline CLI
         'temp_dir': './tmp',
         'audio_config': {
             'sample_rate': 16000,

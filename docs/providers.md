@@ -233,6 +233,41 @@ ssh -N -L 11434:localhost:11434 your-server
 
 ---
 
+### Cline CLI (New CLI Provider)
+
+**When to use:**
+- Command-line based interactions
+- Want a lightweight, script-friendly LLM interface
+- Need quick text processing via CLI
+- Testing alternative LLM providers
+
+**Benefits:**
+- ✅ Easy CLI integration
+- ✅ Flexible configuration
+- ✅ Supports multiple model backends
+- ✅ Minimal setup requirements
+
+**Setup:**
+```json
+{
+  "cline": {
+    "model": "default-model",
+    "api_key": "${CLINE_API_KEY}"
+  }
+}
+```
+
+**Configuration Options:**
+- `cline_llm_model`: Specify the Cline CLI model
+- `cline_api_key`: Optional API key for authenticated providers
+
+**Best Practices:**
+- Use environment variables for API keys
+- Configure via CLI or configuration file
+- Ideal for scripting and automation workflows
+
+---
+
 ## Provider Auto-Detection
 
 Second Voice automatically selects appropriate providers based on available API keys:

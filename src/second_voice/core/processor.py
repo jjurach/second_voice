@@ -166,8 +166,73 @@ class AIProcessor:
             return self._process_openrouter(text, context)
         elif self.llm_provider == 'ollama':
             return self._process_ollama(text, context)
+        elif self.llm_provider == 'cline':
+            return self._process_cline(text, context)
         else:
             raise ValueError(f"Unsupported LLM provider: {self.llm_provider}")
+
+    def _process_cline(self, text: str, context: Optional[str] = None) -> str:
+        """
+        Process text using Cline CLI provider.
+
+        :param text: User input/instruction
+        :param context: Optional previous conversation context
+        :return: LLM processed output
+        """
+        import subprocess
+        import shlex
+
+        model = self.config.get('cline_llm_model', 'default-model')
+        timeout = self.config.get('cline_timeout', 120)
+        api_key = os.environ.get('CLINE_API_KEY', self.config.get('cline_api_key', ''))
+
+        logger.debug(f"Cline CLI config - model: {model}, timeout: {timeout}s")
+
+        # Prepare the full CLI command
+        cmd_parts = [
+            'cline', 'generate',
+            '--model', model
+        ]
+
+        # Add API key if available
+        if api_key:
+            cmd_parts.extend(['--api-key', api_key])
+
+        # Add context if available
+        if context:
+            cmd_parts.extend(['--context', context])
+
+        # Add the input text
+        cmd_parts.extend(['--input', text])
+
+        try:
+            logger.debug(f"Running Cline CLI command: {' '.join(shlex.quote(part) for part in cmd_parts)}")
+            result = subprocess.run(
+                cmd_parts,
+                capture_output=True,
+                text=True,
+                timeout=timeout
+            )
+
+            if result.returncode != 0:
+                error_msg = f"Cline CLI error: {result.stderr.strip()}"
+                logger.error(error_msg)
+                return f"Error: {error_msg}"
+
+            processed_text = result.stdout.strip()
+            logger.debug(f"Cline CLI processing successful, response length: {len(processed_text)}")
+            return processed_text
+
+        except subprocess.TimeoutExpired:
+            error_msg = f"Cline CLI request timeout after {timeout}s"
+            logger.error(error_msg)
+            print(f"Cline CLI processing error: {error_msg}")
+            return f"Error: {error_msg}"
+        except Exception as e:
+            error_msg = f"Cline CLI processing error: {type(e).__name__}: {e}"
+            logger.error(error_msg)
+            print(f"Cline CLI processing error: {e}")
+            return f"Error processing request: {e}"
 
     def _process_ollama(self, text: str, context: Optional[str] = None) -> str:
         """

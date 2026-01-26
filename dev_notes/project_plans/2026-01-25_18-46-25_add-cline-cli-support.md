@@ -3,6 +3,8 @@
 ## Objective
 Extend the current provider support to include Cline CLI as a new provider.
 
+## Status: Completed
+
 ## Scope
 1. Identify and update all files referencing Aider providers
 2. Add Cline CLI support to provider modules

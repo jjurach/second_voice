@@ -9,6 +9,8 @@
     "openrouter_llm_model": "openai/gpt-oss-120b:free",
     "groq_api_key": "gsk_...",
     "openrouter_api_key": "sk-or-...",
+    "cline_llm_model": "default-model",
+    "cline_api_key": "sk-cline-...",
     "temp_dir": "./tmp",
     "vault_path": "~/Documents/Obsidian/VoiceInbox",
     "audio_config": {
