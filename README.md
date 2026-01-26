@@ -191,6 +191,27 @@ aider
 
 ---
 
+#### 🔧 Cline
+**Status:** ✅ Supported
+
+- Open-source code editor CLI
+- Multi-file editing with automatic commits
+- Flexible approval modes (suggest, auto, conversational)
+- Shell integration for testing and debugging
+
+**Setup:**
+```bash
+npm install -g cline
+cd /path/to/second_voice
+cline
+```
+
+**Documentation:**
+- Entry point: Create `CLINE.md` in project root
+- Complete guide: [docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)
+
+---
+
 #### 🔬 Google Gemini
 **Status:** ⏳ Experimental (Testing in progress)
 

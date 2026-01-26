@@ -14,6 +14,11 @@ This directory contains generic, reusable workflow guides for integrating differ
   - Multi-file refactoring with automatic testing
   - Git-first workflow with readable commits
 
+- **[cline.md](./cline.md)** - Cline (Code editor CLI)
+  - Open-source interactive development tool
+  - Multi-file editing with auto-commit to git
+  - Flexible approval modes (suggest, auto, conversational)
+
 - **[codex.md](./codex.md)** - OpenAI Codex (Code editor CLI)
   - Native AGENTS.md discovery
   - Granular approval modes (suggest, auto-edit, full-auto)
