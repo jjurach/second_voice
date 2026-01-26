@@ -43,7 +43,7 @@ class MenuMode(BaseMode):
             
             while True:
                 amp = self.recorder.get_amplitude()
-                bar_len = int(amp * 10)
+                bar_len = min(int(amp * 50), 10)
                 vu_bar = "#" * bar_len + "-" * (10 - bar_len)
                 sys.stdout.write(f"\rLevel: [{vu_bar}] ")
                 sys.stdout.flush()
