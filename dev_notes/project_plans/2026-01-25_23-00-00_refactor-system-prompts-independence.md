@@ -1,8 +1,9 @@
 # Project Plan: Refactor System-Prompts for Independence
 
 **Created:** 2026-01-25 23:00:00
-**Status:** Draft
-**Related Spec:** `dev_notes/system-prompts-refactor-proposal.md`
+**Status:** Completed
+**Completed Date:** 2026-01-25 23:15:00
+**Implementation Reference:** `dev_notes/changes/2026-01-25_23-10-00_refactor-system-prompts-independence.md`
 
 ## Overview
 
@@ -419,3 +420,48 @@ python3 docs/system-prompts/bootstrap.py --dry-run
 - [ ] bootstrap.py --analyze still works without errors
 - [ ] Existing AGENTS.md still syncs correctly
 - [ ] Verification: `grep -r "second_voice\|dev_notes/" docs/system-prompts/` returns no project-specific references
+
+---
+
+## Completion Summary
+
+**Status:** ✅ COMPLETED
+
+All 7 phases executed successfully. System-prompts refactoring is complete and verified.
+
+### Key Achievements
+- ✅ All 5 categories of issues identified and fixed
+- ✅ No references to non-existent files remain
+- ✅ All `dev_notes/` references replaced with `[PLANNING_DIR]` placeholder
+- ✅ All project-specific examples replaced with generic placeholders
+- ✅ Python-specific content consolidated in language-specific section
+- ✅ Templates.md moved into system-prompts for self-contained kernel
+- ✅ README updated with customization guide for new projects
+- ✅ bootstrap.py still works without modification
+- ✅ All changes documented and verified
+
+### Files Created
+- `docs/system-prompts/templates/` (directory)
+- `docs/system-prompts/templates/structure.md` (moved from `docs/templates.md`)
+- `docs/system-prompts/templates/README.md` (new guide)
+- `dev_notes/changes/2026-01-25_23-10-00_refactor-system-prompts-independence.md` (change documentation)
+
+### Files Modified
+- `docs/system-prompts/workflow/core.md` (7 changes)
+- `docs/system-prompts/principles/definition-of-done.md` (8 changes)
+- `docs/system-prompts/languages/python/definition-of-done.md` (1 change)
+- `docs/system-prompts/patterns/prompt-patterns.md` (8 changes)
+- `docs/system-prompts/README.md` (major updates)
+
+### Verification Status
+- Bootstrap tool: ✅ Works correctly
+- Syntax: ✅ All markdown files valid
+- References: ✅ No broken links to non-existent files
+- Generalization: ✅ No project-specific content in generic files
+- Self-contained: ✅ Templates bundled with kernel
+
+### Risk Assessment Outcome
+- All identified risks were LOW to MEDIUM risk
+- No high-risk changes were required
+- All changes are backward compatible
+- No breaking changes introduced

@@ -1,6 +1,6 @@
 # Definition of Done: Python Specifics
 
-This document extends the universal Definition of Done with Python-specific criteria and tools.
+This document extends the universal Definition of Done (see `docs/system-prompts/principles/definition-of-done.md`) with Python-specific criteria and tools.
 
 ## 1. Python Environment & Dependencies
 
@@ -137,7 +137,7 @@ def mock_api(mocker):
 
 **If You Create Test Scripts:**
 1. Create in a temporary directory: `tmp-verify-*.py`
-2. Include the full script content in `dev_notes/changes/` documentation
+2. Include the full script content in your change documentation
 3. Delete the script after verification:
    ```bash
    rm tmp-verify-*.py

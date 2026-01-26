@@ -2,6 +2,8 @@
 
 This document defines prompt structures that work across Claude Code, Aider, Gemini, and other AI coding tools. Use these patterns to write requests that get consistent, high-quality responses regardless of which tool you're using.
 
+**Note:** Examples in this document use placeholder names like `[your-package]`, `[project-name]`, and `[External API A]`. Replace these with your actual project names and service names.
+
 ## Pattern Categories
 
 1. [Request Analysis](#request-analysis-pattern)
@@ -222,7 +224,7 @@ What I've done:
 How to verify:
 ```bash
 pytest -v
-pytest --cov=src/second_voice
+pytest --cov=src/[your-package-name]
 pytest -q
 ```
 
@@ -417,7 +419,7 @@ def save_context(self, context: str, max_context_length: int = 1000):
 ```
 
 Context:
-- In src/second_voice/core/processor.py
+- In `src/[project-name]/core/processor.py` (or equivalent)
 - Saves conversation history to temp file
 - Project style: Type hints, docstrings, error handling for file ops
 
@@ -627,34 +629,34 @@ I need to write integration tests for transcription + LLM pipeline:
 
 End-to-end flow:
 1. User provides audio file
-2. Transcriber processes it (mocked Groq API)
+2. Transcriber processes it (mocked [External API A])
 3. Processor receives text
-4. LLM processes text (mocked Ollama)
+4. LLM processes text (mocked [External API B])
 5. Result returned to user
 
 Components involved:
 - AIProcessor - Main orchestrator
 - AudioRecorder - (mocked, file provided)
-- Groq API - (mocked, returns transcript)
-- Ollama API - (mocked, returns response)
+- [External API A] - (mocked, returns transcript)
+- [External API B] - (mocked, returns response)
 
 Success criteria:
-- [ ] Transcript received from Groq mock
+- [ ] Transcript received from [External API A] mock
 - [ ] LLM receives correct prompt
 - [ ] Final response returned
 - [ ] Context saved if requested
 
 What to mock:
-- Groq API endpoint
-- Ollama API endpoint
+- [External API A] endpoint
+- [External API B] endpoint
 
 What NOT to mock:
 - AIProcessor.transcribe()
 - AIProcessor.process_text()
 
 Failure scenarios:
-- What if Groq returns error?
-- What if Ollama is unreachable?
+- What if [External API A] returns error?
+- What if [External API B] is unreachable?
 - What if audio file is invalid?
 ```
 

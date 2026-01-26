@@ -11,20 +11,20 @@
 4.  **Is it a Research/Documentation Change?** → Make the change directly. No extra documentation required.
 5.  **Is it anything else?** → Announce you will create a **Project Plan**.
 
-> **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting. The full definition and examples are in `docs/overview.md`.
-> **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in `dev_notes`.
+> **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting.
+> **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in your project's planning directory.
 
 **Step B: Process Spec File (If Required)**
-- When a prompt involves planning, represent the planning in `dev_notes/specs`
-- Create a summary of what the user is asking for or what they want in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md`
-- If the prompt involves processing user intentions from a un-timestamped file already in `dev_notes/specs`, then rename it to have the correct filename layout based on the file's last modified time.
+- When a prompt involves planning, represent the planning in your project's planning directory (e.g., `dev_notes/specs/`, `docs/planning/`, `.ai-plans/`)
+- Create a summary of what the user is asking for in `[PLANNING_DIR]/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md` (using the timestamp-based filename format)
+- If the prompt involves processing user intentions from a un-timestamped file already in your planning directory, rename it to match the filename format based on the file's last modified time.
   - Add any additional context as developed over follow-up conversations about the spec.
 - Spec files signify user intentions and goals, and are typically used to create or update project plans.
 
 **Step C: Create a Project Plan (If Required)**
-- Use the **Project Plan Structure** defined in `docs/templates.md`.
+- Use the **Project Plan Structure** defined in `docs/system-prompts/templates/structure.md`.
 - The plan must be detailed enough for another agent to execute.
-- Save the plan to `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md`.
+- Save the plan to `[PLANNING_DIR]/project_plans/YYYY-MM-DD_HH-MM-SS_description.md`.
 
 **Step D: AWAIT DEVELOPER APPROVAL**
 - **NEVER EXECUTE A PLAN WITHOUT EXPLICIT APPROVAL.**
@@ -35,7 +35,7 @@
 
 **Step E: Implement & Document Concurrently**
 - Execute the approved plan step-by-step.
-- After each logical change, create or update a **Change Documentation** entry in `dev_notes/changes/`. Use the structure from `docs/templates.md`.
+- After each logical change, create or update a **Change Documentation** entry in `[PLANNING_DIR]/changes/`. Use the structure from your project's templates documentation.
 
 ## 2. The Unbreakable Rules
 
@@ -43,7 +43,7 @@
 2.  **Quality is Mandatory:** You MUST follow the existing code patterns, conventions, style, and typing of the files you are editing. New code should look like the old code.
 3.  **Uncertainty Requires a Full Stop:** If you encounter any error, are confused by a requirement, or are unsure how to proceed, you MUST **STOP** immediately. Document the issue and ask the developer for guidance. Do not try to solve novel problems alone.
 4.  **File Naming is Mandatory:**
-    - All Project Plans and Change Documentation in `dev_notes/` MUST use the `YYYY-MM-DD_HH-MM-SS_description.md` format.
-    - All new documentation files in `docs/` MUST use `lowercase-kebab.md` naming convention (see `docs/file-naming-conventions.md`).
+    - All Project Plans and Change Documentation MUST use the `YYYY-MM-DD_HH-MM-SS_description.md` filename format. (See your project's documentation for the directory location.)
+    - All new documentation files in `docs/` MUST use `lowercase-kebab.md` naming convention.
 5.  **Temporary Files:** NEVER use `/tmp` or system temporary directories for temporary files. Always create temporary files in the current working directory using the naming patterns `tmp-*` or `*.tmp` or `tmp/*`. These files should be cleaned up when no longer needed.
 6.  **Slack Notification (If Supported):** Notify using the slack-notifications MCP service each time you commit to the local git repo. **Note:** This rule applies only to agents with MCP support.
