@@ -1,4 +1,6 @@
-# Aider - Complete Guide
+# Aider - Interactive Development IDE Guide
+
+**Status:** ✅ Supported
 
 This guide covers how to use **Aider** (collaborative AI coding tool) with this project's AGENTS.md workflow.
 
@@ -22,6 +24,14 @@ aider
 > /exit
 ```
 
+## How Aider Discovers Project Instructions
+
+Aider automatically reads `AGENTS.md` from the project root and uses it to guide development work. This means no special configuration is needed—just follow the AGENTS.md workflow and Aider will respect it.
+
+**Discovery order:**
+1. `./AGENTS.md` (Project Root - **This is what Aider reads**)
+2. `.aider.conf.yml` (Optional Aider-specific configuration)
+
 ## How Aider Differs from Claude Code
 
 | Feature | Claude Code | Aider |
@@ -36,15 +46,18 @@ aider
 
 **Key Difference:** Aider changes code **immediately** without approval gates. This is fundamentally different from Claude Code.
 
-## Aider Philosophy
+## Aider Philosophy & Architecture
 
-Aider uses **trust-based collaboration**:
-- You provide direction
-- Aider makes changes and shows diffs
-- You review changes in git
+Aider uses **trust-based collaboration** with a **cascade agent** that handles multi-step edits:
+- You provide direction in natural language
+- Aider makes coordinated changes across multiple files (cascade agent)
+- Shows diffs of every change (intent tracking: edits, terminal, clipboard)
+- You review changes in git with readable commits
 - You can undo with `git undo` if needed
+- Automatic linting and testing on every change
+- In-the-loop approvals for controlled code changes
 
-This means AGENTS.md needs adaptation for Aider.
+This **trust-based model** means AGENTS.md needs light adaptation for Aider—approval is conversational rather than explicit gates like Claude Code's ExitPlanMode().
 
 ## AGENTS.md Workflow - Aider Adaptation
 

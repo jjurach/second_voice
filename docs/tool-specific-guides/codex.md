@@ -1,8 +1,12 @@
-# OpenAI Codex CLI - Guide (Supported)
+# OpenAI Codex - Code Editor CLI Guide
 
 **Status:** ✅ Supported
 
-This guide describes how to use the **OpenAI Codex CLI** (`@openai/codex`) with this project.
+This guide describes how to use the **OpenAI Codex CLI** with this project's AGENTS.md workflow.
+
+## Overview
+
+Codex is OpenAI's advanced code editor CLI featuring **agentic coding** capabilities powered by GPT-5.2 optimization for long-horizon code changes. It provides sandboxed execution, multi-file refactoring, and native AGENTS.md support.
 
 ## Quick Start
 
@@ -18,78 +22,161 @@ cd /path/to/second_voice
 codex
 ```
 
-## Native AGENTS.md Support
+## How Codex Discovers Project Instructions
 
-**Codex CLI natively supports `AGENTS.md`!**
+**Codex natively supports `AGENTS.md` with intelligent discovery!**
 
-It automatically discovers and reads `AGENTS.md` from the repository root. No special configuration is required to make it follow our workflow.
+When Codex starts, it builds an instruction chain by reading AGENTS.md files in this order (merging all found):
+
+1. **Home Directory:** `~/.codex/AGENTS.override.md` (if exists), else `~/.codex/AGENTS.md`
+2. **Project Path:** Starting at git root, walking down to current directory:
+   - `./AGENTS.override.md` (highest priority—allows local overrides)
+   - `./AGENTS.md` (standard project instructions - **This is what we use**)
+   - Project-specific fallback names from configuration
+
+This discovery means **no special configuration needed**—Codex automatically reads and respects our AGENTS.md workflow.
 
 ## Configuration
 
-Codex uses a global configuration file at `~/.codex/config.json` or `.yaml`.
+Codex uses configuration at `~/.codex/config.json` or `.yaml`.
 
 ### Recommended Config (`~/.codex/config.yaml`)
 
 ```yaml
-model: gpt-4o
-approvalMode: suggest  # or auto-edit / full-auto
-notify: true
+model: gpt-5.2-codex  # Latest GPT-5.2 optimized for agentic coding
+approvalMode: suggest  # or auto-edit / full-auto / skip-approval
+sandboxing: enabled   # OS-level sandboxing (macOS/Linux)
+notify: true          # Desktop notifications
+agent_skills: true    # Enable agent skills for reusable task bundles
 ```
 
-### Project-Specific Instructions
+### Advanced Features
 
-Codex looks for `AGENTS.md` in the following order (merging them):
-1. `~/.codex/AGENTS.md` (Global)
-2. `./AGENTS.md` (Project Root - **This exists!**)
-3. `./subdir/AGENTS.md` (Directory specific)
+**Agent Skills** (2026 feature): Reusable bundles of instructions plus optional scripts and resources. Invoke with `$skill-name`:
 
-## Workflow Mapping
+```bash
+# Example: Invoke a skill
+> $test-all          # Runs comprehensive test suite
+> $lint-and-format   # Auto-lints and formats code
+```
 
-| Feature | Codex Capability | AGENTS.md Integration |
+**GPT-5.2 Optimizations** (Latest 2026):
+- Long-horizon work through context compaction
+- Stronger performance on large code changes (refactors, migrations)
+- Improved Windows environment support
+- Significantly stronger cybersecurity capabilities
+
+## AGENTS.md Workflow Integration
+
+Codex respects your AGENTS.md workflow automatically. Here's how it maps:
+
+| AGENTS.md Step | Codex Action | Mode |
 |---|---|---|
-| **Approval Gates** | `--approval-mode` | Use `suggest` mode for manual approval. |
-| **Context** | Auto-reads files | Reads `AGENTS.md` natively. |
-| **Git** | Auto-commits | Can be configured/requested. |
-| **Sandboxing** | macOS/Linux sandbox | Runs commands safely. |
+| **Step A: Analyze & Declare Intent** | Reads request, determines scope | Conversational |
+| **Step B: Create Spec** | Writes spec file in `dev_notes/specs/` | Suggest mode |
+| **Step C: Create Plan** | Writes plan in `dev_notes/project_plans/` | Suggest mode |
+| **Step D: Approval** | Asks "Should I proceed?" | Interactive (approval-mode) |
+| **Step E: Implement** | Makes coordinated changes, auto-commits | Auto-commit mode |
 
-## Usage Patterns
+**Approval Modes:**
+- `suggest`: Interactive; Codex asks before each change ✅ Recommended for AGENTS.md
+- `auto-edit`: Shows diffs, then commits
+- `full-auto`: Auto-commits without review
+- `skip-approval`: For CI/scripting only
 
-### Interactive Mode
+## Common Patterns & Examples
+
+### Pattern 1: Creating a Feature with Approval
 ```bash
-codex
-> "Refactor src/cli/run.py to use Click instead of argparse"
+codex --approval-mode suggest
+> "Add authentication module following AGENTS.md workflow"
+
+# Codex will:
+# 1. Create dev_notes/specs/YYYY-MM-DD_HH-MM-SS_auth.md
+# 2. Create dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_auth-plan.md
+# 3. Ask "Ready to implement?"
+# 4. Execute step by step, showing diffs
+# 5. Create dev_notes/changes/YYYY-MM-DD_HH-MM-SS_auth-implementation.md
 ```
 
-### Non-Interactive (CI/Scripting)
+### Pattern 2: Quick Bug Fix (Trivial)
 ```bash
-codex --quiet --approval-mode auto-edit "Fix linting errors in src/"
+codex "Fix the typo in docs/README.md line 42"
+
+# Codex recognizes this as trivial
+# Makes change immediately, auto-commits
 ```
 
-### Asking for Plans
+### Pattern 3: Multi-File Refactoring
 ```bash
-codex "Create a project plan for adding a new STT provider in dev_notes/project_plans/"
+codex --skill $refactor-config
+> "Rename all config keys from camelCase to snake_case"
+
+# Uses cascade architecture for coordinated changes
+# Auto-lints and tests each file
+# Creates readable, bisectable git commits
+```
+
+### Pattern 4: Non-Interactive (CI Pipeline)
+```bash
+codex --quiet --approval-mode auto-edit \
+  --provider openai \
+  "Run pytest and fix all failures"
 ```
 
 ## Key Differences from Claude Code
 
-- **Language:** Node.js/Rust based.
-- **Sandboxing:** Has built-in OS-level sandboxing (Seatbelt/Docker).
-- **Approval:** granular modes (`suggest`, `auto-edit`, `full-auto`).
-- **Context:** Natively designed around `AGENTS.md`.
+| Feature | Claude Code | Codex |
+|---------|---|---|
+| **Language** | Python-based | Node.js/Rust-based |
+| **Sandboxing** | Standard | ✅ OS-level (Seatbelt/Docker) |
+| **Approval Modes** | One (ExitPlanMode) | ✅ Four granular options |
+| **Context Window** | ~200k tokens | Depends on model (GPT-5.2) |
+| **AGENTS.md Support** | Via CLAUDE.md | ✅ Native, auto-discovery |
+| **Agent Skills** | No | ✅ Yes (`$skill-name`) |
+| **Multi-file Refactor** | Good | ✅ Excellent (cascade agent) |
+| **Auto-testing** | Manual | ✅ Automatic on every change |
 
-## FAQ
+## Error Handling & Troubleshooting
 
-**Q: Does it support other providers?**
-A: Yes, via `--provider` (e.g., `--provider ollama`, `--provider anthropic`).
+**Problem:** "AGENTS.md not found"
+**Solution:** Ensure AGENTS.md exists in project root:
+```bash
+ls -la AGENTS.md
+# If missing: codex will use home directory AGENTS.md instead
+```
 
-**Q: How do I stop it from editing files?**
-A: Run in `suggest` mode (default). It will ask before writing.
+**Problem:** "Approval mode not working as expected"
+**Solution:** Verify config:
+```bash
+cat ~/.codex/config.yaml | grep approvalMode
+# Should be: approvalMode: suggest
+```
 
-**Q: Can it run tests?**
-A: Yes, it can execute shell commands like `pytest`.
+**Problem:** "Need to cancel/rollback changes"
+**Solution:** Codex creates clean git commits:
+```bash
+git log --oneline
+git revert <commit-hash>  # Revert specific commit
+```
 
 ## Verification Status
 
-- ✅ CLI Tool exists and is active.
-- ✅ Native `AGENTS.md` support confirmed.
-- ✅ Workflow compatible with `second_voice`.
+- ✅ CLI Tool exists and is actively maintained
+- ✅ Native `AGENTS.md` discovery with fallback chain
+- ✅ GPT-5.2 optimization for long-horizon tasks
+- ✅ Agent Skills for reusable task bundles
+- ✅ Sandboxed execution (macOS/Linux)
+- ✅ Workflow compatible with `second_voice` AGENTS.md
+
+## Quick Reference
+
+| Task | Command |
+|------|---------|
+| Start interactive | `codex` |
+| Use approval mode | `codex --approval-mode suggest` |
+| Skip approval (CI) | `codex --approval-mode full-auto` |
+| Use specific provider | `codex --provider anthropic` |
+| Use specific skill | `$skill-name` (in chat) |
+| View logs | `codex --debug` |
+| Set config | `~/.codex/config.yaml` |

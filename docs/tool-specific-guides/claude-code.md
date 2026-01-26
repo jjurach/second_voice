@@ -1,4 +1,6 @@
-# Claude Code (claude-cli) - Complete Guide
+# Claude Code - Interactive Development IDE Guide
+
+**Status:** ✅ Supported
 
 This guide covers how to use **Claude Code** (the official Anthropic Claude CLI tool) with this project's AGENTS.md workflow.
 

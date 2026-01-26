@@ -1,32 +1,88 @@
-# Google Gemini - Guide (Supported)
+# Google Gemini - Code Editor CLI Guide
 
 **Status:** ✅ Supported
 
-This guide describes how to use **Google Gemini CLI** with the AGENTS.md workflow.
+This guide describes how to use **Google Gemini CLI** (open-source AI agent) with the AGENTS.md workflow.
+
+## Overview
+
+Gemini CLI is an open-source AI agent that brings Google's latest models (Gemini 3 Flash, Gemini 3 Pro) directly into your terminal. It uses a **ReAct loop** with built-in tools (file operations, shell commands, web search, MCP integration) to complete complex software development tasks.
 
 ## Quick Start
 
-1.  **Install/Setup:** Ensure you have the Gemini CLI installed and configured.
-2.  **Configuration:** Create a `GEMINI.md` file in the root of your project (see below).
-3.  **Run:**
-    ```bash
-    gemini
-    ```
+```bash
+# Install (open-source, via pip or npm)
+pip install gemini-cli
+# OR: npm install -g @google/gemini-cli
+
+# Set API Key (Google AI Studio or Vertex AI)
+export GOOGLE_API_KEY="your-key-here"
+
+# Run in project root
+cd /path/to/second_voice
+gemini
+```
 
 ## How Gemini Discovers Project Instructions
 
-Gemini looks for a `GEMINI.md` file in the project root. This file serves the same purpose as `CLAUDE.md`.
+Gemini looks for a `GEMINI.md` file in the project root. This file serves the same purpose as `CLAUDE.md` in other tools.
 
-## Workflow Mapping (AGENTS.md)
+**Discovery:**
+1. **Project Root:** `./GEMINI.md` (This is what we use)
+2. **Home Directory:** `~/.gemini/GEMINI.md` (fallback)
 
-| AGENTS.md Step | Gemini Action | Tool Used |
+## Model Selection & Capabilities
+
+Gemini CLI supports cutting-edge models optimized for different use cases:
+
+| Model | Best For | SWE-Bench | Context |
+|-------|----------|-----------|---------|
+| **Gemini 3 Flash** | Terminal workflows, high-frequency tasks | 78% verified | Fast, efficient |
+| **Gemini 3 Pro** | Complex multi-step planning, deep insights | Higher | Full reasoning |
+| **Gemini 2.5 Pro** | Free option (Google account) | — | Limited |
+
+**Configuration:**
+```bash
+# Set model in ~/.gemini/config.yaml
+model: gemini-3-flash        # Fast, recommended for AGENTS.md
+# OR: gemini-3-pro           # Powerful, for complex tasks
+
+# Or via environment
+export GEMINI_MODEL=gemini-3-flash
+```
+
+## Advanced Features
+
+### ReAct Loop Architecture
+Gemini uses **Reason + Act** cycle with built-in tools:
+- Reads files and context
+- Reasons about the task
+- Uses tools (shell, file ops, web search)
+- Iterates until task complete
+
+### MCP (Model Context Protocol) Support
+Integrate custom tools and services:
+```bash
+# Enable MCP servers for extended capabilities
+# Example: Database access, API clients, custom scripts
+```
+
+### Conductor Extension (Preview 2026)
+New context-driven development approach:
+- Structured planning for AI-assisted development
+- Better context management for complex tasks
+- Integration with dev_notes workflow
+
+## AGENTS.md Workflow Mapping
+
+| AGENTS.md Step | Gemini Action | Implementation |
 |---|---|---|
-| **A. Analyze** | Analyze request & context | Internal reasoning |
-| **B. Spec** | Write spec file | `write_file` |
-| **C. Plan** | Write plan file | `write_file` |
-| **D. Approval** | Ask user for confirmation | **Conversation** (No explicit tool) |
-| **E. Implement** | Edit files, run commands | `read_file`, `replace`, `run_shell_command` |
-| **F. Verify** | Run tests | `run_shell_command` ("pytest") |
+| **A. Analyze** | Analyze request using ReAct reasoning | Conversational analysis |
+| **B. Spec** | Write spec file | `write_file` to dev_notes/specs/ |
+| **C. Plan** | Write plan file | `write_file` to dev_notes/project_plans/ |
+| **D. Approval** | Ask conversationally ("Do you approve?") | **Interactive (no explicit gate)** |
+| **E. Implement** | Edit files, run commands step-by-step | `read_file`, `replace`, `run_shell_command` |
+| **F. Verify** | Run tests and validate | `run_shell_command` (pytest, etc.) |
 
 ## Key Differences from Claude Code
 
@@ -65,41 +121,152 @@ This project follows the **AGENTS.md** workflow.
 - Check Types: `mypy .`
 ```
 
-## Common Patterns
+## Common Patterns & Examples
 
-### 1. Creating a Plan
+### Pattern 1: Feature with Conversational Approval
 ```
-User: "Refactor the config loader"
-Gemini: "I will analyze the request."
-[Gemini reads files]
-Gemini: "I have created a plan in dev_notes/project_plans/..."
-Gemini: "Do you approve this plan?"
-User: "Yes"
-Gemini: [Proceeds to implementation]
-```
+User: "Add user authentication to the API"
 
-### 2. Running Tests
-```
-Gemini: "I will verify the changes."
-Tool: run_shell_command(command="pytest tests/test_config.py")
-```
+Gemini analyzes request, creates spec and plan
+Gemini: "I've created dev_notes/specs/... and dev_notes/project_plans/..."
+Gemini: "Does this approach look good? Should I proceed?"
+User: "Yes, proceed"
 
-### 3. Git Operations
-Gemini uses `run_shell_command` for git operations.
-```
-Tool: run_shell_command(command="git status")
-Tool: run_shell_command(command="git add . && git commit -m '...'")
+Gemini implements step by step:
+- Creates auth module
+- Adds tests
+- Updates docs
+- Creates dev_notes/changes/... entry
 ```
 
-## FAQ / Known Issues
+### Pattern 2: Quick Bug Fix
+```
+User: "Fix the config parsing error in src/config.py"
 
-1.  **Approval Gates:** Gemini does not have a hard "ExitPlanMode" state. You must explicitly ask the user "Do you approve?" and wait for their text response.
-2.  **Task Tracking:** Gemini does not have a `Task` tool. Use the `dev_notes/` directory to track progress.
-3.  **File Editing:** Gemini uses `replace` which requires unique context. Ensure you provide enough context lines.
+Gemini analyzes the issue (ReAct reasoning)
+Gemini: "I found the issue and fixed it. Running tests..."
+[Auto-runs pytest]
+Gemini: "✓ All tests pass"
+```
 
-## Contributing
+### Pattern 3: Test-Driven Refactor
+```
+User: "Refactor the API module to use dependency injection"
 
-To update this guide:
-1.  Verify new Gemini features.
-2.  Update `GEMINI.md` template if needed.
-3.  Update this file.
+Gemini:
+1. Reads current implementation
+2. Creates plan in dev_notes/
+3. Asks for approval
+4. Writes tests first (test-driven)
+5. Refactors implementation
+6. Verifies all tests pass
+7. Documents changes
+```
+
+### Pattern 4: Web-Assisted Development
+```
+User: "Implement async/await patterns in our HTTP client"
+
+Gemini (via built-in web search):
+- Searches current best practices
+- Implements improvements
+- Tests against benchmarks
+- Creates detailed change docs
+```
+
+## Tool-Specific Commands Reference
+
+| Task | Command | Notes |
+|------|---------|-------|
+| Start interactive | `gemini` | Opens REPL |
+| Use Gemini 3 Flash | Set `GEMINI_MODEL=gemini-3-flash` | Recommended |
+| Use Gemini 3 Pro | Set `GEMINI_MODEL=gemini-3-pro` | More powerful |
+| View reasoning | Ask "Show your reasoning" | ReAct loop transparency |
+| Enable MCP | `gemini --enable-mcp` | Custom integrations |
+| Use Conductor | `gemini --conductor` | Preview mode (2026) |
+| Check model | `gemini --version` | Shows active model |
+
+## Error Handling & Troubleshooting
+
+**Problem:** "GEMINI.md not found"
+**Solution:** Create a GEMINI.md file:
+```bash
+cat > GEMINI.md << 'EOF'
+# Project - Gemini Instructions
+
+This project follows AGENTS.md workflow.
+- See AGENTS.md for core workflow
+- See docs/definition-of-done.md for completion criteria
+EOF
+```
+
+**Problem:** "API key not recognized"
+**Solution:** Verify configuration:
+```bash
+export GOOGLE_API_KEY="your-key"
+# OR: Use Google AI Studio free tier (GOOGLE_GENERATIVE_AI_API_KEY)
+```
+
+**Problem:** "ReAct loop seems stuck"
+**Solution:** Provide clearer context:
+```
+User: "The HTTP client has a race condition in request pooling.
+      File: src/http_client.py, Lines 42-67"
+```
+
+**Problem:** "File editing failed - unique context required"
+**Solution:** Provide more context lines when asking for edits:
+```
+User: "In src/api.py, after the 'def get_user()' function (around line 45),
+      add validation for empty strings. Show 5 lines before and after."
+```
+
+## Verification Status
+
+- ✅ Open-source CLI available (github.com/google-gemini/gemini-cli)
+- ✅ Gemini 3 Flash (78% SWE-bench verified) for terminal workflows
+- ✅ Gemini 3 Pro for complex multi-step tasks
+- ✅ ReAct loop architecture for reasoning
+- ✅ MCP (Model Context Protocol) support for custom integrations
+- ✅ Conductor extension preview (structured development)
+- ✅ Native AGENTS.md support via GEMINI.md
+- ✅ Web search grounding (for best practices, patterns)
+- ✅ Compatible with `second_voice` workflow
+
+## Key Differences from Claude Code
+
+| Feature | Claude Code | Gemini CLI |
+|---|---|---|
+| **Language** | Python-based | Standalone CLI (multi-lang) |
+| **License** | Proprietary | ✅ Open-source |
+| **Models** | Claude Opus | ✅ Gemini 3 Flash/Pro/2.5 |
+| **Approval** | ExitPlanMode (explicit) | Conversational (flexible) |
+| **Context** | ~200k tokens | Model-dependent (1M+) |
+| **Entry Point** | CLAUDE.md | GEMINI.md |
+| **Web Search** | Via WebSearch tool | ✅ Built-in |
+| **MCP Support** | Via tools | ✅ Native |
+| **ReAct Loop** | N/A | ✅ Yes (reasoning shown) |
+| **Conductor** | N/A | ✅ Preview 2026 |
+
+## Quick Reference Card
+
+```bash
+# Configuration
+~/.gemini/config.yaml       # Global config
+./GEMINI.md                 # Project instructions
+./dev_notes/                # Workflow artifacts
+
+# Environment Variables
+GOOGLE_API_KEY              # Auth token
+GEMINI_MODEL                # Model selection
+GEMINI_DEBUG                # Enable debug output
+
+# Common Commands
+gemini                      # Interactive shell
+gemini --version            # Show version/model
+gemini --help               # Show help
+
+# In-session Commands
+/clear                      # Clear conversation
+/exit                       # Exit shell
+```
