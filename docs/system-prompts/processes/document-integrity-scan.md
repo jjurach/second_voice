@@ -12,9 +12,10 @@ The document integrity scan is a multi-layer verification process that checks:
 
 1. **Referential Correctness** - All links point to existing files
 2. **Architectural Constraints** - System-prompts doesn't reference back into project files without explicit marking
-3. **Naming Conventions** - Files follow established naming patterns
-4. **Directory Structure** - Tool guides are organized correctly (generic vs. project-specific)
-5. **Coverage** - All documentation relationships are captured and verified
+3. **Reference Formatting** - All file references use hyperlinks or backticks (not plain text)
+4. **Naming Conventions** - Files follow established naming patterns
+5. **Directory Structure** - Tool guides are organized correctly (generic vs. project-specific)
+6. **Coverage** - All documentation relationships are captured and verified
 
 ---
 
@@ -102,7 +103,51 @@ This integrates with [our provider](docs/tool-specific-guides/cline.md).
 
 ---
 
-### Layer 3: File Organization Verification
+### Layer 3: Reference Formatting Verification
+
+**Goal:** Ensure all file/document references use proper markdown formatting (hyperlinks or backticks), not plain text.
+
+**Rationale:**
+- Markdown hyperlinks `[text](path)` are clickable in markdown viewers
+- Backticks `` `file.md` `` semantically identify filenames as code/paths
+- Plain text references are hard to discover and don't work in markdown viewers
+- Consistent formatting makes documentation more professional and usable
+
+**Process:**
+1. Scan all `.md` files for markdown file references
+2. For each reference to a `.md` file, check if it's properly formatted:
+   - ✅ **Hyperlink:** Link format with brackets and parentheses - for navigation links
+   - ✅ **Backtick:** Filename wrapped in backticks - for inline file references
+   - ❌ **Plain text:** "see file.md" - NOT ALLOWED
+3. Remove code blocks and inline code to avoid false positives
+4. Report any plain-text references
+
+**Examples:**
+
+**Correct - Hyperlink for Navigation:**
+```markdown
+[AGENTS.md](AGENTS.md)
+[See the test guide](docs/test-guide.md)
+```
+
+**Correct - Backticks for File References in Prose:**
+```markdown
+The `AGENTS.md` file defines the workflow.
+Consult `docs/definition-of-done.md` for completion criteria.
+Configuration files: `config.json`, `setup.py`
+```
+
+**Incorrect - Plain Text (FLAGGED):**
+```markdown
+See AGENTS.md for details.
+Check docs/test-guide.md for more information.
+```
+
+**Severity:** Warning (flags potential issues but doesn't block)
+
+---
+
+### Layer 4: File Organization Verification
 
 **Goal:** Verify tool guides are in correct locations based on reusability.
 
@@ -124,7 +169,7 @@ This integrates with [our provider](docs/tool-specific-guides/cline.md).
 
 ---
 
-### Layer 4: Reference Coverage
+### Layer 5: Reference Coverage
 
 **Goal:** Ensure all tool guide references from main project files are complete and correct.
 
@@ -149,7 +194,7 @@ README.md:
 
 ---
 
-### Layer 5: Naming Convention Verification
+### Layer 6: Naming Convention Verification
 
 **Goal:** Ensure all documentation files follow established naming conventions.
 
@@ -193,7 +238,32 @@ Exception: Links to entry points (AGENTS.md, CLAUDE.md, GEMINI.md, AIDER.md, CLI
 are always safe (these files must exist in projects using AGENTS.md)
 ```
 
-### Rule 3: Tool Guides in Correct Locations
+### Rule 3: Document Reference Formatting
+```
+All references to .md files must use proper markdown formatting:
+
+Hyperlinks (for navigation links):
+  Format: [text](relative/path/to/file.md)
+  Use when: Creating call-to-action links, navigation sections
+  Example: [AGENTS.md](AGENTS.md)
+
+Backticks (for file references in prose):
+  Format: `relative/path/to/file.md`
+  Use when: Mentioning files inline, listing files, describing content
+  Example: "The `AGENTS.md` file defines the workflow"
+
+Never use plain text:
+  ❌ See AGENTS.md (no formatting)
+  ❌ check docs/file.md (no formatting)
+
+Rationale:
+  - Hyperlinks are clickable in markdown viewers
+  - Backticks identify files as code/paths
+  - Consistency makes documentation more professional
+  - Plain text references are hard to discover
+```
+
+### Rule 4: Tool Guides in Correct Locations
 ```
 Generic tool guides (reusable across projects):
   Location: docs/system-prompts/tools/{tool}.md
@@ -206,7 +276,7 @@ Project-specific guides:
   References: OK to reference project architecture/config
 ```
 
-### Rule 4: Naming Conventions
+### Rule 5: Naming Conventions
 ```
 Documentation files in docs/ directory:
   Pattern: lowercase-kebab.md
@@ -222,7 +292,7 @@ Timestamped files (dev_notes/):
   Location: dev_notes/specs/, dev_notes/project_plans/, dev_notes/changes/
 ```
 
-### Rule 5: Reference Coverage
+### Rule 6: Reference Coverage
 ```
 All tool guides must be referenced from:
   1. README.md (main index)

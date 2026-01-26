@@ -146,6 +146,7 @@ When the user refers to implementing, executing, or applying a **"process"** (e.
 **MANDATORY:** Consult `docs/definition-of-done.md` for documentation-specific completion criteria.
 
 The Definition of Done includes special requirements for:
+- **Reference Formatting:** All file/document references must use either markdown hyperlinks `[text](path)` or backticks `` `file.md` ``; plain text references are not allowed
 - Documentation verification and integrity
 - Link validity and consistency
 - Naming conventions compliance

@@ -77,7 +77,7 @@ python3 src/cli/run.py --file samples/test.wav --verbose
 - AIFF, AU, CAF (legacy formats)
 - And 25+ additional formats supported by `soundfile`
 
-See `TESTING.md` for comprehensive testing documentation.
+See [docs/test-guide.md](docs/test-guide.md) for comprehensive testing documentation.
 
 ### Running the Demo Script
 

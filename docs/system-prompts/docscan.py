@@ -8,13 +8,15 @@ See docs/system-prompts/processes/document-integrity-scan.md for detailed proces
 Checks:
 1. Referential Correctness - All links point to existing files
 2. Architectural Constraints - system-prompts doesn't reference back to project files
-3. Naming Conventions - Files follow established patterns
-4. Directory Structure - Tool guides in correct locations
-5. Coverage - All documentation relationships captured
+3. Reference Formatting - All file references use hyperlinks or backticks (not plain text)
+4. Naming Conventions - Files follow established patterns
+5. Directory Structure - Tool guides in correct locations
+6. Coverage - All documentation relationships captured
 
 Usage:
     python3 docscan.py                              # Run full scan
     python3 docscan.py --check broken-links         # Only broken links
+    python3 docscan.py --check reference-formatting # Only reference formatting
     python3 docscan.py --check back-references      # Only back-references
     python3 docscan.py --verbose                    # Verbose output
     python3 docscan.py --strict                     # Fail on warnings
@@ -41,9 +43,9 @@ CONDITIONAL_MARKERS = {
 ENTRY_POINTS = {
     "AGENTS.md",
     "CLAUDE.md",
-    "GEMINI.md",
+    "CLINE.md",
     "AIDER.md",
-    "AGENTS.md",
+    "GEMINI.md",
 }
 
 
@@ -66,6 +68,9 @@ class DocumentScanner:
 
         if not self.options.check or "back-references" in self.options.check:
             self._check_back_references()
+
+        if not self.options.check or "reference-formatting" in self.options.check:
+            self._check_reference_formatting()
 
         if not self.options.check or "tool-organization" in self.options.check:
             self._check_tool_organization()
@@ -197,6 +202,89 @@ class DocumentScanner:
                         )
                         if self.options.verbose:
                             print(f"  ⚠️  {relative_path}: {link_target} (not marked conditional)")
+
+    def _check_reference_formatting(self):
+        """Check Layer 3: All file references use hyperlinks or backticks (not plain text)."""
+        print("\n### Checking Reference Formatting...")
+
+        # Patterns to detect file references
+        hyperlink_pattern = re.compile(r"\[([^\]]+)\]\(([^)]+\.md)\)")
+        backtick_pattern = re.compile(r"`([^`]+\.md)`")
+
+        # Pattern for potential plain-text references (words containing .md or path-like structures)
+        # This includes: docs/file.md, AGENTS.md, ./file.md, ../file.md, etc.
+        plaintext_pattern = re.compile(
+            r"(?:^|[^`\[])(?:(?:docs/|\.{0,2}/)?(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+\.md|(?:AGENTS|CLAUDE|CLINE|AIDER|GEMINI)\.md)(?:[^)\]`]|$)"
+        )
+
+        all_md_files = list(self.project_root.rglob("*.md"))
+
+        for md_file in all_md_files:
+            if ".git" in str(md_file):
+                continue
+
+            relative_path = str(md_file.relative_to(self.project_root))
+            with open(md_file, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Build a set of all properly formatted references in this file
+            hyperlink_targets = set()
+            backtick_targets = set()
+
+            for match in hyperlink_pattern.finditer(content):
+                hyperlink_targets.add(match.group(2))
+
+            for match in backtick_pattern.finditer(content):
+                backtick_targets.add(match.group(1))
+
+            # Now look for plain-text file references that are NOT in hyperlinks or backticks
+            # Split by backtick sections and hyperlinks to avoid false positives
+
+            # Remove code blocks and inline code first to avoid false positives
+            content_for_check = re.sub(r"```[\s\S]*?```", "", content)
+
+            # Process line by line to find plain-text refs
+            for line_num, line in enumerate(content_for_check.split("\n"), 1):
+                # Skip lines that are entirely in code/links
+                if line.strip().startswith("`") or line.strip().startswith("["):
+                    continue
+
+                # Remove hyperlinks and backticks from this line for analysis
+                line_to_check = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", "", line)
+                line_to_check = re.sub(r"`[^`]+`", "", line_to_check)
+
+                # Look for markdown file references
+                # Pattern: word characters with dots (like AGENTS.md) or paths (docs/file.md)
+                potential_refs = re.findall(
+                    r"(?:(?:docs|\.)/)?(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+\.md|(?:AGENTS|CLAUDE|CLINE|AIDER|GEMINI)\.md",
+                    line_to_check
+                )
+
+                for ref in potential_refs:
+                    # Skip if it's in a valid format
+                    if ref in hyperlink_targets or ref in backtick_targets:
+                        continue
+
+                    # Skip common false positives (file paths in explanations that shouldn't be links)
+                    if "filename" in line.lower() or "example" in line.lower():
+                        continue
+
+                    # Check if the file actually exists
+                    if not ref.endswith(".md"):
+                        continue
+
+                    # This looks like a plain-text file reference
+                    self.violations.append(
+                        {
+                            "file": relative_path,
+                            "type": "reference-formatting",
+                            "severity": "warning",
+                            "message": f"Plain-text file reference '{ref}' should use backticks or hyperlink format",
+                            "line": line_num,
+                        }
+                    )
+                    if self.options.verbose:
+                        print(f"  ⚠️  {relative_path}:{line_num}: '{ref}' (plain text, not formatted)")
 
     def _check_tool_organization(self):
         """Check Layer 3: Tool guides in correct locations."""
@@ -359,7 +447,7 @@ def main():
     parser.add_argument(
         "--check",
         action="append",
-        choices=["broken-links", "back-references", "tool-organization", "naming", "coverage"],
+        choices=["broken-links", "back-references", "reference-formatting", "tool-organization", "naming", "coverage"],
         help="Run specific checks (default: run all)",
     )
 

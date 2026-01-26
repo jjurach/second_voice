@@ -36,7 +36,31 @@
         2.  Update `config.example.json` to include the new key with a safe default or placeholder.
     *   **Secrets:** Never hardcode secrets. Ensure they are read from env vars or config, and documented in `config.example.json`.
 
-## 4. The Agent Handoff
+## 4. Documentation Reference Formatting
+
+*   **Hyperlinks for Navigation:**
+    *   When creating a reference that users should navigate to, use markdown hyperlinks: `[text](path)`
+    *   Examples: `[AGENTS.md](AGENTS.md)`, `[docs/test-guide.md](docs/test-guide.md)`
+    *   Use in: Call-to-action sections, navigation tables, cross-document references
+
+*   **Backticks for File References in Prose:**
+    *   When mentioning a file inline in text, use backticks: `` `filename.md` ``
+    *   Examples: "The `AGENTS.md` file defines the workflow", "See `docs/file-naming-conventions.md` for details"
+    *   Use in: Explanatory prose, file lists, technical descriptions
+
+*   **What NOT to Do:**
+    *   Do NOT use plain text file references: ❌ "See AGENTS.md" or "check docs/file.md" (no formatting)
+    *   All file/path references must use either backticks or hyperlinks
+
+*   **Semantic Guide:**
+    ```
+    ✅ [AGENTS.md](AGENTS.md) for workflow - I want them to navigate here
+    ✅ `AGENTS.md` file - I'm describing what the file is/contains
+    ✅ `config.json`, `setup.py` - Listing multiple files/paths
+    ❌ See AGENTS.md - Plain text, no formatting (AVOID)
+    ```
+
+## 5. The Agent Handoff
 
 *   **Known Issues:**
     *   If the implementation is functional but has caveats (e.g., "slow on first run," "edge case X not handled"), you MUST add a **"Known Issues"** section to the `dev_notes/changes/` entry.
