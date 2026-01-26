@@ -124,6 +124,36 @@ For more information, see `docs/workflows.md`.
 5.  **Temporary Files:** NEVER use `/tmp` or system temporary directories for temporary files. Always create temporary files in the current working directory using the naming patterns `tmp-*` or `*.tmp` or `tmp/*`. These files should be cleaned up when no longer needed.
 6.  **Slack Notification (If Supported):** Notify using the slack-notifications MCP service each time you commit to the local git repo. **Note:** This rule applies only to agents with MCP support.
 
+---
+
+## 4. Discovering Processes & Resources
+
+### Processes
+
+When the user refers to implementing, executing, or applying a **"process"** (e.g., "apply the document-integrity-scan process", "run the verification process"):
+
+1. Check `docs/system-prompts/processes/` directory
+2. Look for documentation matching the requested process
+3. Read the process specification and execute as instructed
+4. Report results to user
+
+**Examples:** document-integrity-scan, verification, validation, scanning
+
+### Documentation-Specific Requirements
+
+**When making changes to `docs/` or markdown files:**
+
+**MANDATORY:** Consult `docs/definition-of-done.md` for documentation-specific completion criteria.
+
+The Definition of Done includes special requirements for:
+- Documentation verification and integrity
+- Link validity and consistency
+- Naming conventions compliance
+- Coverage requirements
+- Referential correctness
+
+You must verify your documentation changes against these requirements before marking them complete.
+
 
 <!-- SECTION: CORE-WORKFLOW -->
 # Agent Kernel: Core Workflow & Unbreakable Rules
@@ -447,6 +477,8 @@ pytest tests/
 - [ ] Temporary scripts deleted after verification
 - [ ] Python version documented and tested
 <!-- END-SECTION -->
+
+
 
 <!-- SECTION: LOGS-FIRST-WORKFLOW -->
 # Logs-First Workflow
