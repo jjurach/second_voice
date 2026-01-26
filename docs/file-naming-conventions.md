@@ -137,13 +137,26 @@ These files are **NOT automatically discovered**. They exist only because other 
 - **Auto-discovered:** ❌ No
 - **Location:** docs/ folder ✅
 - **Naming:** directory and files use lowercase-kebab ✅
-- **Referenced by:** README.md, tools-capabilities.md
+- **Referenced by:** README.md, project-specific guides
+- **Purpose:** Project-specific tool integration guides (e.g., how Cline integrates with second_voice)
 - **Can rename:** ✅ YES (directory and files) - if you update links everywhere
 - **Current files (all correct naming):**
-  - `claude-code.md` - ✅ Correct
-  - `aider.md` - ✅ Correct
-  - `gemini.md` - ✅ Correct
-  - `codex.md` - ✅ Correct
+  - `cline.md` - ✅ Correct (project-specific provider integration)
+
+### docs/system-prompts/tools/ (directory + files)
+- **Auto-discovered:** ❌ No
+- **Location:** docs/system-prompts/ folder ✅
+- **Naming:** directory and files use lowercase-kebab ✅
+- **Referenced by:** README.md, bootstrap.py
+- **Purpose:** Generic, reusable workflow guides for AI development tools (not project-specific)
+- **Reusable:** ✅ YES - can be copied to other projects
+- **Can rename:** ✅ YES (directory and files) - if you update links everywhere
+- **Current files (all correct naming):**
+  - `claude-code.md` - ✅ Correct (generic AGENTS.md + Claude Code)
+  - `aider.md` - ✅ Correct (generic AGENTS.md + Aider)
+  - `gemini.md` - ✅ Correct (generic AGENTS.md + Gemini)
+  - `codex.md` - ✅ Correct (generic AGENTS.md + Codex)
+  - `README.md` - ✅ Correct (directory index)
 
 ---
 
@@ -274,9 +287,9 @@ Create `CLAUDE.md`:
 
 This project uses the AGENTS.md workflow for all development.
 
-See: [AGENTS.md](./AGENTS.md) - Core development workflow
-See: [tools-capabilities.md](./docs/tools-capabilities.md) - Tool support matrix
-See: [workflow-mapping.md](./docs/workflow-mapping.md) - How workflow maps to each tool
+See: [AGENTS.md](../AGENTS.md) - Core development workflow
+See: [tools-capabilities.md](./tools-capabilities.md) - Tool support matrix
+See: [workflow-mapping.md](./workflow-mapping.md) - How workflow maps to each tool
 ```
 
 ### For Aider

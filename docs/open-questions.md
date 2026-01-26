@@ -8,7 +8,7 @@ This document tracks unresolved technical questions and strategic initiatives to
 
 ### OpenAI Codex / GPT-4 Integration
 - **Official CLI:** As of 2026, is there an official OpenAI CLI tool that supports function calling and file operations natively?
-- **Deprecation:** Should `docs/tool-specific-guides/codex.md` be deprecated in favor of `Aider` (which already supports GPT-4) to reduce maintenance overhead?
+- **Deprecation:** Should `docs/system-prompts/tools/codex.md` be deprecated in favor of `Aider` (which already supports GPT-4) to reduce maintenance overhead?
 - **Approval gates:** If using the raw API, how do we implement and enforce `ExitPlanMode`-style approval gates?
 
 ### Tool Capabilities Matrix

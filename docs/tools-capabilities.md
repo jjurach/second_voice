@@ -160,7 +160,15 @@ Regardless of tool, all AGENTS.md-compliant work must:
 ## Contributing to This Document
 
 When adding support for a new tool:
+
+**For generic, reusable tool guides:**
+1. Create `docs/system-prompts/tools/{tool}.md`
+2. Update this matrix
+3. Document AGENTS.md workflow mapping
+4. Verify reusability across projects
+
+**For project-specific tool integrations:**
 1. Create `docs/tool-specific-guides/{tool}.md`
 2. Update this matrix
-3. Create entry point config file
+3. Create entry point config file (if needed)
 4. Verify AGENTS.md workflow compliance

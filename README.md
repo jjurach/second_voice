@@ -166,7 +166,7 @@ claude-code
 
 **Documentation:**
 - Entry point: [CLAUDE.md](CLAUDE.md)
-- Complete guide: [docs/tool-specific-guides/claude-code.md](docs/tool-specific-guides/claude-code.md)
+- Complete guide: [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)
 
 ---
 
@@ -186,8 +186,8 @@ aider
 ```
 
 **Documentation:**
-- Configuration: `.aider.conf` (create from [docs/tool-specific-guides/aider.md](docs/tool-specific-guides/aider.md))
-- Complete guide: [docs/tool-specific-guides/aider.md](docs/tool-specific-guides/aider.md)
+- Configuration: `.aider.conf` (create from [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md))
+- Complete guide: [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)
 
 ---
 
@@ -200,7 +200,7 @@ aider
 - Web search integration
 
 **Documentation:**
-- Status & guide: [docs/tool-specific-guides/gemini.md](docs/tool-specific-guides/gemini.md)
+- Status & guide: [docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)
 - Help us test! See guide for how to contribute.
 
 ---
@@ -214,7 +214,7 @@ aider
 - Function calling support
 
 **Documentation:**
-- Status & guide: [docs/tool-specific-guides/codex.md](docs/tool-specific-guides/codex.md)
+- Status & guide: [docs/system-prompts/tools/codex.md](docs/system-prompts/tools/codex.md)
 - Help us integrate! See guide for how to contribute.
 
 ### All Tools Use the Same Workflow
@@ -238,7 +238,8 @@ Regardless of tool, all development follows **AGENTS.md:**
 | [docs/workflow-mapping.md](docs/workflow-mapping.md) | How AGENTS.md maps to each tool |
 | [docs/prompt-patterns.md](docs/prompt-patterns.md) | Universal prompt structures |
 | [docs/file-naming-conventions.md](docs/file-naming-conventions.md) | Which file names matter |
-| [docs/tool-specific-guides/](docs/tool-specific-guides/) | Per-tool complete guides |
+| [docs/system-prompts/tools/](docs/system-prompts/tools/) | Generic tool workflow guides |
+| [docs/tool-specific-guides/](docs/tool-specific-guides/) | Project-specific tool integration |
 
 ### Quick Decision Tree
 

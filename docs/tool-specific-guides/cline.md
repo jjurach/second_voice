@@ -448,6 +448,6 @@ system_prompt = (
 ## Related Tools
 
 - **Claude Code** (`CLAUDE.md`) - Interactive development IDE
-- **Aider** (`docs/tool-specific-guides/aider.md`) - Collaborative coding
-- **Codex** (`docs/tool-specific-guides/codex.md`) - OpenAI code editor
+- **Aider** (`docs/system-prompts/tools/aider.md`) - Collaborative coding
+- **Codex** (`docs/system-prompts/tools/codex.md`) - OpenAI code editor
 - **Gemini** (`GEMINI.md`) - Google's agent integration
