@@ -79,31 +79,31 @@ The core workflow (Steps A-E, Unbreakable Rules) is **always present** and **nev
 
 | File | Purpose | References |
 |------|---------|-----------|
-| **CLAUDE.md** | Claude-specific instructions | → AGENTS.md |
-| **GEMINI.md** | Gemini-specific instructions | → AGENTS.md<br>→ docs/definition-of-done.md |
-| **AGENTS.md** | Core agent instructions (MANDATORY for all agents) | ↔ CLAUDE.md, GEMINI.md<br>→ docs/definition-of-done.md<br>→ docs/templates.md<br>→ docs/workflows.md<br>→ docs/architecture.md<br>→ docs/system-prompts/workflows/logs-first.md (conditional) |
+| **`CLAUDE.md`** | Claude-specific instructions | → `AGENTS.md` |
+| **`GEMINI.md`** | Gemini-specific instructions | → `AGENTS.md`<br>→ `docs/definition-of-done.md` |
+| **`AGENTS.md`** | Core agent instructions (MANDATORY for all agents) | ↔ `CLAUDE.md`, `GEMINI.md`<br>→ `docs/definition-of-done.md`<br>→ `docs/templates.md`<br>→ `docs/workflows.md`<br>→ `docs/architecture.md`<br>→ `docs/system-prompts/workflows/logs-first.md` (conditional) |
 
 ### Core Documentation Files
 
 | File | Purpose | References |
 |------|---------|-----------|
-| **docs/definition-of-done.md** | Quality standards for task completion | Referenced by AGENTS.md, GEMINI.md<br>→ docs/templates.md<br>→ docs/implementation-reference.md (if present) |
-| **docs/templates.md** | Templates for specs, plans, changes | Referenced by AGENTS.md<br>Referenced by docs/definition-of-done.md |
-| **docs/workflows.md** | User guide for workflow selection | Referenced by AGENTS.md<br>→ docs/system-prompts/workflows/logs-first.md<br>→ docs/system-prompts/workflows/README.md |
-| **docs/architecture.md** | System architecture and design | Referenced by AGENTS.md<br>→ docs/system-prompts/workflows/ (explains workflow layer) |
+| **`docs/definition-of-done.md`** | Quality standards for task completion | Referenced by `AGENTS.md`, `GEMINI.md`<br>→ `docs/templates.md`<br>→ `docs/implementation-reference.md` (if present) |
+| **`docs/templates.md`** | Templates for specs, plans, changes | Referenced by `AGENTS.md`<br>Referenced by `docs/definition-of-done.md` |
+| **`docs/workflows.md`** | User guide for workflow selection | Referenced by `AGENTS.md`<br>→ `docs/system-prompts/workflows/logs-first.md`<br>→ `docs/system-prompts/workflows/README.md` |
+| **`docs/architecture.md`** | System architecture and design | Referenced by `AGENTS.md`<br>→ `docs/system-prompts/workflows/` (explains workflow layer) |
 
 ### System Prompts Directory (Reusable, Language-Agnostic)
 
 | File | Purpose | References | Conditional? |
 |------|---------|-----------|-------------|
-| **bootstrap.py** | Injection tool for AGENTS.md | Reads from: workflows/, languages/, principles/, workflow/core.md | N/A |
-| **README.md** | System prompts overview | → workflows/README.md<br>→ workflows/logs-first.md<br>→ custom-template.md | No |
-| **workflows/logs-first.md** | Complete logs-first workflow | → docs/templates.md (references)<br>→ docs/definition-of-done.md (references)<br>→ docs/architecture.md (references) | ✓ YES - Only referenced when section enabled in AGENTS.md |
-| **workflows/custom-template.md** | Template for custom workflows | References bootstrap.py integration | ✓ YES - Conditional reference |
-| **workflows/README.md** | Workflows directory guide | → logs-first.md<br>→ custom-template.md | ✓ YES - Only if workflows enabled |
-| **workflow/core.md** | Core A-E workflow steps | → Always injected into AGENTS.md | No |
-| **principles/definition-of-done.md** | Universal DoD criteria | → Always injected into AGENTS.md | No |
-| **languages/python/definition-of-done.md** | Python-specific DoD | → Conditionally injected (if Python project) | ✓ YES |
+| **`bootstrap.py`** | Injection tool for `AGENTS.md` | Reads from: `workflows/`, `languages/`, `principles/`, `workflow/core.md` | N/A |
+| **`README.md`** | System prompts overview | → `workflows/README.md`<br>→ `workflows/logs-first.md`<br>→ `custom-template.md` | No |
+| **`workflows/logs-first.md`** | Complete logs-first workflow | → `docs/templates.md` (references)<br>→ `docs/definition-of-done.md` (references)<br>→ `docs/architecture.md` (references) | ✓ YES - Only referenced when section enabled in `AGENTS.md` |
+| **`workflows/custom-template.md`** | Template for custom workflows | References `bootstrap.py` integration | ✓ YES - Conditional reference |
+| **`workflows/README.md`** | Workflows directory guide | → `logs-first.md`<br>→ `custom-template.md` | ✓ YES - Only if workflows enabled |
+| **`workflow/core.md`** | Core A-E workflow steps | → Always injected into `AGENTS.md` | No |
+| **`principles/definition-of-done.md`** | Universal DoD criteria | → Always injected into `AGENTS.md` | No |
+| **`languages/python/definition-of-done.md`** | Python-specific DoD | → Conditionally injected (if Python project) | ✓ YES |
 
 ---
 

@@ -1,6 +1,8 @@
 # Tool-Specific Workflow Guides
 
-This directory contains generic, reusable workflow guides for integrating different AI development tools with the AGENTS.md workflow.
+This directory contains **generic, reusable, comprehensive workflow guides** for integrating different AI development tools with the `AGENTS.md` workflow.
+
+**Related:** Entry point files ([CLAUDE.md](../../../CLAUDE.md), [AIDER.md](../../../AIDER.md), [CLINE.md](../../../CLINE.md), [GEMINI.md](../../../GEMINI.md)) are minimal navigation hubs that redirect users to these comprehensive guides.
 
 ## Available Guides
 
@@ -38,6 +40,34 @@ These guides are **generic documentation** explaining how each tool integrates w
 - Integrated into system-prompts infrastructure
 - Used as reference material for developers
 
+## Entry Point → Guide Hierarchy
+
+**User Discovery Flow:**
+
+```
+1. User enters project with Tool X
+2. Finds entry point in project root (e.g., CLAUDE.md)
+3. Entry point provides 4 quick links
+4. User follows tool guide link
+5. Arrives at comprehensive guide (this directory)
+```
+
+**Entry Point Characteristics:**
+- **Anemic format** - 20 lines maximum
+- **Navigation only** - No detailed content
+- **Auto-generated** - Created by bootstrap.py templates
+- **Validated** - Checked by docscan.py
+
+**Tool Guide Characteristics (this directory):**
+- **Comprehensive** - 200-600+ lines
+- **Generic** - Reusable across projects
+- **Reference material** - Not mandatory instructions
+- **Canonical** - Single source of truth per tool
+
+**Relationship:** Entry points → Point to → Tool guides
+
+For details on managing entry points, see [Tool Entry Points Process](../processes/tool-entry-points.md) (if present).
+
 ## Project-Specific Tool Guides
 
 For guides specific to individual projects (e.g., how Cline integrates with second_voice), see the project's `docs/tool-specific-guides/` directory.
@@ -51,7 +81,7 @@ These guides are **reference material**, not mandatory loading for agents. Agent
 - Reference patterns and examples as needed
 - NOT treat them as imperative instructions to follow
 
-Mandatory tool instructions (how to use ExitPlanMode, basic workflow mapping) are located in AGENTS.md or tool-specific configuration files (CLAUDE.md, GEMINI.md, AIDER.md).
+Mandatory tool instructions (how to use ExitPlanMode, basic workflow mapping) are located in `AGENTS.md` or tool-specific configuration files (`CLAUDE.md`, `GEMINI.md`, `AIDER.md`).
 
 ## Conditional References
 

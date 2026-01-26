@@ -14,11 +14,25 @@ This directory contains the "ideal state" documentation for:
 ```
 docs/system-prompts/
 ├── bootstrap.py                 # Tool to inject/maintain sections in AGENTS.md
+├── docscan.py                   # Document integrity scanner
 ├── README.md                    # This file
 ├── principles/
 │   └── definition-of-done.md    # Universal DoD criteria
-├── workflow/
-│   └── core.md                  # Core A-E workflow + Unbreakable Rules
+├── processes/
+│   ├── README.md                # Processes directory guide
+│   ├── document-integrity-scan.md # Documentation verification process
+│   └── tool-entry-points.md     # Tool entry point architecture
+├── tools/
+│   ├── README.md                # Tools directory guide
+│   ├── aider.md                 # Aider specific guide
+│   ├── claude-code.md           # Claude Code specific guide
+│   ├── cline.md                 # Cline specific guide
+│   └── gemini.md                # Gemini specific guide
+├── workflows/                   # Workflow patterns (Core + Optional)
+│   ├── README.md                # Workflows directory guide
+│   ├── core.md                  # Core A-E workflow + Unbreakable Rules
+│   ├── logs-first.md            # Documented development workflow
+│   └── custom-template.md       # Template for creating custom workflows
 ├── patterns/
 │   └── prompt-patterns.md       # Prompt templates for consistent results
 ├── templates/
@@ -32,6 +46,35 @@ docs/system-prompts/
     └── python/
         └── definition-of-done.md # Python-specific DoD (pytest, venv, etc.)
 ```
+
+## Tool Entry Points
+
+The project uses "anemic" tool entry points in the root directory that redirect to comprehensive guides in `docs/system-prompts/tools/`.
+
+**Entry Point Files (Root):**
+- `AIDER.md` → `docs/system-prompts/tools/aider.md`
+- `CLAUDE.md` → `docs/system-prompts/tools/claude-code.md`
+- `CLINE.md` → `docs/system-prompts/tools/cline.md`
+- `GEMINI.md` → `docs/system-prompts/tools/gemini.md`
+
+**Management:**
+These files are managed by `bootstrap.py`:
+- **Validation:** `python3 docs/system-prompts/bootstrap.py --validate-tool-entries`
+- **Regeneration:** `python3 docs/system-prompts/bootstrap.py --regenerate-tool-entries --commit`
+
+See `docs/system-prompts/processes/tool-entry-points.md` for the complete architecture.
+
+## Processes
+
+The `docs/system-prompts/processes/` directory documents maintenance workflows:
+
+1.  **Document Integrity Scan** (`document-integrity-scan.md`)
+    - Describes how `docscan.py` validates the documentation graph.
+    - Ensures no broken links or orphaned files.
+
+2.  **Tool Entry Points** (`tool-entry-points.md`)
+    - Describes the "Anemic Entry Point" pattern.
+    - Explains how to add support for new AI tools.
 
 ## Core Concept
 

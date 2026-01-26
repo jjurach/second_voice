@@ -170,7 +170,11 @@ class DocumentScanner:
             with open(md_file, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            for match in link_pattern.finditer(content):
+            # Remove code blocks before scanning to avoid false positives in templates/examples
+            content_without_code = re.sub(r"```[\s\S]*?```", "", content)
+            content_without_code = re.sub(r"`[^`]+`", "", content_without_code)
+
+            for match in link_pattern.finditer(content_without_code):
                 link_text = match.group(1)
                 link_target = match.group(2)
 
@@ -179,34 +183,71 @@ class DocumentScanner:
                     continue
                 if any(entry in link_target for entry in ENTRY_POINTS):
                     continue
-                if "system-prompts" in link_target:
-                    continue
+                
+                # Check actual resolved path
+                try:
+                    # Handle relative paths
+                    if link_target.startswith("/"):
+                        # Absolute from project root (convention)
+                        target_path = self.project_root / link_target.lstrip("/")
+                    else:
+                        target_path = (md_file.parent / link_target).resolve()
+                    
+                    # Check if target is inside system-prompts
+                    # We use strict=False because target might not exist (that's a broken link check)
+                    try:
+                        target_path.relative_to(system_prompts_dir)
+                        # It is inside system-prompts, so it's safe
+                        continue
+                    except ValueError:
+                        # It is outside system-prompts
+                        pass
+                except Exception:
+                    # If path resolution fails, fall back to string check or assume unsafe
+                    if "system-prompts" in link_target:
+                        continue
+
                 if not link_target.endswith(".md"):
                     continue
 
-                # Skip relative references within same directory (e.g., ./filename.md)
-                if link_target.startswith("./"):
-                    continue
+                # Check if marked as conditional
+                # We need to find the match in the ORIGINAL content to check surrounding text
+                # This is tricky because we stripped code. 
+                # Alternative: Check if the link exists in the stripped content (it does),
+                # then find its location in the stripped content.
+                # But 'content' has code, 'content_without_code' doesn't. Indices don't match.
+                # Simplified approach: If found in content_without_code, we search for the target string in original content
+                # and check markers around it. This might have false positives if same link appears twice (once in code, once out).
+                # Better: iterate matches in content_without_code, and use a context window from there?
+                # No, content_without_code shrinks.
+                
+                # reliable context check:
+                # We know the link is problematic. We need to check if it's conditional.
+                # We search for the specific link text in the original content (outside code blocks logic is implied by previous step)
+                # We'll just check if *any* occurrence of this link in the file is marked conditional?
+                # Or simply: if the link is found in the "clean" content, we flag it.
+                # We just need to check if "conditional markers" are near the link in the clean content.
+                
+                context_start = max(0, match.start() - 200)
+                context_end = min(len(content_without_code), match.end() + 200)
+                context = content_without_code[context_start:context_end]
+                
+                is_conditional = any(
+                    marker.lower() in context.lower()
+                    for marker in CONDITIONAL_MARKERS
+                )
 
-                # Check if it's a back-reference (outside system-prompts)
-                if "system-prompts" not in link_target:
-                    # Check if marked as conditional
-                    is_conditional = any(
-                        marker.lower() in content[max(0, match.start() - 200) : match.end() + 200].lower()
-                        for marker in CONDITIONAL_MARKERS
+                if not is_conditional:
+                    self.violations.append(
+                        {
+                            "file": relative_path,
+                            "type": "back-reference",
+                            "severity": "warning",
+                            "message": f"Back-reference to project file without conditional marking: {link_target}",
+                        }
                     )
-
-                    if not is_conditional:
-                        self.violations.append(
-                            {
-                                "file": relative_path,
-                                "type": "back-reference",
-                                "severity": "warning",
-                                "message": f"Back-reference to project file without conditional marking: {link_target}",
-                            }
-                        )
-                        if self.options.verbose:
-                            print(f"  ⚠️  {relative_path}: {link_target} (not marked conditional)")
+                    if self.options.verbose:
+                        print(f"  ⚠️  {relative_path}: {link_target} (not marked conditional)")
 
     def _check_reference_formatting(self):
         """Check Layer 3: All file references use hyperlinks or backticks (not plain text)."""

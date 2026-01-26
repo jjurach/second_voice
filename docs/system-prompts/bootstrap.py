@@ -132,7 +132,7 @@ class Bootstrap:
 
         # Map section names to file paths
         section_map = {
-            "CORE-WORKFLOW": "workflow/core.md",
+            "CORE-WORKFLOW": "workflows/core.md",
             "PRINCIPLES": "principles/definition-of-done.md",
             "PYTHON-DOD": f"languages/python/definition-of-done.md",
             "PROMPT-PATTERNS": "patterns/prompt-patterns.md",
@@ -310,8 +310,9 @@ class Bootstrap:
         changed = False
 
         # Sections to sync
+        # Sections to sync
         sections = [
-            ("CORE-WORKFLOW", "workflow/core.md"),
+            ("CORE-WORKFLOW", "workflows/core.md"),
             ("PRINCIPLES", "principles/definition-of-done.md"),
         ]
 
@@ -390,8 +391,9 @@ class Bootstrap:
         print(f"AGENTS.md path: {self.agents_file}")
         print(f"System prompts dir: {self.system_prompts_dir}")
 
+        # Sections to sync
         sections = [
-            ("CORE-WORKFLOW", "workflow/core.md"),
+            ("CORE-WORKFLOW", "workflows/core.md"),
             ("PRINCIPLES", "principles/definition-of-done.md"),
         ]
 
@@ -644,6 +646,12 @@ Examples:
 
   # Disable logs-first workflow
   python3 bootstrap.py --disable-logs-first --commit
+
+  # Validate tool entry point files
+  python3 bootstrap.py --validate-tool-entries
+
+  # Regenerate tool entry point files
+  python3 bootstrap.py --regenerate-tool-entries --commit
 
   # Dry run (default) - shows what would happen
   python3 bootstrap.py
