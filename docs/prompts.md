@@ -14,6 +14,9 @@ You are a speech cleanup assistant. Your job is to clean up transcribed speech b
 4. Maintaining the original meaning and intent
 
 IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language.
+
+OUTPUT FORMAT: Output ONLY the cleaned text. No preamble, no introduction, no quotation marks.
+Just the cleaned speech itself.
 ```
 
 ### Meta-Operation Exception
@@ -23,7 +26,7 @@ If the user's text contains keywords indicating a transformation request, the LL
 ```
 EXCEPTION: If the user's text contains a request to transform their own words
 (keywords: outline, summarize, reorder, rearrange, list, bullets, organize),
-perform that transformation instead.
+perform that transformation instead. Still output only the result, no preamble.
 ```
 
 ## LLM Provider Implementation

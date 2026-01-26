@@ -209,7 +209,9 @@ class AIProcessor:
             "2. Consolidating similar ideas into coherent statements\n"
             "3. Fixing grammar and improving sentence structure\n"
             "4. Maintaining the original meaning and intent\n\n"
-            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language."
+            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language.\n\n"
+            "OUTPUT FORMAT: Output ONLY the cleaned text. No preamble, no introduction, no quotation marks. "
+            "Just the cleaned speech itself."
         )
 
         # Check for meta-operations (outline, summarize, etc.)
@@ -217,7 +219,7 @@ class AIProcessor:
             system_prompt += (
                 "\n\nEXCEPTION: If the user's text contains a request to transform their own words "
                 "(keywords: outline, summarize, reorder, rearrange, list, bullets, organize), "
-                "perform that transformation instead."
+                "perform that transformation instead. Still output only the result, no preamble."
             )
 
         # Build the input with system prompt prepended
@@ -288,15 +290,17 @@ class AIProcessor:
             "2. Consolidating similar ideas into coherent statements\n"
             "3. Fixing grammar and improving sentence structure\n"
             "4. Maintaining the original meaning and intent\n\n"
-            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language.\n"
+            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language.\n\n"
+            "OUTPUT FORMAT: Output ONLY the cleaned text. No preamble, no introduction, no quotation marks. "
+            "Just the cleaned speech itself."
         )
 
         # Check for meta-operations (outline, summarize, etc.)
         if self._detect_meta_operation(text):
             system_prompt += (
-                "EXCEPTION: If the user's text contains a request to transform their own words "
+                "\nEXCEPTION: If the user's text contains a request to transform their own words "
                 "(keywords: outline, summarize, reorder, rearrange, list, bullets, organize), "
-                "perform that transformation instead.\n"
+                "perform that transformation instead. Still output only the result, no preamble.\n"
             )
 
         # Build the full prompt
@@ -358,7 +362,9 @@ class AIProcessor:
             "2. Consolidating similar ideas into coherent statements\n"
             "3. Fixing grammar and improving sentence structure\n"
             "4. Maintaining the original meaning and intent\n\n"
-            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language."
+            "IMPORTANT: Do NOT answer questions or provide new information. Only clean up the language.\n\n"
+            "OUTPUT FORMAT: Output ONLY the cleaned text. No preamble, no introduction, no quotation marks. "
+            "Just the cleaned speech itself."
         )
 
         # Check for meta-operations (outline, summarize, etc.)
@@ -366,7 +372,7 @@ class AIProcessor:
             system_prompt += (
                 "\n\nEXCEPTION: If the user's text contains a request to transform their own words "
                 "(keywords: outline, summarize, reorder, rearrange, list, bullets, organize), "
-                "perform that transformation instead."
+                "perform that transformation instead. Still output only the result, no preamble."
             )
 
         try:
