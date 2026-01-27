@@ -51,7 +51,8 @@ class TestCliArgumentParsing:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    no_edit=False
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -73,7 +74,8 @@ class TestCliArgumentParsing:
                     keep_files=True,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    no_edit=False
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -95,7 +97,8 @@ class TestCliArgumentParsing:
                     keep_files=False,
                     file=None,
                     debug=True,
-                    verbose=False
+                    verbose=False,
+                    no_edit=False
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -117,7 +120,8 @@ class TestCliArgumentParsing:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=True
+                    verbose=True,
+                    no_edit=False
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -238,7 +242,8 @@ class TestCliFileInputHandling:
                     keep_files=False,
                     file=str(audio_file),
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    no_edit=False
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:

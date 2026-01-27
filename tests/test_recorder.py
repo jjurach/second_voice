@@ -145,7 +145,7 @@ class TestTemporaryFileHandling:
 
         assert path.startswith(str(temp_dir))
         assert path.endswith('.wav')
-        assert 'tmp-audio-' in path
+        assert 'recording-' in path  # New timestamp-based naming
 
     def test_temp_path_includes_timestamp(self, temp_dir):
         """Temp file path includes timestamp for uniqueness."""

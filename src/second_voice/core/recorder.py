@@ -4,6 +4,13 @@ import soundfile as sf
 import numpy as np
 import time
 import threading
+import logging
+from pathlib import Path
+
+from ..audio.aac_handler import AACHandler
+from ..utils.timestamp import create_recording_filename, create_whisper_filename, extract_timestamp_from_filename
+
+logger = logging.getLogger(__name__)
 
 class AudioRecorder:
     """
@@ -63,13 +70,12 @@ class AudioRecorder:
     def _create_temp_audio_path(self, extension='wav'):
 
         """
-        Create a unique temporary audio file path.
+        Create a unique temporary audio file path with timestamp.
 
         :param extension: File extension (default: wav)
         :return: Absolute path to temporary audio file
         """
-        timestamp = int(time.time())
-        return os.path.join(self.temp_dir, f'tmp-audio-{timestamp}.{extension}')
+        return create_recording_filename(self.temp_dir, format=extension)
 
     def start_recording(self, duration=None):
         """
@@ -141,6 +147,70 @@ class AudioRecorder:
         sf.write(temp_path, audio_data, self.sample_rate)
 
         return temp_path
+
+    def read_audio_with_aac_fallback(self, file_path: str):
+        """Read audio file, converting AAC if needed.
+
+        :param file_path: Path to audio file
+        :return: Tuple[audio_data, sample_rate]
+        :raises RuntimeError: If file cannot be read
+        """
+        file_path = os.path.abspath(file_path)
+
+        try:
+            # Try soundfile first (faster, native formats)
+            audio_data, sample_rate = sf.read(file_path)
+            logger.info(f"Successfully read audio file: {file_path}")
+            return audio_data, sample_rate
+        except Exception as soundfile_error:
+            # Check if it's AAC
+            if AACHandler.is_aac_file(file_path):
+                logger.info("soundfile couldn't read AAC, attempting conversion...")
+                try:
+                    wav_path = AACHandler.convert_to_wav(file_path)
+                    audio_data, sample_rate = sf.read(wav_path)
+                    # Clean up temp WAV
+                    try:
+                        os.unlink(wav_path)
+                    except Exception as e:
+                        logger.warning(f"Could not clean up temp WAV: {e}")
+                    logger.info(f"Successfully converted and read AAC file: {file_path}")
+                    return audio_data, sample_rate
+                except Exception as aac_error:
+                    raise RuntimeError(
+                        f"Failed to read audio file: {soundfile_error}\n"
+                        f"AAC conversion also failed: {aac_error}\n"
+                        f"Ensure FFmpeg is installed: apt-get install ffmpeg"
+                    )
+            else:
+                raise RuntimeError(f"Failed to read audio file: {soundfile_error}")
+
+    def process_external_file(self, file_path: str):
+        """Process external audio file, returns paths for tracking.
+
+        :param file_path: Path to input audio file
+        :return: Tuple[audio_data_path, timestamp, source_format]
+        :raises RuntimeError: If file cannot be read
+        """
+        from ..utils.timestamp import get_timestamp
+
+        input_format = Path(file_path).suffix.lstrip('.').lower()
+        timestamp = get_timestamp()
+
+        # If input is AAC, convert it
+        if AACHandler.is_aac_file(file_path):
+            wav_path = create_recording_filename(self.temp_dir, format="wav")
+            audio_data, sr = self.read_audio_with_aac_fallback(file_path)
+            sf.write(wav_path, audio_data, sr)
+            logger.info(f"Processed AAC file: {file_path} -> {wav_path}")
+            return wav_path, timestamp, input_format
+        else:
+            # Copy/save existing file with timestamp
+            wav_path = create_recording_filename(self.temp_dir, format="wav")
+            audio_data, sr = self.read_audio_with_aac_fallback(file_path)
+            sf.write(wav_path, audio_data, sr)
+            logger.info(f"Processed audio file: {file_path} -> {wav_path}")
+            return wav_path, timestamp, input_format
 
     def get_audio_devices(self):
         """

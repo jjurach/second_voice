@@ -4,6 +4,10 @@ import requests
 import logging
 from typing import Optional, Dict, Any
 from urllib.parse import urljoin
+from pathlib import Path
+
+from ..utils.headers import Header, generate_title, infer_project_name
+from ..utils.timestamp import create_whisper_filename
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -45,22 +49,105 @@ class AIProcessor:
         text_lower = text.lower()
         return any(keyword in text_lower for keyword in keywords)
 
-    def transcribe(self, audio_path: str) -> Optional[str]:
+    def transcribe(self, audio_path: str, recording_timestamp: Optional[str] = None) -> Optional[str]:
         """
         Transcribe audio using configured STT provider.
 
         :param audio_path: Path to the audio file
+        :param recording_timestamp: Optional timestamp from recording for matching whisper file
         :return: Transcribed text or None if transcription fails
         """
         if not os.path.exists(audio_path):
             raise FileNotFoundError(f"Audio file not found: {audio_path}")
 
         if self.stt_provider == 'groq':
-            return self._transcribe_groq(audio_path)
+            transcript = self._transcribe_groq(audio_path)
         elif self.stt_provider == 'local_whisper':
-            return self._transcribe_local_whisper(audio_path)
+            transcript = self._transcribe_local_whisper(audio_path)
         else:
             raise ValueError(f"Unsupported STT provider: {self.stt_provider}")
+
+        # Save whisper output for recovery
+        if transcript and recording_timestamp:
+            self._save_whisper_output(transcript, recording_timestamp)
+
+        return transcript
+
+    def _save_whisper_output(self, transcript: str, recording_timestamp: str):
+        """Save whisper output to file for recovery.
+
+        :param transcript: Transcribed text
+        :param recording_timestamp: Timestamp from recording for matching
+        """
+        temp_dir = self.config.get('temp_dir', './tmp')
+        whisper_path = create_whisper_filename(temp_dir, recording_timestamp)
+        try:
+            with open(whisper_path, 'w', encoding='utf-8') as f:
+                f.write(transcript)
+            logger.info(f"Whisper output saved: {whisper_path}")
+        except Exception as e:
+            logger.warning(f"Could not save whisper output: {e}")
+
+    def process_with_headers_and_fallback(self, transcript: str, recording_path: Optional[str] = None,
+                                          context: Optional[str] = None) -> str:
+        """Process transcript with header injection and fallback on LLM failure.
+
+        :param transcript: Raw whisper output
+        :param recording_path: Path to recording (for source header)
+        :param context: Session context
+        :return: LLM output with headers or fallback transcript
+        """
+        # Parse existing headers if present
+        existing_header = Header.from_string(transcript)
+
+        if not existing_header:
+            # Build new header
+            source = Path(recording_path).name if recording_path else "unknown"
+            title = generate_title(transcript)
+            project = infer_project_name(transcript)
+
+            header = Header(
+                source=source,
+                status="Awaiting transformation",
+                title=title,
+                project=project
+            )
+        else:
+            header = existing_header
+
+        # Prepend header to input
+        header_text = header.to_string(include_title=False, include_project=False)
+        augmented_transcript = f"{header_text}\n\n{transcript}"
+
+        try:
+            # Process with LLM
+            result = self.process_text(augmented_transcript, context)
+
+            # Ensure output has headers
+            output_header = Header.from_string(result)
+            if not output_header:
+                # Inject headers into output
+                result_header = Header(
+                    source=f"second-voice from {header.source}",
+                    status="Awaiting ingest",
+                    title=generate_title(result),
+                    project=infer_project_name(result)
+                )
+                result = f"{result_header.to_string(True, True)}\n\n{result}"
+
+            return result
+        except Exception as e:
+            logger.error(f"LLM processing failed: {e}")
+            logger.info("Falling back to raw whisper output")
+
+            # Return raw transcript as fallback
+            fallback_msg = (
+                "⚠️ **Warning**: LLM processing failed, returning raw transcript.\n\n"
+                f"Error: {str(e)}\n\n"
+                f"---\n\n"
+                f"{transcript}"
+            )
+            return fallback_msg
 
     def _transcribe_local_whisper(self, audio_path: str) -> Optional[str]:
         """

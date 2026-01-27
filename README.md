@@ -74,8 +74,15 @@ python3 src/cli/run.py --file samples/test.wav --verbose
 
 **Supported Audio Formats:**
 - WAV, FLAC, OGG, MP3 (common formats)
+- **AAC, M4A** (via FFmpeg conversion)
 - AIFF, AU, CAF (legacy formats)
 - And 25+ additional formats supported by `soundfile`
+
+**AAC Support Requirements:**
+To process AAC files, install FFmpeg:
+- Linux: `apt-get install ffmpeg`
+- macOS: `brew install ffmpeg`
+- Windows: `choco install ffmpeg` or download from ffmpeg.org
 
 See [docs/test-guide.md](docs/test-guide.md) for comprehensive testing documentation.
 
@@ -96,6 +103,26 @@ python3 src/cli/run.py --keep-files
 ```
 
 Temporary files will be preserved in the `tmp/` and `tmp/mode_tmp/` directories.
+
+### Whisper Output Recovery
+
+On failure or with the `--keep-files` flag, Second Voice preserves:
+- **Recording files**: `tmp/recording-YYYY-MM-DD_HH-MM-SS.{format}`
+- **Whisper transcripts**: `tmp/whisper-YYYY-MM-DD_HH-MM-SS.txt`
+
+This allows you to:
+1. Review raw transcriptions if LLM processing fails
+2. Recover transcripts from crashes
+3. Audit the processing pipeline
+
+**Example recovery:**
+```bash
+# Keep files with --keep-files flag
+python3 src/cli/run.py --file recording.aac --keep-files
+
+# Later, recover the whisper output
+python3 scripts/recover_whisper_output.py --recover
+```
 
 ## Configuration
 

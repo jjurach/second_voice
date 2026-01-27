@@ -15,7 +15,7 @@ from second_voice.modes import detect_mode, get_mode
 
 def main():
     parser = argparse.ArgumentParser(description="Second Voice - AI Assistant")
-    parser.add_argument('--mode', choices=['auto', 'gui', 'tui', 'menu'], default='auto', help="Interaction mode")
+    parser.add_argument('--mode', choices=['auto', 'gui', 'tui', 'menu'], default='menu', help="Interaction mode (default: menu)")
     parser.add_argument('--keep-files', action='store_true', help="Keep temporary files after execution")
     parser.add_argument('--file', type=str, help="Input audio file to process (bypasses recording)")
     parser.add_argument('--debug', action='store_true', help="Enable debug logging")
@@ -46,12 +46,31 @@ def main():
             print(f"Error: Input file not readable: {input_file_path}")
             sys.exit(1)
 
-        # Validate file format (try to open with soundfile)
+        # Validate file format (handle both soundfile and AAC formats)
         try:
+            from second_voice.audio.aac_handler import AACHandler
             import soundfile as sf
-            info = sf.info(input_file_path)
-            if args.verbose:
-                print(f"Detected audio: {info.samplerate}Hz, {info.channels}ch, {info.duration:.1f}s")
+
+            # Check if it's an AAC file
+            if AACHandler.is_aac_file(input_file_path):
+                # Validate AAC file
+                valid, error_msg = AACHandler.validate_aac_file(input_file_path)
+                if not valid:
+                    print(f"Error: {error_msg}")
+                    sys.exit(1)
+
+                # Get AAC file info if verbose
+                if args.verbose:
+                    duration = AACHandler.get_duration(input_file_path)
+                    if duration:
+                        print(f"Detected AAC audio: {duration:.1f}s")
+                    else:
+                        print(f"Detected AAC audio file")
+            else:
+                # Use soundfile for other formats
+                info = sf.info(input_file_path)
+                if args.verbose:
+                    print(f"Detected audio: {info.samplerate}Hz, {info.channels}ch, {info.duration:.1f}s")
         except Exception as e:
             print(f"Error: Invalid audio file: {e}")
             sys.exit(1)

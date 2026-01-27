@@ -6,3 +6,5 @@ rich
 pytest
 pytest-cov
 requests-mock
+mutagen>=1.46
+pydub>=0.25

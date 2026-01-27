@@ -83,6 +83,12 @@ class TestLocalWhisperTranscription:
 
     def test_transcribe_local_whisper_success(self, mock_audio_file, requests_mock):
         """Successfully transcribe audio with local Whisper."""
+        # Mock health check endpoint
+        requests_mock.get(
+            'http://localhost:9090/health',
+            json={'status': 'ok'}
+        )
+        # Mock transcription endpoint
         requests_mock.post(
             'http://localhost:9090/v1/audio/transcriptions',
             json={'text': 'Hello, this is a test'}
@@ -101,6 +107,12 @@ class TestLocalWhisperTranscription:
 
     def test_transcribe_local_whisper_custom_url(self, mock_audio_file, requests_mock):
         """Use custom Whisper service URL."""
+        # Mock health check endpoint (GET to same URL since replace won't match)
+        requests_mock.get(
+            'http://custom:8000/transcribe',
+            json={'status': 'ok'}
+        )
+        # Mock transcription endpoint
         requests_mock.post(
             'http://custom:8000/transcribe',
             json={'text': 'Custom service'}
@@ -134,6 +146,12 @@ class TestLocalWhisperTranscription:
 
     def test_transcribe_local_whisper_http_error(self, mock_audio_file, requests_mock):
         """Handle HTTP error gracefully."""
+        # Mock health check endpoint
+        requests_mock.get(
+            'http://localhost:9090/health',
+            json={'status': 'ok'}
+        )
+        # Mock transcription endpoint with error
         requests_mock.post(
             'http://localhost:9090/v1/audio/transcriptions',
             status_code=500,
@@ -270,6 +288,12 @@ class TestTranscriptionDispatch:
 
     def test_transcribe_dispatches_to_local_whisper(self, mock_audio_file, requests_mock):
         """Dispatch to local Whisper provider when configured."""
+        # Mock health check endpoint
+        requests_mock.get(
+            'http://localhost:9090/health',
+            json={'status': 'ok'}
+        )
+        # Mock transcription endpoint
         requests_mock.post(
             'http://localhost:9090/v1/audio/transcriptions',
             json={'text': 'Whisper result'}
