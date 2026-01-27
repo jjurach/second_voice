@@ -50,6 +50,29 @@ ENTRY_POINTS = {
     "GEMINI.md",
 }
 
+# Directories to exclude from plain-text reference checks (transient/working documents)
+TRANSIENT_DIRS = {
+    "dev_notes",
+    "tmp",
+    ".git",
+    "node_modules",
+    "venv",
+    "__pycache__",
+}
+
+# Allowlisted back-references (intentional project integration links)
+ALLOWED_BACK_REFERENCES = {
+    "docs/system-prompts/README.md": {
+        "../definition-of-done.md",
+        "../workflows.md",
+        "../architecture.md",
+        "../implementation-reference.md",
+    }
+}
+
+# Entry file line count threshold (relaxed from 20 to account for enhanced templates)
+ENTRY_FILE_MAX_LINES = 40
+
 
 class DocumentScanner:
     """Scan documentation for integrity issues."""
@@ -143,6 +166,19 @@ class DocumentScanner:
 
                 # Check if target exists
                 if not target_file.exists():
+                    # Check if this link is marked as conditional (optional)
+                    context_start = max(0, match.start() - 100)
+                    context_end = min(len(content_without_code), match.end() + 100)
+                    context = content_without_code[context_start:context_end]
+
+                    is_conditional = any(
+                        marker.lower() in context.lower()
+                        for marker in CONDITIONAL_MARKERS
+                    )
+
+                    # Skip if marked as conditional/optional
+                    if is_conditional:
+                        continue
                     self.violations.append(
                         {
                             "file": relative_path,
@@ -210,9 +246,14 @@ class DocumentScanner:
                 if not link_target.endswith(".md"):
                     continue
 
+                # Check if this is an allowlisted back-reference (intentional project integration)
+                if relative_path in ALLOWED_BACK_REFERENCES:
+                    if link_target in ALLOWED_BACK_REFERENCES[relative_path]:
+                        continue
+
                 # Check if marked as conditional
                 # We need to find the match in the ORIGINAL content to check surrounding text
-                # This is tricky because we stripped code. 
+                # This is tricky because we stripped code.
                 # Alternative: Check if the link exists in the stripped content (it does),
                 # then find its location in the stripped content.
                 # But 'content' has code, 'content_without_code' doesn't. Indices don't match.
@@ -220,18 +261,18 @@ class DocumentScanner:
                 # and check markers around it. This might have false positives if same link appears twice (once in code, once out).
                 # Better: iterate matches in content_without_code, and use a context window from there?
                 # No, content_without_code shrinks.
-                
+
                 # reliable context check:
                 # We know the link is problematic. We need to check if it's conditional.
                 # We search for the specific link text in the original content (outside code blocks logic is implied by previous step)
                 # We'll just check if *any* occurrence of this link in the file is marked conditional?
                 # Or simply: if the link is found in the "clean" content, we flag it.
                 # We just need to check if "conditional markers" are near the link in the clean content.
-                
+
                 context_start = max(0, match.start() - 200)
                 context_end = min(len(content_without_code), match.end() + 200)
                 context = content_without_code[context_start:context_end]
-                
+
                 is_conditional = any(
                     marker.lower() in context.lower()
                     for marker in CONDITIONAL_MARKERS
@@ -270,6 +311,11 @@ class DocumentScanner:
                 continue
 
             relative_path = str(md_file.relative_to(self.project_root))
+
+            # Skip transient directories (working documents, not canonical)
+            if any(transient in relative_path for transient in TRANSIENT_DIRS):
+                continue
+
             with open(md_file, "r", encoding="utf-8") as f:
                 content = f.read()
 
@@ -371,14 +417,14 @@ class DocumentScanner:
             relative_path = str(entry_path.relative_to(self.project_root))
             line_count = len(content.strip().split("\n"))
 
-            # Check line count (should be anemic: ≤20 lines)
-            if line_count > 20:
+            # Check line count (should be anemic: ≤40 lines, relaxed from 20)
+            if line_count > ENTRY_FILE_MAX_LINES:
                 self.violations.append(
                     {
                         "file": relative_path,
                         "type": "tool-entry-bloated",
                         "severity": "warning",
-                        "message": f"Entry file is {line_count} lines (should be ≤20 for anemic format)",
+                        "message": f"Entry file is {line_count} lines (should be ≤{ENTRY_FILE_MAX_LINES} for anemic format)",
                     }
                 )
 
