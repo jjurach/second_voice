@@ -48,10 +48,83 @@ Second Voice - AI Assistant
 optional arguments:
   -h, --help            show this help message and exit
   --mode {auto,gui,tui,menu}
-                        Interaction mode (default: auto)
+                        Interaction mode (default: menu)
   --keep-files          Keep temporary files (recordings, transcripts) after execution
-  --file FILE           Process an existing .wav file instead of recording from microphone
+  --file FILE           Input audio file to process (bypasses recording)
+  --edit                Open editor after processing (default: no)
+  --editor-command CMD  Specify custom editor command (e.g., 'code --wait', 'emacs')
 ```
+
+### Pipeline Modes
+
+For automation and integration with other tools, use pipeline modes to execute isolated workflow stages:
+
+#### Record-Only Mode
+Record audio and exit immediately:
+
+```bash
+# Record to default temp file
+python3 src/cli/run.py --record-only
+
+# Record to specific file
+python3 src/cli/run.py --record-only --audio-file recording.wav
+```
+
+#### Transcribe-Only Mode
+Transcribe existing audio without editing or translation:
+
+```bash
+# Transcribe audio to temp file
+python3 src/cli/run.py --transcribe-only --audio-file recording.wav
+
+# Transcribe to specific file
+python3 src/cli/run.py --transcribe-only --audio-file recording.wav --text-file transcript.txt
+```
+
+#### Translate-Only Mode
+Process/translate existing text without recording or transcription:
+
+```bash
+# Process text to temp file
+python3 src/cli/run.py --translate-only --text-file transcript.txt
+
+# Process to specific file
+python3 src/cli/run.py --translate-only --text-file transcript.txt --output-file final.md
+```
+
+#### Full Pipeline Example
+
+Chain pipeline modes for complete workflow:
+
+```bash
+# Step 1: Record audio
+python3 src/cli/run.py --record-only --audio-file recording.wav
+
+# Step 2: Transcribe audio
+python3 src/cli/run.py --transcribe-only --audio-file recording.wav --text-file transcript.txt
+
+# Step 3: Process/translate text
+python3 src/cli/run.py --translate-only --text-file transcript.txt --output-file final.md
+```
+
+### Editor Behavior
+
+**Default:** No editor is invoked by default. To enable editor:
+
+```bash
+# Open editor after processing (uses $EDITOR env var or 'nano' by default)
+python3 src/cli/run.py --edit
+
+# Specify custom editor
+python3 src/cli/run.py --edit --editor-command "code --wait"
+python3 src/cli/run.py --edit --editor-command "emacs"
+```
+
+**Editor Resolution:** The following command sources are checked in order:
+1. `--editor-command` flag from CLI
+2. `editor_command` setting in config file
+3. `$EDITOR` environment variable
+4. System default (`nano`)
 
 ## Testing
 

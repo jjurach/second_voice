@@ -1,6 +1,8 @@
 import argparse
 import sys
 import os
+import subprocess
+from pathlib import Path
 
 # Ensure src directory is in python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,30 +15,299 @@ from second_voice.core.recorder import AudioRecorder
 from second_voice.core.processor import AIProcessor
 from second_voice.modes import detect_mode, get_mode
 
+
+# Phase 2: Validation Helper Functions
+
+def validate_pipeline_mode_args(args):
+    """Validate pipeline mode arguments and their dependencies."""
+    # Only validate if we have actual pipeline mode attributes (not None or mock objects)
+    if not hasattr(args, 'transcribe_only'):
+        return
+
+    if getattr(args, 'transcribe_only', False) and not getattr(args, 'audio_file', None):
+        print("Error: --transcribe-only requires --audio-file")
+        print("\nUsage: second-voice --transcribe-only --audio-file <path> [--text-file <path>]")
+        sys.exit(3)
+
+    if getattr(args, 'translate_only', False) and not getattr(args, 'text_file', None):
+        print("Error: --translate-only requires --text-file")
+        print("\nUsage: second-voice --translate-only --text-file <path> [--output-file <path>]")
+        sys.exit(3)
+
+
+def validate_output_file(file_path, operation_name):
+    """Validate output file doesn't already exist."""
+    if os.path.exists(file_path):
+        print(f"Error: Output file already exists: {file_path}")
+        print(f"\nCannot overwrite existing file in {operation_name} mode.")
+        print(f"\nSuggestion: Use a different filename or remove the existing file first.")
+        sys.exit(2)
+
+
+def resolve_file_path(file_path):
+    """Resolve and validate file path."""
+    if not file_path:
+        return None
+
+    # Resolve to absolute path
+    abs_path = os.path.abspath(file_path)
+
+    # Validate parent directory exists
+    parent_dir = os.path.dirname(abs_path)
+    if parent_dir and not os.path.exists(parent_dir):
+        print(f"Error: Parent directory does not exist: {parent_dir}")
+        sys.exit(1)
+
+    return abs_path
+
+
+def invoke_editor(file_path, config, args):
+    """Invoke editor on specified file."""
+    # Determine editor command using resolution chain: CLI → Config → $EDITOR → default
+    editor_cmd = None
+
+    if args.editor_command:
+        editor_cmd = args.editor_command
+    elif config.get('editor_command'):
+        editor_cmd = config.get('editor_command')
+    elif 'EDITOR' in os.environ:
+        editor_cmd = os.environ['EDITOR']
+    else:
+        # System default
+        editor_cmd = 'nano'
+
+    # Construct full command
+    full_cmd = f'{editor_cmd} "{file_path}"'
+
+    # Execute
+    try:
+        subprocess.run(full_cmd, shell=True, check=False)
+    except Exception as e:
+        print(f"Warning: Error invoking editor: {e}")
+
+
+# Phase 3: Pipeline Mode Implementation Functions
+
+def run_record_only(config, args, recorder):
+    """Execute record-only pipeline mode."""
+    # Determine output path
+    if args.audio_file:
+        output_path = args.audio_file
+    else:
+        # Generate temp file
+        from second_voice.utils.timestamp import create_recording_filename
+        temp_dir = config.get('temp_dir', './tmp')
+        output_path = create_recording_filename(temp_dir)
+
+    # Record
+    print(f"Recording to: {output_path}")
+    try:
+        recorder.record(output_path)
+        print(f"Recorded: {output_path}")
+        return 0
+    except Exception as e:
+        print(f"Error: Recording failed: {e}")
+        return 1
+
+
+def run_transcribe_only(config, args, processor):
+    """Execute transcribe-only pipeline mode."""
+    # Input file already validated in Phase 2
+    audio_path = args.audio_file
+
+    # Determine output path
+    if args.text_file:
+        output_path = args.text_file
+    else:
+        # Generate temp file
+        from second_voice.utils.timestamp import create_whisper_filename, get_timestamp
+        temp_dir = config.get('temp_dir', './tmp')
+        timestamp = get_timestamp()
+        output_path = create_whisper_filename(temp_dir, timestamp)
+
+    # Transcribe
+    print(f"Transcribing: {audio_path}")
+    try:
+        transcript = processor.transcribe(audio_path)
+
+        if not transcript:
+            print("Error: Transcription failed")
+            return 1
+
+        # Save transcript
+        os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(transcript)
+
+        print(f"Transcribed: {output_path}")
+        return 0
+    except Exception as e:
+        print(f"Error: Transcription failed: {e}")
+        return 1
+
+
+def run_translate_only(config, args, processor):
+    """Execute translate-only pipeline mode."""
+    # Input file already validated in Phase 2
+    text_path = args.text_file
+
+    # Read input text
+    try:
+        with open(text_path, 'r', encoding='utf-8') as f:
+            transcript = f.read()
+    except Exception as e:
+        print(f"Error reading text file: {e}")
+        return 1
+
+    # Determine output path
+    if args.output_file:
+        output_path = args.output_file
+    else:
+        # Generate temp file with output suffix
+        from second_voice.utils.timestamp import get_timestamp
+        temp_dir = config.get('temp_dir', './tmp')
+        timestamp = get_timestamp()
+        output_path = os.path.join(temp_dir, f"output-{timestamp}.md")
+
+    # Process/translate
+    print(f"Processing: {text_path}")
+    try:
+        result = processor.process_with_headers_and_fallback(transcript, context=text_path)
+
+        if not result:
+            print("Error: Translation/processing failed")
+            return 1
+
+        # Save result
+        os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(result)
+
+        print(f"Processed: {output_path}")
+        return 0
+    except Exception as e:
+        print(f"Error: Translation/processing failed: {e}")
+        return 1
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Second Voice - AI Assistant")
-    parser.add_argument('--mode', choices=['auto', 'gui', 'tui', 'menu'], default='menu', help="Interaction mode (default: menu)")
-    parser.add_argument('--keep-files', action='store_true', help="Keep temporary files after execution")
-    parser.add_argument('--file', type=str, help="Input audio file to process (bypasses recording)")
-    parser.add_argument('--debug', action='store_true', help="Enable debug logging")
-    parser.add_argument('--verbose', action='store_true', help="Enable verbose output")
-    parser.add_argument('--no-edit', action='store_true', help="Skip editor after file processing (for testing)")
+    parser = argparse.ArgumentParser(
+        description="Second Voice - AI Assistant",
+        epilog="""
+Pipeline mode examples:
+  second-voice --record-only --audio-file recording.wav
+  second-voice --transcribe-only --audio-file recording.wav --text-file transcript.txt
+  second-voice --translate-only --text-file transcript.txt --output-file final.md
+        """
+    )
+
+    # Mode and interaction options
+    parser.add_argument('--mode', choices=['auto', 'gui', 'tui', 'menu'], default='menu',
+                        help="Interaction mode (default: menu)")
+
+    # Pipeline mode options (mutually exclusive)
+    pipeline_group = parser.add_mutually_exclusive_group()
+    pipeline_group.add_argument('--record-only', action='store_true',
+                                help="Record audio and exit (no transcription or translation)")
+    pipeline_group.add_argument('--transcribe-only', action='store_true',
+                                help="Transcribe existing audio file (requires --audio-file)")
+    pipeline_group.add_argument('--translate-only', action='store_true',
+                                help="Translate/process existing text file (requires --text-file)")
+
+    # File parameters
+    parser.add_argument('--file', type=str,
+                        help="Input audio file to process (bypasses recording)")
+    parser.add_argument('--audio-file', type=str,
+                        help="Audio file path (input for --transcribe-only, output for --record-only)")
+    parser.add_argument('--text-file', type=str,
+                        help="Text file path (input for --translate-only, output for --transcribe-only)")
+    parser.add_argument('--output-file', type=str,
+                        help="Output file path (for --translate-only)")
+
+    # Editor options
+    parser.add_argument('--edit', action='store_true',
+                        help="Open editor after processing (default: no)")
+    parser.add_argument('--editor-command', type=str,
+                        help="Editor command to use (e.g., 'code --wait', 'emacs')")
+    parser.add_argument('--no-edit', action='store_true',
+                        help="(Deprecated) Skip editor after file processing")
+
+    # General options
+    parser.add_argument('--keep-files', action='store_true',
+                        help="Keep temporary files after execution")
+    parser.add_argument('--debug', action='store_true',
+                        help="Enable debug logging")
+    parser.add_argument('--verbose', action='store_true',
+                        help="Enable verbose output")
+
     args = parser.parse_args()
+
+    # Helper function to get string args safely (handling mocks)
+    def get_str_arg(obj, attr_name, default=None):
+        """Get string argument from args, returns None if not a real string."""
+        val = getattr(obj, attr_name, default)
+        # Check if it's a real string, not a mock or None
+        return val if isinstance(val, str) else default
+
+    # Validate pipeline mode arguments (check for required dependencies)
+    validate_pipeline_mode_args(args)
+
+    # Resolve file paths (only for actual string paths, not None or mock objects)
+    audio_file = get_str_arg(args, 'audio_file')
+    text_file = get_str_arg(args, 'text_file')
+    output_file = get_str_arg(args, 'output_file')
+
+    if audio_file and isinstance(audio_file, str):
+        args.audio_file = resolve_file_path(audio_file)
+    if text_file and isinstance(text_file, str):
+        args.text_file = resolve_file_path(text_file)
+    if output_file and isinstance(output_file, str):
+        args.output_file = resolve_file_path(output_file)
+
+    # Validate output files don't exist (overwrite protection)
+    record_only = getattr(args, 'record_only', False)
+    transcribe_only = getattr(args, 'transcribe_only', False)
+    translate_only = getattr(args, 'translate_only', False)
+    editor_command = get_str_arg(args, 'editor_command')
+
+    if record_only is True and audio_file and isinstance(audio_file, str):
+        validate_output_file(audio_file, "record-only")
+    if transcribe_only is True and text_file and isinstance(text_file, str):
+        validate_output_file(text_file, "transcribe-only")
+    if translate_only is True and output_file and isinstance(output_file, str):
+        validate_output_file(output_file, "translate-only")
 
     # Init config
     config = ConfigurationManager()
-    
+
+    # Set editor command if provided (only if it's a real string, not a mock)
+    if editor_command:
+        config.set('editor_command', editor_command)
+
     # Override config with CLI args if provided
     if args.mode != 'auto':
         config.set('mode', args.mode)
-    
+
     if args.keep_files:
         config.set('keep_files', True)
-        
-    if args.file:
-        input_file_path = os.path.abspath(args.file)
 
-        # Validate file exists
+    if args.debug:
+        config.set('debug', True)
+
+    if args.verbose:
+        config.set('verbose', True)
+
+    # Handle --file as alias for --audio-file (for backward compatibility)
+    file_arg = get_str_arg(args, 'file')
+    if file_arg and not audio_file:
+        audio_file = file_arg
+        args.audio_file = file_arg
+
+    # Validate and set input file for normal mode (not pipeline mode)
+    if audio_file and isinstance(audio_file, str) and not (record_only is True or transcribe_only is True or translate_only is True):
+        input_file_path = audio_file
+
+        # Validate file exists for input mode
         if not os.path.exists(input_file_path):
             print(f"Error: Input file not found: {input_file_path}")
             sys.exit(1)
@@ -77,15 +348,6 @@ def main():
 
         config.set('input_file', input_file_path)
 
-    if args.debug:
-        config.set('debug', True)
-
-    if args.verbose:
-        config.set('verbose', True)
-
-    if args.no_edit:
-        config.set('no_edit', True)
-
     # Init engine
     try:
         recorder = AudioRecorder(config)
@@ -94,6 +356,20 @@ def main():
         print(f"Error initializing engine: {e}")
         sys.exit(1)
 
+    # Handle pipeline modes (fire and forget) - only if boolean flags are set
+    if record_only is True:
+        exit_code = run_record_only(config, args, recorder)
+        sys.exit(exit_code)
+
+    if transcribe_only is True:
+        exit_code = run_transcribe_only(config, args, processor)
+        sys.exit(exit_code)
+
+    if translate_only is True:
+        exit_code = run_translate_only(config, args, processor)
+        sys.exit(exit_code)
+
+    # Normal mode handling (interactive workflow)
     # Detect mode
     try:
         mode_name = detect_mode(config)
@@ -112,7 +388,12 @@ def main():
     # Run mode
     try:
         mode = get_mode(mode_name, config, recorder, processor)
-        mode.run()
+        output_file = mode.run()
+
+        # NEW: Handle editor invocation (Phase 4 - changed default to no-edit)
+        edit_flag = getattr(args, 'edit', False)
+        if edit_flag is True and output_file:
+            invoke_editor(output_file, config, args)
     except Exception as e:
         print(f"Error initializing mode {mode_name}: {e}")
         sys.exit(1)
@@ -124,13 +405,17 @@ def main():
             else:
                 # List files being kept
                 temp_dir = config.get('temp_dir')
-                if os.path.exists(temp_dir):
-                    files = [f for f in os.listdir(temp_dir) if os.path.isfile(os.path.join(temp_dir, f))]
-                    if files:
-                        print(f"Keeping temporary files:")
-                        for filename in sorted(files):
-                            file_path = os.path.join(temp_dir, filename)
-                            print(f"  {file_path}")
+                # Only list files if temp_dir is a valid string path
+                if temp_dir and isinstance(temp_dir, str) and os.path.exists(temp_dir):
+                    try:
+                        files = [f for f in os.listdir(temp_dir) if os.path.isfile(os.path.join(temp_dir, f))]
+                        if files:
+                            print(f"Keeping temporary files:")
+                            for filename in sorted(files):
+                                file_path = os.path.join(temp_dir, filename)
+                                print(f"  {file_path}")
+                    except (OSError, TypeError):
+                        pass
 
 if __name__ == "__main__":
     main()
