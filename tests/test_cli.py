@@ -33,6 +33,17 @@ class TestCliArgumentParsing:
                 # Import and run main to test argument parsing
                 from cli.run import main
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    # Setup config.get side effect
+                    def config_get_side_effect(key):
+                        defaults = {
+                            'keep_files': False,
+                            'temp_dir': '/tmp',
+                            'input_file': None
+                        }
+                        return defaults.get(key)
+                    
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -56,6 +67,11 @@ class TestCliArgumentParsing:
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='tui'):
@@ -79,6 +95,13 @@ class TestCliArgumentParsing:
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        # Should return true for keep_files as it was set
+                        if key == 'keep_files': return True 
+                        defaults = {'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -102,6 +125,11 @@ class TestCliArgumentParsing:
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -125,6 +153,11 @@ class TestCliArgumentParsing:
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -247,6 +280,11 @@ class TestCliFileInputHandling:
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': str(audio_file)}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -271,7 +309,12 @@ class TestCliModeDetection:
                     verbose=False
                 )
 
-                with mock.patch('cli.run.ConfigurationManager'):
+                with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+                    
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -290,7 +333,12 @@ class TestCliModeDetection:
                     verbose=False
                 )
 
-                with mock.patch('cli.run.ConfigurationManager'):
+                with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', side_effect=Exception("Detection failed")):
@@ -317,6 +365,11 @@ class TestCliModeDetection:
                     )
 
                     with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                        def config_get_side_effect(key):
+                            defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': tmp_path}
+                            return defaults.get(key)
+                        mock_config.return_value.get.side_effect = config_get_side_effect
+
                         with mock.patch('cli.run.AudioRecorder'):
                             with mock.patch('cli.run.AIProcessor'):
                                 with mock.patch('cli.run.detect_mode', return_value='gui'):
@@ -364,7 +417,12 @@ class TestCliErrorHandling:
                     verbose=False
                 )
 
-                with mock.patch('cli.run.ConfigurationManager'):
+                with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -387,7 +445,12 @@ class TestCliErrorHandling:
                     verbose=False
                 )
 
-                with mock.patch('cli.run.ConfigurationManager'):
+                with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder'):
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -459,7 +522,11 @@ class TestCliResourceCleanup:
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
-                    mock_config.return_value.get.return_value = False  # keep_files = False
+                    def config_get_side_effect(key):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
                     with mock.patch('cli.run.AudioRecorder') as mock_recorder:
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):
@@ -482,7 +549,12 @@ class TestCliResourceCleanup:
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
-                    mock_config.return_value.get.return_value = True  # keep_files = True
+                    def config_get_side_effect(key):
+                        if key == 'keep_files': return True
+                        defaults = {'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+                    
                     with mock.patch('cli.run.AudioRecorder') as mock_recorder:
                         with mock.patch('cli.run.AIProcessor'):
                             with mock.patch('cli.run.detect_mode', return_value='menu'):

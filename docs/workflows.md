@@ -56,7 +56,7 @@ python3 docs/system-prompts/bootstrap.py --disable-logs-first --commit
 
 ### Logs-First Workflow
 
-**What it is:** A comprehensive workflow that emphasizes documentation and accountability through three connected documents: Spec → Project Plan → Change Documentation.
+**What it is:** A comprehensive workflow that emphasizes documentation and accountability through three connected documents: Spec (often from Inbox) → Project Plan → Change Documentation.
 
 **When to use it:**
 - Small teams (1-10 developers)

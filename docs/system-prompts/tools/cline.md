@@ -65,6 +65,39 @@ CLINE_TIMEOUT=120               # Request timeout (seconds)
 | **E. Implement** | Edit files, run commands | `read_file`, `replace`, `run_shell_command` |
 | **F. Verify** | Run tests and validate | `run_shell_command` (pytest, etc.) |
 
+## Inbox Processing Workflow
+
+When user says "process the first inbox item" or "process inbox":
+1. List files in `dev_notes/inbox/` (lexicographically sorted)
+2. Read the first file
+3. Generate a professional specification in `dev_notes/specs/`
+   - Use timestamp-based naming: `YYYY-MM-DD_HH-MM-SS_description.md`
+   - Include standardized header with Source and Timestamp (see `docs/header-standard.md`)
+4. Move original file to `dev_notes/inbox-archive/`
+5. Ask: "Should I create a project plan for this spec?" or proceed if instructed
+
+## Generating Project Plans
+
+When creating a project plan from a spec:
+1. Research the codebase to understand current implementation
+2. Create detailed, phased implementation plan
+3. Include clarifying questions if requirements are ambiguous
+4. Save to `dev_notes/project_plans/` with matching timestamp
+5. Set **Status: 🔵 Ready for Implementation**
+6. Set **Source:** to the spec file path
+7. Stop and await human review (unless instructed to proceed)
+
+## Implementing Project Plans
+
+When user approves a plan ("implement the plan", "I approve"):
+1. Update plan **Status: 🟡 In Progress**
+2. Execute tasks according to plan phases
+3. Create `dev_notes/changes/` log with matching timestamp
+4. Update change log as tasks complete
+5. When all tasks complete, update plan **Status: 🟢 Awaiting Approval**
+6. Update change log **Status: 🟢 Awaiting Approval**
+7. Stop and await human review
+
 ## Key Capabilities
 
 - **Multi-file editing** - Coordinated changes across multiple files

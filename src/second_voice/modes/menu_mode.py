@@ -123,7 +123,7 @@ class MenuMode(BaseMode):
         Main menu-driven workflow for Second Voice.
         """
         context = None
-        
+
         # Check for input file
         input_file = self.config.get('input_file')
         if input_file and os.path.exists(input_file):
@@ -131,7 +131,10 @@ class MenuMode(BaseMode):
             # Process the file directly as if option 1 was selected
             try:
                 self.show_status("⌛ Transcribing...")
-                transcription = self.processor.transcribe(input_file)
+                # Generate timestamp for external file to ensure transcription is saved
+                from ..utils.timestamp import get_timestamp
+                file_timestamp = get_timestamp()
+                transcription = self.processor.transcribe(input_file, file_timestamp)
 
                 if transcription:
                     self.show_transcription(transcription)
@@ -157,7 +160,14 @@ class MenuMode(BaseMode):
                 # We don't delete the input file
 
             except Exception as e:
-                print(f"Error processing input file: {e}")
+                # Check if transcription file exists for recovery
+                from ..utils.timestamp import create_whisper_filename
+                whisper_file = create_whisper_filename(self.processor.config.get('temp_dir', './tmp'), file_timestamp)
+                if os.path.exists(whisper_file):
+                    print(f"Error processing input file: {e}")
+                    print(f"✓ Transcription saved to: {whisper_file}")
+                else:
+                    print(f"Error processing input file: {e}")
 
         while True:
             try:

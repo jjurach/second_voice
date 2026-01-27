@@ -122,7 +122,15 @@ def main():
             if not config.get('keep_files'):
                 recorder.cleanup_temp_files()
             else:
-                print(f"Keeping temporary files in {config.get('temp_dir')}")
+                # List files being kept
+                temp_dir = config.get('temp_dir')
+                if os.path.exists(temp_dir):
+                    files = [f for f in os.listdir(temp_dir) if os.path.isfile(os.path.join(temp_dir, f))]
+                    if files:
+                        print(f"Keeping temporary files:")
+                        for filename in sorted(files):
+                            file_path = os.path.join(temp_dir, filename)
+                            print(f"  {file_path}")
 
 if __name__ == "__main__":
     main()

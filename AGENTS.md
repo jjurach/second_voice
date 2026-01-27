@@ -77,8 +77,9 @@ For more information, see `docs/workflows.md`.
 > **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting. The full definition and examples are in `docs/overview.md`.
 > **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in `dev_notes`.
 
-**Step B: Process Spec File (If Required)**
+**Step B: Process Inbox Item or Spec File (If Required)**
 - When a prompt involves planning, represent the planning in `dev_notes/specs`
+- **Inbox Workflow:** If instructed to "process inbox", read `dev_notes/inbox/`, generate a spec in `dev_notes/specs/` with standardized header, and archive the original file.
 - Create a summary of what the user is asking for or what they want in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md`
 - If the prompt involves processing user intentions from a un-timestamped file already in `dev_notes/specs`, then rename it to have the correct filename layout based on the file's last modified time.
   - Add any additional context as developed over follow-up conversations about the spec.
@@ -173,8 +174,9 @@ You must verify your documentation changes against these requirements before mar
 > **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting.
 > **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in `dev_notes`.
 
-**Step B: Process Spec File (If Required)**
+**Step B: Process Inbox Item or Spec File (If Required)**
 - When a prompt involves planning, represent the planning in `dev_notes/specs`
+- **Inbox Workflow:** If instructed to "process inbox", read `dev_notes/inbox/`, generate a spec in `dev_notes/specs/` with standardized header, and archive the original file.
 - Create a summary of what the user is asking for in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md` (using the timestamp-based filename format)
 - If the prompt involves processing user intentions from a un-timestamped file already in `dev_notes/specs`, then rename it to match the filename format based on the file's last modified time.
   - Add any additional context as developed over follow-up conversations about the spec.
@@ -534,10 +536,11 @@ This enables agents to:
    - *Research/Documentation Change:* Requests which culminate ONLY into writes to markdown documents in the root folder or in `docs/` or in `dev_notes`.
 5. **Is it anything else?** → Announce you will create a **Spec File** and **Project Plan**.
 
-### Step B: Process Spec File (If Required)
+### Step B: Process Inbox Item or Spec File (If Required)
 
 When a prompt involves planning, represent it in `dev_notes/specs`:
 
+- **Inbox Workflow:** If instructed to "process inbox", read `dev_notes/inbox/`, generate a spec in `dev_notes/specs/` with standardized header, and archive the original file.
 - Create a summary of what the user is asking for in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md`
 - If updating an existing un-timestamped spec file, rename it with the correct filename format based on the file's last modified time
 - Add any additional context as developed over follow-up conversations
@@ -757,6 +760,16 @@ Present plan to developer. Wait for "yes" or "approved".
 2. After each major change, create entry in `dev_notes/changes/`
 3. Include verification (test output, coverage, etc.)
 4. Mark Plan as "Completed" when all steps done
+
+### Example: Processing Inbox Item
+
+User: "Process the first inbox item"
+
+Agent:
+1. Reads `dev_notes/inbox/feature-request.md`
+2. Creates `dev_notes/specs/2026-01-27_12-00-00_feature-request.md` with standard header
+3. Moves original to `dev_notes/inbox-archive/feature-request.md`
+4. Asks: "I've created the spec. Should I generate a project plan?"
 
 ---
 
