@@ -398,18 +398,24 @@ class Bootstrap:
 
         if not only_if_missing:
             print("Regenerating tool entry point files...")
-        
+
+        # Get current timestamp
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d")
+
         for tool in tools:
             file_path = os.path.join(self.project_root, f"{tool.upper()}.md")
             if only_if_missing and os.path.exists(file_path):
                 continue
-                
+
             template = self.get_tool_entry_point_template(tool)
             if not template:
                 print(f"ERROR: No template for {tool}")
                 continue
 
-            self._write_file(file_path, template)
+            # Format template with timestamp
+            content = template.format(timestamp=timestamp)
+            self._write_file(file_path, content)
             changed = True
 
         if not self.dry_run:
@@ -442,6 +448,23 @@ The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claud
 - Workflow mapping to AGENTS.md
 - All tools and approval gates
 - Common patterns and examples
+
+## System Architecture
+
+- **Agent Kernel:** [docs/system-prompts/README.md](docs/system-prompts/README.md)
+- **Project Architecture:** [docs/architecture.md](docs/architecture.md)
+- **Implementation Patterns:** [docs/implementation-reference.md](docs/implementation-reference.md)
+- **Development Workflows:** [docs/workflows.md](docs/workflows.md)
+- **Code Examples:** [docs/examples/](docs/examples/)
+
+## System-Prompts Processes (Informational Only)
+
+The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
+
+**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
+
+---
+Last Updated: {timestamp}
 """,
             "aider": """# Aider Instructions
 
@@ -461,6 +484,23 @@ The **[docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)**
 - Workflow mapping to AGENTS.md
 - Auto-commit and git integration
 - Common patterns and examples
+
+## System Architecture
+
+- **Agent Kernel:** [docs/system-prompts/README.md](docs/system-prompts/README.md)
+- **Project Architecture:** [docs/architecture.md](docs/architecture.md)
+- **Implementation Patterns:** [docs/implementation-reference.md](docs/implementation-reference.md)
+- **Development Workflows:** [docs/workflows.md](docs/workflows.md)
+- **Code Examples:** [docs/examples/](docs/examples/)
+
+## System-Prompts Processes (Informational Only)
+
+The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
+
+**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
+
+---
+Last Updated: {timestamp}
 """,
             "cline": """# Cline Instructions
 
@@ -480,6 +520,23 @@ The **[docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)**
 - Workflow mapping to AGENTS.md
 - Multi-file editing and auto-commit
 - Common patterns and examples
+
+## System Architecture
+
+- **Agent Kernel:** [docs/system-prompts/README.md](docs/system-prompts/README.md)
+- **Project Architecture:** [docs/architecture.md](docs/architecture.md)
+- **Implementation Patterns:** [docs/implementation-reference.md](docs/implementation-reference.md)
+- **Development Workflows:** [docs/workflows.md](docs/workflows.md)
+- **Code Examples:** [docs/examples/](docs/examples/)
+
+## System-Prompts Processes (Informational Only)
+
+The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
+
+**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
+
+---
+Last Updated: {timestamp}
 """,
             "gemini": """# Gemini Instructions
 
@@ -499,6 +556,23 @@ The **[docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)
 - Workflow mapping to AGENTS.md
 - Multimodal capabilities and ReAct loop
 - Common patterns and examples
+
+## System Architecture
+
+- **Agent Kernel:** [docs/system-prompts/README.md](docs/system-prompts/README.md)
+- **Project Architecture:** [docs/architecture.md](docs/architecture.md)
+- **Implementation Patterns:** [docs/implementation-reference.md](docs/implementation-reference.md)
+- **Development Workflows:** [docs/workflows.md](docs/workflows.md)
+- **Code Examples:** [docs/examples/](docs/examples/)
+
+## System-Prompts Processes (Informational Only)
+
+The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
+
+**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
+
+---
+Last Updated: {timestamp}
 """,
         }
         return templates.get(tool_name, "")
