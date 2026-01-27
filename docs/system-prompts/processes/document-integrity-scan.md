@@ -115,12 +115,14 @@ This integrates with [our provider](docs/tool-specific-guides/cline.md).
 
 **Process:**
 1. Scan all `.md` files for markdown file references
-2. For each reference to a `.md` file, check if it's properly formatted:
+2. Skip entry point files (AGENTS.md, CLAUDE.md, etc.) - these meta-documents frequently self-reference
+3. Skip transient directories (dev_notes/, tmp/) - working documents, not canonical
+4. For each reference to a `.md` file, check if it's properly formatted:
    - ✅ **Hyperlink:** Link format with brackets and parentheses - for navigation links
    - ✅ **Backtick:** Filename wrapped in backticks - for inline file references
    - ❌ **Plain text:** "see file.md" - NOT ALLOWED
-3. Remove code blocks and inline code to avoid false positives
-4. Report any plain-text references
+5. Remove code blocks and inline code to avoid false positives
+6. Report any plain-text references
 
 **Examples:**
 
@@ -255,6 +257,18 @@ Backticks (for file references in prose):
 Never use plain text:
   ❌ See AGENTS.md (no formatting)
   ❌ check docs/file.md (no formatting)
+
+Exemptions:
+  Entry point files (AGENTS.md, CLAUDE.md, AIDER.md, CLINE.md, GEMINI.md)
+  are exempt from reference-formatting checks.
+
+  Rationale:
+    - These are meta-documents that provide instructions to AI agents
+    - They frequently reference themselves and other documentation as part of
+      explaining the workflow (e.g., "See AGENTS.md section X", "this AGENTS.md file")
+    - They are transitional instruction documents, not canonical user documentation
+    - Forcing backticks on every self-reference creates noise and reduces readability
+    - Similar to how dev_notes/ is exempt (transient working documents)
 
 Rationale:
   - Hyperlinks are clickable in markdown viewers

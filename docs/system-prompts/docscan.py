@@ -316,6 +316,10 @@ class DocumentScanner:
             if any(transient in relative_path for transient in TRANSIENT_DIRS):
                 continue
 
+            # Skip entry point files (meta-documents that reference themselves and other docs)
+            if md_file.name in ENTRY_POINTS:
+                continue
+
             with open(md_file, "r", encoding="utf-8") as f:
                 content = f.read()
 
