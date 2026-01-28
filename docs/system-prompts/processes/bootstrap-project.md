@@ -49,6 +49,23 @@ You will:
 
 ---
 
+## Critical Boundary: What This Process Does and Doesn't Do
+
+**✅ THIS PROCESS MODIFIES:**
+- `AGENTS.md` - Project's main agent instructions
+- `README.md` - Project's main documentation
+- `[TOOL].md` - Tool-specific entry files (CLAUDE.md, AIDER.md, etc.)
+- `docs/*.md` - Project-specific documentation files
+- `dev_notes/` - Change logs and planning documents
+
+**❌ THIS PROCESS DOES NOT MODIFY:**
+- `docs/system-prompts/` - The Agent Kernel (read-only)
+- Any files within system-prompts/ directory
+
+**Why:** `docs/system-prompts/` is the Agent Kernel, a separate, portable system. The bootstrap process reads FROM it, never writes TO it. If you need to change system-prompts files, do so explicitly in a separate operation (not as part of bootstrap).
+
+---
+
 ## Phase 0: Pre-Bootstrap Analysis
 
 **Applies to:** Both scenarios
@@ -692,8 +709,11 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 **Applies to:** Both scenarios (but different focus)
 **Goal:** Reduce duplication by establishing clear content ownership and removing redundant content
 
+**SCOPE: Project-specific documentation ONLY** (docs/*.md, definition-of-done.md, contributing.md, etc.)
+**DO NOT modify docs/system-prompts/** - The Agent Kernel is read-only to this process.
+
 **For Initial Bootstrap:** Light consolidation (project docs are usually minimal)
-**For Updates:** AGGRESSIVE - System-prompts has evolved, so project-specific docs likely have content now covered by system-prompts. Remove redundancy aggressively.
+**For Updates:** AGGRESSIVE - System-prompts has evolved, so project-specific docs likely have content now covered by system-prompts. Remove redundancy aggressively from project docs only.
 
 ### Step 4.1: Analyze docs/definition-of-done.md
 
