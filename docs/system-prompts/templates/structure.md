@@ -442,8 +442,14 @@ Recorder module 86% coverage - lines 88-92, 106-107, 110-113 untested (exception
 
 ### Status Field
 - **Spec Files:** `Under Review`, `Approved`, `In Progress`
-- **Project Plans:** `Draft`, `Approved`, `In Progress`, `Completed`
+- **Project Plans:** `Draft`, `Approved`, `In Progress`, `Completed`, `WONT-DO`
 - **Change Documentation:** `In Progress`, `Completed`
+
+**WONT-DO Status:**
+Use `WONT-DO` for project plans that are cancelled or indefinitely postponed. When marking a plan as WONT-DO:
+- Update the Status header to include the reason: `Status: WONT-DO - Reason here`
+- Add a section at the top explaining why the plan is not being implemented
+- Keep the plan for historical reference and to avoid repeating the same analysis
 
 ### Cross-References
 - Project Plans reference related Spec Files
@@ -475,12 +481,18 @@ Under Review → Approved → In Progress
 ### Project Plans
 ```
 Draft → Approved → In Progress → Completed
+     ↘ WONT-DO (cancelled/postponed)
 ```
 
 When marking Complete:
 1. Update `Status: Completed` header
 2. Add `Completion Summary` section at end
 3. Reference related Change Documentation file
+
+When marking WONT-DO:
+1. Update `Status: WONT-DO - [Reason]` header
+2. Add explanation section at top of document
+3. Keep plan for historical reference
 
 ### Change Documentation
 ```
@@ -527,7 +539,7 @@ See `docs/definition-of-done.md` for complete checklist.
 | Document Type | Location | Triggers | Status Values | Example |
 |---|---|---|---|---|
 | **Spec File** | `dev_notes/specs/` | Step B of workflow | `Under Review`, `Approved` | `2026-01-25_18-46-25_add-tests.md` |
-| **Project Plan** | `dev_notes/project_plans/` | Step C of workflow | `Draft`, `Approved`, `Completed` | `2026-01-25_18-46-25_test-plan.md` |
+| **Project Plan** | `dev_notes/project_plans/` | Step C of workflow | `Draft`, `Approved`, `Completed`, `WONT-DO` | `2026-01-25_18-46-25_test-plan.md` |
 | **Change Doc** | `dev_notes/changes/` | Step E of workflow | `In Progress`, `Completed` | `2026-01-25_18-50-00_pytest-tests.md` |
 
 ---

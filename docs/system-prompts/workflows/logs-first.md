@@ -24,6 +24,43 @@ This enables agents to:
 
 ---
 
+## File Naming Conventions
+
+**CRITICAL:** All timestamped files in `dev_notes/` use this exact format:
+
+```
+YYYY-MM-DD_HH-MM-SS_description.md
+```
+
+**Examples from this project:**
+- `dev_notes/specs/2026-01-27_07-28-35_inbox-based-spec-generation.md`
+- `dev_notes/project_plans/2026-01-25_18-46-25_add-tests-fix-pytest.md`
+- `dev_notes/changes/2026-01-26_23-15-42_aac-support-implementation.md`
+
+**How to generate the timestamp:**
+
+```bash
+date +%Y-%m-%d_%H-%M-%S
+```
+
+**IMPORTANT - Always check existing files first:**
+
+Before creating any file in `dev_notes/specs/`, `dev_notes/project_plans/`, or `dev_notes/changes/`, you MUST:
+
+1. **List existing files** in the target directory (e.g., `ls dev_notes/specs/`)
+2. **Observe the naming pattern** used in existing files
+3. **Match that exact pattern** for your new file
+
+This ensures consistency and makes it obvious when the format is wrong.
+
+**Common Mistakes to Avoid:**
+- ❌ `20260128_103440` (no hyphens, wrong separators)
+- ❌ `2026-01-28-10-34-40` (all hyphens, should be underscore between date and time)
+- ❌ `2026_01_28_10_34_40` (all underscores, should use hyphens within date and time)
+- ✅ `2026-01-28_10-34-40` (correct format)
+
+---
+
 ## The Core Workflow
 
 **MANDATORY:** For any request that involves creating or modifying code or infrastructure, you MUST follow this workflow.
@@ -42,17 +79,27 @@ This enables agents to:
 
 When a prompt involves planning, represent it in `dev_notes/specs`:
 
-- Create a summary of what the user is asking for in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md`
+- **Check existing files first:** Run `ls dev_notes/specs/` to see the naming pattern
+- Create a summary of what the user is asking for using the timestamp format (see "File Naming Conventions" above)
+- **Example filename:** `dev_notes/specs/2026-01-28_14-22-15_add-authentication.md`
 - If updating an existing un-timestamped spec file, rename it with the correct filename format based on the file's last modified time
 - Add any additional context as developed over follow-up conversations
 
 **Spec files signify user intentions and goals.** They are typically used to create or update project plans.
 
+**Processing inbox items:** When the user asks you to process an item from `dev_notes/inbox/`, follow this pattern:
+1. Read the inbox file to understand requirements
+2. Create a timestamped spec file in `dev_notes/specs/` with the content reorganized
+3. **Archive the inbox file:** Move it to `dev_notes/inbox-archive/` with a timestamp prefix (e.g., `dev_notes/inbox-archive/2026-01-28_14-22-15-original-name.md`)
+4. This "archiving" moves the inbox file out of the way while preserving it with a timestamp
+
 ### Step C: Create a Project Plan (If Required)
 
+- **Check existing files first:** Run `ls dev_notes/project_plans/` to see the naming pattern
 - Use the **Project Plan Structure** defined in `docs/templates.md`
 - The plan must be detailed enough for another agent to execute
-- Save to `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md`
+- **Example filename:** `dev_notes/project_plans/2026-01-28_14-25-30_add-authentication.md`
+- Save using the exact timestamp format (see "File Naming Conventions" above)
 
 ### Step D: AWAIT DEVELOPER APPROVAL
 
@@ -80,7 +127,8 @@ When a prompt involves planning, represent it in `dev_notes/specs`:
 3. **Uncertainty Requires a Full Stop:** If you encounter any error, are confused by a requirement, or are unsure how to proceed, you MUST **STOP** immediately. Document the issue and ask the developer for guidance. Do not try to solve novel problems alone.
 
 4. **File Naming is Mandatory:**
-   - All Project Plans and Change Documentation in `dev_notes/` MUST use the `YYYY-MM-DD_HH-MM-SS_description.md` format
+   - All Project Plans, Specs, and Change Documentation in `dev_notes/` MUST use the timestamp format defined in "File Naming Conventions" section above
+   - **Always check existing files first** to observe the pattern before creating new files
    - All new documentation files in `docs/` MUST use `lowercase-kebab.md` naming convention
 
 5. **Temporary Files:** NEVER use `/tmp` or system temporary directories for temporary files. Always create temporary files in the current working directory using the naming patterns `tmp-*` or `*.tmp` or `tmp/*`. These files should be cleaned up when no longer needed.
@@ -99,7 +147,9 @@ When a prompt involves planning, represent it in `dev_notes/specs`:
 All Project Plans in `dev_notes/project_plans/` must have a `Status` header:
 - **Draft:** Initial state when creating the plan
 - **Approved:** State after human developer gives explicit approval
+- **In Progress:** Plan is being actively implemented
 - **Completed:** You MUST update the header to `Status: Completed` before declaring the task finished
+- **WONT-DO:** Plan is cancelled or indefinitely postponed (include reason in header)
 
 ---
 
