@@ -81,6 +81,107 @@ class DocumentScanner:
         self.project_root = project_root
         self.options = options
         self.violations = []
+        self._anchor_cache = {}  # Cache of file -> valid anchors
+
+    def _extract_anchors_from_file(self, file_path: Path) -> set:
+        """Extract all valid anchors from a markdown file.
+
+        Detects:
+        1. Auto-generated anchors from headings (# Heading -> #heading)
+        2. Explicit anchors (# Heading {#custom-id})
+        3. HTML anchors (<a id="anchor"></a>)
+        """
+        if file_path in self._anchor_cache:
+            return self._anchor_cache[file_path]
+
+        anchors = set()
+
+        if not file_path.exists():
+            self._anchor_cache[file_path] = anchors
+            return anchors
+
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # Pattern 1: Explicit anchors in headings: # Heading {#custom-id}
+            explicit_pattern = re.compile(r"^#+\s+.+\{#([^}]+)\}", re.MULTILINE)
+            for match in explicit_pattern.finditer(content):
+                anchors.add(match.group(1))
+
+            # Pattern 2: HTML anchors: <a id="anchor"></a>
+            html_pattern = re.compile(r'<a\s+id=["\']([^"\']+)["\']', re.IGNORECASE)
+            for match in html_pattern.finditer(content):
+                anchors.add(match.group(1))
+
+            # Pattern 3: Auto-generated anchors from headings (# Heading -> #heading)
+            # GitHub's auto-anchor generation rules:
+            # 1. Convert to lowercase
+            # 2. Remove punctuation except dashes
+            # 3. Replace spaces with dashes
+            # 4. Collapse multiple dashes
+            heading_pattern = re.compile(r"^(#+)\s+([^\n{]+)", re.MULTILINE)
+            for match in heading_pattern.finditer(content):
+                heading_text = match.group(2).strip()
+
+                # Check if there's an explicit anchor for this heading
+                heading_start = match.start()
+                heading_end = match.end()
+                # Look ahead for explicit anchor on same line
+                line_end = content.find('\n', heading_end)
+                if line_end == -1:
+                    line_end = len(content)
+                rest_of_line = content[heading_end:line_end]
+
+                if '{#' in rest_of_line:
+                    # Already captured as explicit anchor
+                    continue
+
+                # Generate anchor from heading text
+                # Remove markdown formatting first (like bold, italics, code)
+                cleaned = re.sub(r'[*_`]', '', heading_text)
+                # Remove special characters except dashes
+                anchor = re.sub(r'[^\w\s-]', '', cleaned.lower())
+                # Replace spaces with dashes
+                anchor = re.sub(r'\s+', '-', anchor)
+                # Collapse multiple dashes
+                anchor = re.sub(r'-+', '-', anchor)
+                # Strip leading/trailing dashes
+                anchor = anchor.strip('-')
+
+                if anchor:
+                    anchors.add(anchor)
+
+        except Exception as e:
+            if self.options.verbose:
+                print(f"    Warning: Could not parse anchors from {file_path}: {e}")
+
+        self._anchor_cache[file_path] = anchors
+        return anchors
+
+    def _resolve_link_target(self, link_target: str, from_file: Path) -> Tuple[Path, str]:
+        """Split a link target into file path and anchor.
+
+        Returns (file_path, anchor) where anchor may be empty string.
+        Resolves relative paths based on from_file location.
+        """
+        # Split on # to separate file path from anchor
+        if '#' in link_target:
+            file_part, anchor_part = link_target.split('#', 1)
+        else:
+            file_part = link_target
+            anchor_part = ""
+
+        # Resolve file path
+        if file_part.startswith("/"):
+            target_file = self.project_root / file_part.lstrip("/")
+        elif file_part:
+            target_file = (from_file.parent / file_part).resolve()
+        else:
+            # Just an anchor (e.g., "#section") - refers to current file
+            target_file = from_file
+
+        return target_file, anchor_part
 
     def run(self) -> int:
         """Execute scan and return exit code."""
@@ -128,7 +229,10 @@ class DocumentScanner:
         return 0
 
     def _check_broken_links(self):
-        """Check Layer 1: Ensure all links point to existing files."""
+        """Check Layer 1: Ensure all links point to existing files and anchors.
+
+        Now properly handles links with anchors (e.g., docs/file.md#section).
+        """
         print("\n### Checking for Broken Links...")
 
         link_pattern = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
@@ -150,21 +254,47 @@ class DocumentScanner:
                 link_text = match.group(1)
                 link_target = match.group(2)
 
-                # Skip external URLs and anchors
-                if link_target.startswith(("http://", "https://", "#", "mailto:")):
+                # Skip external URLs and mailto
+                if link_target.startswith(("http://", "https://", "mailto:")):
                     continue
+
+                # Handle pure anchors: [Section](#section-id) refers to same file
+                if link_target.startswith("#"):
+                    # Validate anchor exists in current file
+                    anchor = link_target[1:]  # Remove leading #
+                    valid_anchors = self._extract_anchors_from_file(md_file)
+                    if anchor not in valid_anchors:
+                        context_start = max(0, match.start() - 100)
+                        context_end = min(len(content_without_code), match.end() + 100)
+                        context = content_without_code[context_start:context_end]
+                        is_conditional = any(
+                            marker.lower() in context.lower()
+                            for marker in CONDITIONAL_MARKERS
+                        )
+                        if not is_conditional:
+                            self.violations.append(
+                                {
+                                    "file": relative_path,
+                                    "type": "broken-link",
+                                    "severity": "error",
+                                    "message": f"Broken link: {link_target} (anchor not found in file)",
+                                    "target": f"{relative_path}{link_target}",
+                                }
+                            )
+                            if self.options.verbose:
+                                print(f"  ❌ {relative_path}: {link_target} (anchor not found)")
+                    continue
+
+                # Resolve link target (file path and optional anchor)
+                target_file, anchor = self._resolve_link_target(link_target, md_file)
 
                 # Skip placeholder-like targets (single word, not a path)
-                if "/" not in link_target and not link_target.endswith(".md"):
+                # Check the FILE part only, not including anchor
+                file_part = link_target.split("#")[0] if "#" in link_target else link_target
+                if "/" not in file_part and not file_part.endswith(".md"):
                     continue
 
-                # Resolve relative paths
-                if link_target.startswith("/"):
-                    target_file = self.project_root / link_target.lstrip("/")
-                else:
-                    target_file = (md_file.parent / link_target).resolve()
-
-                # Check if target exists
+                # Check if target file exists
                 if not target_file.exists():
                     # Check if this link is marked as conditional (optional)
                     context_start = max(0, match.start() - 100)
@@ -184,12 +314,37 @@ class DocumentScanner:
                             "file": relative_path,
                             "type": "broken-link",
                             "severity": "error",
-                            "message": f"Broken link: {link_target}",
-                            "target": str(target_file.relative_to(self.project_root)),
+                            "message": f"Broken link: {link_target} (file not found)",
+                            "target": str(target_file.relative_to(self.project_root)) if target_file.is_absolute() else str(target_file),
                         }
                     )
                     if self.options.verbose:
                         print(f"  ❌ {relative_path}: {link_target}")
+                    continue
+
+                # File exists - now check anchor if provided
+                if anchor:
+                    valid_anchors = self._extract_anchors_from_file(target_file)
+                    if anchor not in valid_anchors:
+                        context_start = max(0, match.start() - 100)
+                        context_end = min(len(content_without_code), match.end() + 100)
+                        context = content_without_code[context_start:context_end]
+                        is_conditional = any(
+                            marker.lower() in context.lower()
+                            for marker in CONDITIONAL_MARKERS
+                        )
+                        if not is_conditional:
+                            self.violations.append(
+                                {
+                                    "file": relative_path,
+                                    "type": "broken-link",
+                                    "severity": "error",
+                                    "message": f"Broken link: {link_target} (anchor '{anchor}' not found)",
+                                    "target": str(target_file.relative_to(self.project_root)),
+                                }
+                            )
+                            if self.options.verbose:
+                                print(f"  ❌ {relative_path}: {link_target} (anchor '{anchor}' not found)")
 
     def _check_back_references(self):
         """Check Layer 2: System-prompts shouldn't reference outside without marking."""
@@ -359,6 +514,14 @@ class DocumentScanner:
                 for ref in potential_refs:
                     # Skip if it's in a valid format
                     if ref in hyperlink_targets or ref in backtick_targets:
+                        continue
+
+                    # Skip special root files that are often referenced in plain text
+                    ignored_files = {
+                        "README.md", "AGENTS.md", "CLAUDE.md", "AIDER.md",
+                        "GEMINI.md", "CLINE.md", "TOOL-X.md"
+                    }
+                    if ref in ignored_files or ref.split("/")[-1] in ignored_files:
                         continue
 
                     # Skip common false positives (file paths in explanations that shouldn't be links)

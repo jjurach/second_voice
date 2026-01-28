@@ -132,6 +132,134 @@ python3 bootstrap.py --disable-logs-first --commit  # Disable logs-first workflo
    - **Missing sections:** Adds them
 4. **Safe by Default:** Dry-run mode is the default; use `--commit` to write
 
+## Testing Agent Kernel Tools
+
+The Agent Kernel includes a comprehensive test suite for `bootstrap.py` and `docscan.py`. Tests are located in `docs/system-prompts/tests/` and use Python's standard library only—no external dependencies required.
+
+### Running Tests
+
+**Run all tests:**
+```bash
+python3 -m unittest discover -s docs/system-prompts/tests -p "test_*.py"
+```
+
+**Run specific test suite:**
+```bash
+python3 docs/system-prompts/tests/test_docscan.py     # Test document scanner
+python3 docs/system-prompts/tests/test_bootstrap.py   # Test bootstrap tool
+```
+
+**Using the test runner script:**
+```bash
+./docs/system-prompts/tests/run_tests.sh              # Run all tests
+./docs/system-prompts/tests/run_tests.sh docscan      # Run docscan tests only
+./docs/system-prompts/tests/run_tests.sh bootstrap    # Run bootstrap tests only
+./docs/system-prompts/tests/run_tests.sh -v           # Verbose output
+```
+
+### What Tests Cover
+
+**docscan.py Tests:**
+- Anchor extraction (explicit `{#id}`, auto-generated from headings, HTML anchors)
+- Link target resolution (file paths + anchors)
+- Broken link detection (missing files, missing anchors)
+- Conditional link handling
+- External URL handling
+- Mandatory reading anchor validation
+
+**bootstrap.py Tests:**
+- Section marker validation (matching pairs, no duplicates, proper formatting)
+- Section extraction and updates
+- Project language detection (Python, JavaScript, unknown)
+- Project root detection
+- MANDATORY-READING section handling
+- Safe update operations with force flag
+
+### Test Requirements
+
+**When Adding New Features:**
+
+1. **Update Tests When Adding Features**
+   - If you add new functionality to `bootstrap.py` or `docscan.py`, you MUST add corresponding tests
+   - This prevents regressions and documents expected behavior
+   - Tests serve as executable documentation
+
+2. **Test Coverage Expectations**
+   - New methods should have unit tests
+   - Edge cases should be tested (malformed input, missing files, etc.)
+   - Happy path and error paths should both be covered
+
+3. **Running Tests Before Committing**
+   ```bash
+   # Before committing changes to bootstrap.py or docscan.py:
+   python3 -m unittest discover -s docs/system-prompts/tests -p "test_*.py"
+
+   # All tests must pass before commit
+   ```
+
+4. **Backwards Compatibility**
+   - New tests should not break existing tests
+   - If you change behavior, update the corresponding tests
+   - Ensure new features work with existing projects
+
+### Test Structure
+
+```
+docs/system-prompts/tests/
+├── __init__.py                    # Test module initialization
+├── test_docscan.py               # Document scanner tests (~400 lines, 8 test classes)
+├── test_bootstrap.py             # Bootstrap tool tests (~350 lines, 6 test classes)
+└── run_tests.sh                  # Test runner script
+```
+
+### Adding Tests
+
+To add tests for new features:
+
+1. Identify which file your feature is in (`docscan.py` or `bootstrap.py`)
+2. Open the corresponding test file (`test_docscan.py` or `test_bootstrap.py`)
+3. Add a new test class or add methods to an existing class:
+
+```python
+class TestMyNewFeature(unittest.TestCase):
+    """Test description of the feature."""
+
+    def setUp(self):
+        """Initialize test environment."""
+        # Create temporary files/directories as needed
+        pass
+
+    def tearDown(self):
+        """Clean up test artifacts."""
+        pass
+
+    def test_happy_path(self):
+        """Test normal operation."""
+        # Test code
+        self.assertEqual(expected, actual)
+
+    def test_edge_case(self):
+        """Test edge cases or error conditions."""
+        # Test code
+        self.assertRaises(SomeException, function_call)
+```
+
+4. Run tests to verify:
+```bash
+python3 docs/system-prompts/tests/test_docscan.py -v
+```
+
+### No External Dependencies
+
+All tests use Python's standard library:
+- `unittest` - Test framework
+- `tempfile` - Temporary test files
+- `pathlib` - File path handling
+- `sys` - Module imports
+- `re` - Regular expressions (already used by bootstrap.py and docscan.py)
+
+This ensures tests run on any Python 3.x installation without setup overhead.
+
 ## Understanding Workflows
 
 The Agent Kernel includes optional **Workflows**—sets of instructions that govern how AI agents approach development tasks. Projects can enable, disable, or create custom workflows.

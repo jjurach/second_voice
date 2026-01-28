@@ -85,6 +85,38 @@ class Bootstrap:
             return match.group(1).strip()
         return ""
 
+    def _validate_section_markers(self, content: str) -> list[str]:
+        """
+        Validate that all section markers are properly formatted.
+
+        Returns:
+            List of validation errors (empty list = valid)
+        """
+        errors = []
+
+        # Check for unmatched SECTION markers
+        open_sections = re.findall(r"<!-- SECTION: (\w+(?:-\w+)*) -->", content)
+        close_sections = re.findall(r"<!-- END-SECTION -->", content)
+
+        if len(open_sections) != len(close_sections):
+            errors.append(
+                f"Mismatched section markers: {len(open_sections)} open, {len(close_sections)} close"
+            )
+
+        # Check for malformed markers
+        malformed_open = re.findall(r"<!--\s*SECTION:", content)
+        malformed_close = re.findall(r"END-SECTION\s*-->", content)
+
+        if len(malformed_open) > len(open_sections):
+            errors.append("Found malformed SECTION markers (incorrect spacing)")
+
+        # Check for duplicate section names
+        if len(open_sections) != len(set(open_sections)):
+            duplicates = [s for s in set(open_sections) if open_sections.count(s) > 1]
+            errors.append(f"Duplicate section names: {', '.join(duplicates)}")
+
+        return errors
+
     def _update_section(
         self, content: str, section_name: str, new_content: str, force: bool = False
     ) -> tuple[str, bool]:
@@ -306,6 +338,16 @@ class Bootstrap:
             print(f"Initializing new {self.agents_file}")
             agents_content = "# Project Agents\n\nTODO: describe whatever here\n"
             changed = True
+
+        # Validate existing section markers
+        validation_errors = self._validate_section_markers(agents_content)
+        if validation_errors:
+            print("⚠️  Validation errors in AGENTS.md:")
+            for error in validation_errors:
+                print(f"   - {error}")
+            if not force:
+                print("   Use --force to proceed anyway.")
+                return False
 
         language = self._detect_language()
 

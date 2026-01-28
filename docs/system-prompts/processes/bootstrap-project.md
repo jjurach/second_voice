@@ -414,7 +414,7 @@ The project follows the Agent Kernel template system. For complete template docu
 Development notes and session transcripts are stored in `dev_notes/` using the format:
 
 \```
-dev_notes/YYYY-MM-DD_HH-MM-SS_description.md
+dev_notes/subdir/YYYY-MM-DD_HH-MM-SS_description.md
 \```
 
 ### Planning Documents
@@ -1472,7 +1472,7 @@ done
 
 ### Step 7.4: Create Integration Summary
 
-**Create summary document:** `dev_notes/YYYY-MM-DD_HH-MM-SS_bootstrap-integration-complete.md`
+**Create summary document:** `dev_notes/changes/YYYY-MM-DD_HH-MM-SS_bootstrap-integration-complete.md`
 
 ```markdown
 # Bootstrap Integration Complete
@@ -1552,7 +1552,7 @@ Integration complete. Project ready for development.
 ### Step 7.5: Final Commit
 
 ```bash
-git add dev_notes/[timestamp]_bootstrap-integration-complete.md [any other final changes]
+git add dev_notes/changes/[timestamp]_bootstrap-integration-complete.md [any other final changes]
 
 git commit -m "docs: complete Agent Kernel bootstrap integration
 
