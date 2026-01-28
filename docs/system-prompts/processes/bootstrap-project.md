@@ -1,25 +1,45 @@
 # Bootstrap Project: Agent Kernel Integration Process
 
 **Process Owner:** Agent Kernel
-**Purpose:** Integrate Agent Kernel documentation into a new project, eliminate duplication, fix broken links, and establish clear content ownership.
-**Audience:** AI agents performing initial project documentation integration
-**Prerequisites:** Agent Kernel (docs/system-prompts/) already copied into project
+**Purpose:** Integrate Agent Kernel documentation into a project, eliminate duplication, fix broken links, and establish clear content ownership.
+**Audience:** AI agents performing project documentation integration
+**Prerequisites:** Agent Kernel (docs/system-prompts/) is present in project
 
 ---
 
 ## Overview
 
-This process guides you through integrating the Agent Kernel into a new project. You will:
+This process guides you through bootstrapping the Agent Kernel integration into a project. The process works in two scenarios:
 
-1. Run bootstrap.py to generate project files
-2. Analyze the generated files and existing documentation
-3. Identify and fix integration gaps (TODOs, broken links, duplication)
-4. Establish clear content ownership and cross-references
-5. Validate integrity and completeness
+### Scenario 1: Initial Bootstrap (New Project)
+You're setting up a project for the first time with Agent Kernel.
+- Goal: Generate AGENTS.md, create missing documentation, establish structure
+- Focus: Phases 1, 3 (create missing files), 4 (light consolidation), 5-7
+- Duration: 15-20 file operations
 
-**Expected Duration:** 6 phases, typically 15-20 file operations
+### Scenario 2: Bootstrap After System-Prompts Updates
+Agent Kernel documentation in docs/system-prompts/ has changed (new sections, updated workflows, etc.). You need to re-validate and re-connect the project.
+- Goal: Re-sync AGENTS.md, verify links, remove redundant project documentation
+- Focus: Phases 1 (re-sync), 2 (scan for breakage), 4 (aggressive redundancy cleanup), 5-7
+- Duration: 5-15 file operations
 
-**Success Criteria:**
+**Both scenarios follow the same 7-phase process; the emphasis just shifts.**
+
+---
+
+## Process Steps
+
+You will:
+
+1. Verify current state and identify issues
+2. Run bootstrap.py to generate/update AGENTS.md
+3. Analyze documentation for gaps and broken links
+4. Fix issues and establish proper structure
+5. Consolidate duplication and remove redundancy
+6. Verify cross-references and integrity
+7. Validate and document completion
+
+**Success Criteria (Both Scenarios):**
 - 0 critical TODOs remaining
 - 0 broken links in documentation
 - Clear separation: generic content in system-prompts/, project-specific in docs/
@@ -31,7 +51,11 @@ This process guides you through integrating the Agent Kernel into a new project.
 
 ## Phase 0: Pre-Bootstrap Analysis
 
+**Applies to:** Both scenarios
 **Goal:** Understand current state before running bootstrap
+
+**For Initial Bootstrap:** Establishes baseline of what exists
+**For Updates:** Identifies what changed and what might be broken
 
 ### Step 0.1: Verify Agent Kernel is Present
 
@@ -74,7 +98,11 @@ wc -l AGENTS.md 2>/dev/null || echo "File doesn't exist yet"
 
 ## Phase 1: Run Bootstrap
 
-**Goal:** Generate AGENTS.md and analyze what needs integration
+**Applies to:** Both scenarios
+**Goal:** Generate/update AGENTS.md and identify what needs integration
+
+**For Initial Bootstrap:** Creates AGENTS.md from scratch
+**For Updates:** Re-syncs AGENTS.md with updated system-prompts sections
 
 ### Step 1.1: Analyze Mode (Dry Run)
 
@@ -153,7 +181,11 @@ cat AGENTS.md
 
 ## Phase 2: Comprehensive Documentation Scan
 
-**Goal:** Identify all integration gaps, broken links, and duplication
+**Applies to:** Both scenarios (but different focus)
+**Goal:** Identify integration gaps, broken links, and duplication
+
+**For Initial Bootstrap:** Establishes baseline of documentation quality
+**For Updates:** Identifies what broke due to system-prompts changes (new section names, moved files, etc.)
 
 ### Step 2.1: Find All Markdown Files
 
@@ -307,7 +339,11 @@ Consolidate findings into a structured summary:
 
 ## Phase 3: Fix Critical TODOs and Create Missing Core Files
 
+**Applies to:** Primarily Initial Bootstrap (light work for Updates)
 **Goal:** Resolve placeholders and establish proper document architecture
+
+**For Initial Bootstrap:** Create all missing files (architecture.md, implementation-reference.md, templates.md, etc.)
+**For Updates:** Files likely exist; just verify they still make sense and aren't out of date
 
 ### Step 3.1: Fix AGENTS.md Introduction
 
@@ -651,9 +687,13 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 
 ---
 
-## Phase 4: Consolidate Duplicated Content
+## Phase 4: Consolidate Duplicated Content & Remove Redundancy
 
-**Goal:** Reduce duplication by establishing clear content ownership
+**Applies to:** Both scenarios (but different focus)
+**Goal:** Reduce duplication by establishing clear content ownership and removing redundant content
+
+**For Initial Bootstrap:** Light consolidation (project docs are usually minimal)
+**For Updates:** AGGRESSIVE - System-prompts has evolved, so project-specific docs likely have content now covered by system-prompts. Remove redundancy aggressively.
 
 ### Step 4.1: Analyze docs/definition-of-done.md
 
@@ -894,7 +934,11 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 
 ## Phase 5: Establish Clear Cross-References
 
+**Applies to:** Both scenarios (but different focus)
 **Goal:** Create bidirectional links between AGENTS.md, docs/, and system-prompts/
+
+**For Initial Bootstrap:** Establish all cross-references from scratch
+**For Updates:** Verify existing cross-references still work; update any broken ones due to system-prompts structure changes
 
 ### Step 5.1: Add Cross-References to AGENTS.md
 
@@ -1174,7 +1218,11 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 
 ## Phase 6: Run Integrity Processes
 
+**Applies to:** Both scenarios
 **Goal:** Ensure all documentation is consistent and discoverable
+
+**For Initial Bootstrap:** First full integrity check of complete documentation
+**For Updates:** Verify no breakage from system-prompts changes
 
 ### Step 6.1: Run Document Integrity Scan
 
@@ -1317,7 +1365,11 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 
 ## Phase 7: Final Validation and Summary
 
+**Applies to:** Both scenarios
 **Goal:** Verify all success criteria met and create completion summary
+
+**For Initial Bootstrap:** Document successful first-time bootstrap
+**For Updates:** Document what changed and verify no regressions
 
 ### Step 7.1: Final Integrity Scan
 
@@ -1557,33 +1609,46 @@ python3 docs/system-prompts/bootstrap.py --commit --language python
 
 Before starting this process, verify:
 
-- [ ] Agent Kernel copied to `docs/system-prompts/`
+- [ ] Agent Kernel present in `docs/system-prompts/`
 - [ ] Git repository initialized and clean working tree
 - [ ] Python 3.8+ available
-- [ ] Have 1-2 hours for full integration process
+- [ ] Have 1-2 hours (initial) or 30-60 minutes (updates)
 - [ ] Understand project domain (to identify project-specific content)
 - [ ] Can commit changes incrementally (7 commits recommended)
 
+**For Initial Bootstrap additionally:**
+- [ ] Understand whether core files (architecture.md, etc.) exist
+- [ ] Know what project-specific documentation exists
+
+**For Updates additionally:**
+- [ ] Review what changed in docs/system-prompts/
+- [ ] Prepared to remove redundant content from project docs
+
 **After completion, the project will have:**
 - ✓ Clear documentation hierarchy
-- ✓ No duplication between project docs and Agent Kernel
+- ✓ No duplication between project docs and Agent Kernel (or only intentional project-specific extensions)
 - ✓ Bidirectional navigation
 - ✓ All documentation discoverable
 - ✓ Quality standards established
 - ✓ AI agents can immediately start following AGENTS.md workflow
+- ✓ System-prompts changes successfully integrated (for updates)
 
 ---
 
 ## Process Metadata
 
-**Version:** 1.0
-**Last Updated:** 2026-01-27
+**Version:** 1.1
+**Last Updated:** 2026-01-28
 **Maintained By:** Agent Kernel
 **Used In:** Google Personal MCP Server (reference implementation)
 
-**Process Type:** One-time integration (run once per project)
-**Repeatable:** Can be re-run if Agent Kernel updates
-**Approvals Required:** Human approval before Phase 3 (file creation) recommended
+**Process Type:** Flexible integration (initial setup or post-update validation)
+**Scenarios:**
+- Initial Bootstrap - First-time Agent Kernel integration into new project
+- Bootstrap After System-Prompts Updates - Re-validate after system-prompts changes
+
+**Repeatable:** Yes, run after any Agent Kernel update
+**Approvals Required:** Human approval before Phase 3 (file creation) recommended for initial bootstrap
 
 ---
 
