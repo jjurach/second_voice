@@ -132,6 +132,7 @@ class Bootstrap:
 
         # Map section names to file paths
         section_map = {
+            "MANDATORY-READING": "mandatory-reading.md",
             "CORE-WORKFLOW": "workflows/core.md",
             "PRINCIPLES": "principles/definition-of-done.md",
             "PYTHON-DOD": f"languages/python/definition-of-done.md",
@@ -310,6 +311,7 @@ class Bootstrap:
 
         # Sections to sync
         sections = [
+            ("MANDATORY-READING", "mandatory-reading.md"),
             ("CORE-WORKFLOW", "workflows/core.md"),
             ("PRINCIPLES", "principles/definition-of-done.md"),
         ]

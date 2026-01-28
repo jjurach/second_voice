@@ -3,6 +3,7 @@
     "stt_provider": "local_whisper",
     "llm_provider": "ollama",
     "local_whisper_url": "http://localhost:9090/v1/audio/transcriptions",
+    "local_whisper_timeout": 300,
     "ollama_url": "http://localhost:11434/api/generate",
     "ollama_model": "llama3",
     "groq_stt_model": "whisper-large-v3",

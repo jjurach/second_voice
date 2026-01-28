@@ -1,9 +1,10 @@
 # Project Plan: Simple Mandatory Reading Lists for Agent Files
 
 **Created:** 2026-01-28
-**Status:** Draft
+**Status:** Completed
 **Related Spec:** `dev_notes/specs/2026-01-28_10-36-41_mandatory-context-assembly.md`
 **Supersedes:** `dev_notes/project_plans/2026-01-28_10-36-41_mandatory-context-assembly.md` (WONT-DO)
+**Implementation Reference:** `dev_notes/changes/2026-01-28_10-36-41_simple-mandatory-reading-lists.md`
 
 ---
 

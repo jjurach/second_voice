@@ -2,6 +2,19 @@
 
 **Status:** ✅ Supported
 
+## 🚨 MANDATORY READING FIRST 🚨
+
+**STOP!** Before reading this guide, you MUST first read the files listed in the "MANDATORY READING" section of [AGENTS.md](../../../AGENTS.md#mandatory-reading---read-first-every-session).
+
+**Quick links to mandatory files:**
+1. [Core Workflow](../workflows/logs-first.md) - How to approach all tasks
+2. [Definition of Done](../../definition-of-done.md) - Completion criteria
+3. [Project Guidelines](../../mandatory.md) - Second Voice specific rules
+
+**Have you read all three?** ✓ Yes, continue. ✗ No, read them now.
+
+---
+
 This guide covers how to use **Claude Code** (the official Anthropic Claude CLI tool) with this project's AGENTS.md workflow.
 
 ## Quick Start

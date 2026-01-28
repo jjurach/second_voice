@@ -12,6 +12,7 @@ class ConfigurationManager:
         'openrouter_llm_model': 'openai/gpt-oss-120b:free',
         'groq_stt_model': 'whisper-large-v3',
         'local_whisper_url': 'http://localhost:9090/v1/audio/transcriptions',
+        'local_whisper_timeout': 300,  # 5 minutes timeout
         'ollama_url': 'http://localhost:11434/api/generate',
         'ollama_model': 'llama-pro:latest',
         'cline_llm_model': 'default-model',  # Added Cline CLI model config
