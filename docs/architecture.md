@@ -171,3 +171,6 @@ The application maintains session memory (`last_output`) for iterative refinemen
 3. **LLM Logic:** System prompt detects references to previous output ("it", "this", "that") and transforms accordingly
 
 This enables voice-driven iteration without re-stating the entire context.
+
+---
+Last Updated: 2026-01-28

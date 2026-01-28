@@ -422,3 +422,6 @@ The **core workflow is the same for all tools**. The differences are in HOW each
 4. **For tool developers:** Use this as template for adding new tool support
 
 Each tool section shows the minimum changes needed to adapt AGENTS.md to that tool's constraints.
+
+---
+Last Updated: 2026-01-28

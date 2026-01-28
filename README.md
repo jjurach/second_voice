@@ -397,6 +397,21 @@ To add or improve tool support:
 4. **Configure** - Create tool config file (e.g., `.aider.conf`)
 5. **Submit** - PR with documentation and config
 
+## Documentation
+
+### For AI Agents
+- **[AGENTS.md](AGENTS.md)** - Mandatory workflow for AI agents
+- **[Definition of Done](docs/definition-of-done.md)** - Quality standards
+- **[Workflows](docs/workflows.md)** - Development workflows
+
+### For Developers
+- **[Documentation Index](docs/README.md)** - Complete documentation navigation
+- **[Architecture](docs/architecture.md)** - System architecture
+- **[Implementation Reference](docs/implementation-reference.md)** - Code patterns
+
 ## License
 
 MIT
+
+---
+Last Updated: 2026-01-28

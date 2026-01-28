@@ -174,9 +174,8 @@ You must verify your documentation changes against these requirements before mar
 > **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting.
 > **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in `dev_notes`.
 
-**Step B: Process Inbox Item or Spec File (If Required)**
+**Step B: Process Spec File (If Required)**
 - When a prompt involves planning, represent the planning in `dev_notes/specs`
-- **Inbox Workflow:** If instructed to "process inbox", read `dev_notes/inbox/`, generate a spec in `dev_notes/specs/` with standardized header, and archive the original file.
 - Create a summary of what the user is asking for in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_spec-description.md` (using the timestamp-based filename format)
 - If the prompt involves processing user intentions from a un-timestamped file already in `dev_notes/specs`, then rename it to match the filename format based on the file's last modified time.
   - Add any additional context as developed over follow-up conversations about the spec.
@@ -212,6 +211,14 @@ You must verify your documentation changes against these requirements before mar
 
 <!-- SECTION: PRINCIPLES -->
 # Definition of Done: Universal Principles
+
+This section is maintained by the Agent Kernel. For the complete, authoritative version, see:
+- [Universal DoD](docs/system-prompts/principles/definition-of-done.md) - Agent Kernel universal requirements
+- [Python DoD](docs/system-prompts/languages/python/definition-of-done.md) - Agent Kernel language requirements
+
+**Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)
+
+---
 
 **MANDATORY:** No task is considered "Done" until all applicable criteria in this document are met. This document serves as the **State Transition Logic** for the project's development workflow.
 
@@ -825,7 +832,7 @@ These files define:
 ---
 
 ### 2. Definition of Done
-**File:** [docs/definition-of-done.md](../definition-of-done.md)
+**File:** [docs/definition-of-done.md](docs/definition-of-done.md)
 
 **What it contains:**
 - Completion criteria for all tasks
@@ -839,7 +846,7 @@ These files define:
 ---
 
 ### 3. Project-Specific Guidelines
-**File:** [docs/mandatory.md](../mandatory.md)
+**File:** [docs/mandatory.md](docs/mandatory.md)
 
 **What it contains:**
 - Second Voice project structure and overview
@@ -856,9 +863,10 @@ These files define:
 
 These files provide additional context when working on specific features:
 
-- **Architecture:** [docs/architecture.md](../architecture.md) - System design, components, and data flow
-- **Implementation Reference:** [docs/implementation-reference.md](../implementation-reference.md) - Code patterns, style, and conventions
-- **Workflows:** [docs/workflows.md](../workflows.md) - Development processes and available workflow options
+- **Architecture:** [docs/architecture.md](docs/architecture.md) - System design, components, and data flow
+- **Implementation Reference:** [docs/implementation-reference.md](docs/implementation-reference.md) - Code patterns, style, and conventions
+- **Workflows:** [docs/workflows.md](docs/workflows.md) - Development processes and available workflow options
+- **Templates:** [docs/templates.md](docs/templates.md) - Planning document templates
 - **Tool Guides:** [docs/system-prompts/tools/](tools/) - Guides for Aider, Claude Code, and other tools
 
 ---
@@ -881,3 +889,5 @@ If you can't answer these, **re-read the mandatory files now**. This isn't punis
 
 **Remember:** Reading is REQUIRED, not suggested. These files are in your context for a reason.
 <!-- END-SECTION -->
+---
+Last Updated: 2026-01-28

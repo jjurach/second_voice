@@ -172,3 +172,5 @@ When adding support for a new tool:
 2. Update this matrix
 3. Create entry point config file (if needed)
 4. Verify AGENTS.md workflow compliance
+---
+Last Updated: 2026-01-28

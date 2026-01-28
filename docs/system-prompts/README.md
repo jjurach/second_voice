@@ -809,6 +809,64 @@ project-root/
     └── changes/                       # Change documentation
 ```
 
+## Project Integration
+
+This Agent Kernel is integrated into the **Second Voice** project with the following extensions:
+
+### Entry Points
+
+- **[AGENTS.md](../../AGENTS.md)** - Main agent instructions combining Agent Kernel workflows with project-specific requirements
+- **[docs/definition-of-done.md](../definition-of-done.md)** - Project-specific DoD extending Agent Kernel universal and Python DoD
+- **[docs/workflows.md](../workflows.md)** - Project-specific development workflows
+
+### Project-Specific Extensions
+
+The project adds domain-specific requirements for:
+
+**Project Type:**
+- CLI Application
+- Audio Processing (AAC, Whisper)
+- Google Gemini Integration
+
+**Technology Stack:**
+- Python 3.12+
+- Pytest
+- SoundDevice
+- Pydub
+
+See [docs/definition-of-done.md](../definition-of-done.md) for complete project-specific requirements.
+
+### Sync Status
+
+- **Bootstrap sync:** Completed 2026-01-28
+- **Last integration update:** 2026-01-28
+- **Sections synchronized:** CORE-WORKFLOW, PRINCIPLES, PYTHON-DOD
+
+### Documentation Structure
+
+```
+project-root/
+├── AGENTS.md                           # Combined: Agent Kernel + project extensions
+├── [TOOL].md                           # Tool-specific instructions (if exists)
+├── docs/
+│   ├── definition-of-done.md          # Project DoD (extends Agent Kernel)
+│   ├── architecture.md                # Project architecture
+│   ├── implementation-reference.md    # Implementation patterns
+│   ├── workflows.md                   # Project workflows (extends Agent Kernel)
+│   ├── examples/                      # Project-specific examples (if exists)
+│   └── system-prompts/                # Agent Kernel (this directory)
+│       ├── README.md                  # This file
+│       ├── principles/                # Universal principles
+│       ├── languages/                 # Language-specific standards
+│       ├── templates/                 # Document templates
+│       ├── workflows/                 # Workflow documentation
+│       └── tools/                     # Tool-specific guides
+└── dev_notes/                         # Runtime documentation
+    ├── specs/                         # Specifications
+    ├── project_plans/                 # Project plans
+    └── changes/                       # Change documentation
+```
+
 ## Version
 
 Agent Kernel v1.0 - January 2026

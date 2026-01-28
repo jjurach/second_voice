@@ -368,3 +368,6 @@ project:
 5. **Document this:** Share this FILE-NAMING-CONVENTIONS.md with team
 
 The key principle: **Auto-discovered files have fixed names. Everything else is flexible as long as links are updated.**
+
+---
+Last Updated: 2026-01-28

@@ -163,3 +163,6 @@ Context is passed to the LLM to maintain conversational continuity.
 | OpenRouter | `https://openrouter.ai/api/v1/chat/completions` | POST | `messages` |
 | Groq (STT) | `https://api.groq.com/openai/v1/audio/transcriptions` | POST | `file` |
 | Local Whisper | `http://localhost:9090/v1/audio/transcriptions` | POST | `file` |
+
+---
+Last Updated: 2026-01-28

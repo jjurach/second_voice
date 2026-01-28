@@ -150,3 +150,6 @@ When processing completes:
 3. Modal dialog: "Refine in Obsidian. Click OK to set as next round's context."
 4. On OK: Read buffer back into `last_output` memory
 5. Archive buffer to `voice_note_<timestamp>.md`
+
+---
+Last Updated: 2026-01-28

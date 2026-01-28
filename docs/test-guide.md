@@ -420,3 +420,5 @@ docker-compose config | grep -A20 "whisper:"
 - [NVIDIA Container Toolkit Docs](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/)
 - [Docker GPU Support](https://docs.docker.com/compose/how-tos/gpu-support/)
 - [NVIDIA CUDA Documentation](https://docs.nvidia.com/cuda/)
+---
+Last Updated: 2026-01-28

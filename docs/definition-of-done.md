@@ -1,79 +1,83 @@
-# Definition of Done (DoD)
+# Definition of Done - Second Voice
 
-**MANDATORY:** No task is considered "Done" until all applicable criteria in this document are met. This document serves as the **State Transition Logic** for the project's development workflow.
+**Referenced from:** [AGENTS.md](../AGENTS.md)
 
-## 1. The "Plan vs. Reality" Protocol
+This document defines the "Done" criteria for Second Voice. It extends the universal Agent Kernel Definition of Done with project-specific requirements.
 
-*   **Plan Consistency:**
-    *   **Insignificant Deviation:** If the implementation differs slightly from the plan (e.g., helper function name change, minor logic simplification) but the *outcome* is identical, note this in the `dev_notes/changes/` entry.
-    *   **Significant Deviation:** If you discover a significantly better architectural approach or a blocker that requires changing other components: **STOP**. Abort the current execution path and ask the human developer for intervention. Do not unilaterally rewrite the architecture.
-*   **Plan Status:**
-    *   All Project Plans in `dev_notes/project_plans/` must have a `Status` header.
-    *   **Draft:** Initial state when creating the plan.
-    *   **Approved:** State after human developer gives explicit approval.
-    *   **Completed:** You MUST update the header to `Status: Completed` before declaring the task finished.
+## Agent Kernel Definition of Done
 
-## 2. Verification as Data
+This project follows the Agent Kernel Definition of Done. **You MUST review these documents first:**
 
-*   **Proof of Work:**
-    *   In the `dev_notes/changes/` entry, the "Verification Results" section is **mandatory**.
-    *   You MUST include the **exact command** used to verify the change.
-    *   You MUST include a **snippet of the terminal output** (stdout/stderr) showing success.
-    *   "It works" is not acceptable. Proof is required.
-*   **Temporary Tests:**
-    *   If you created a temporary test script (e.g., `scripts/verify_bug_123.py`):
-        1.  Run it and capture the output.
-        2.  Include the **full content of the script** in the `dev_notes/changes/` entry (inside a code block).
-        3.  **Delete** the temporary script from the repository.
+### Universal Requirements
 
-## 3. Codebase State Integrity
+See **[Universal Definition of Done](system-prompts/principles/definition-of-done.md)** for:
+- Plan vs Reality Protocol
+- Verification as Data
+- Codebase State Integrity
+- Agent Handoff
+- Status tracking in project plans
+- dev_notes/ change documentation requirements
 
-*   **Dependencies:**
-    *   If any new library is imported, the task is **NOT DONE** until both `requirements.txt` AND `pyproject.toml` are updated.
-*   **Configuration Drift:**
-    *   If you add or modify a configuration key (e.g., `openrouter_llm_model`):
-        1.  Update `docs/implementation-reference.md` (or relevant doc).
-        2.  Update `config.example.json` to include the new key with a safe default or placeholder.
-    *   **Secrets:** Never hardcode secrets. Ensure they are read from env vars or config, and documented in `config.example.json`.
+### Python Requirements
 
-## 4. Documentation Reference Formatting
+See **[Python Definition of Done](system-prompts/languages/python/definition-of-done.md)** for:
+- Python environment & dependencies
+- Testing requirements (pytest)
+- Code quality standards
+- File organization
+- Coverage requirements
 
-*   **Hyperlinks for Navigation:**
-    *   When creating a reference that users should navigate to, use markdown hyperlinks: `[text](path)`
-    *   Examples: `[AGENTS.md](AGENTS.md)`, `[docs/test-guide.md](docs/test-guide.md)`
-    *   Use in: Call-to-action sections, navigation tables, cross-document references
+## Project-Specific Extensions
 
-*   **Backticks for File References in Prose:**
-    *   When mentioning a file inline in text, use backticks: `` `filename.md` ``
-    *   Examples: "The `AGENTS.md` file defines the workflow", "See `docs/file-naming-conventions.md` for details"
-    *   Use in: Explanatory prose, file lists, technical descriptions
+The following requirements are specific to Second Voice and extend the Agent Kernel DoD:
 
-*   **What NOT to Do:**
-    *   Do NOT use plain text file references: ❌ "See AGENTS.md" or "check docs/file.md" (no formatting)
-    *   All file/path references must use either backticks or hyperlinks
+### 1. Configuration & Dependencies
 
-*   **Semantic Guide:**
-    ```
-    ✅ [AGENTS.md](AGENTS.md) for workflow - I want them to navigate here
-    ✅ `AGENTS.md` file - I'm describing what the file is/contains
-    ✅ `config.json`, `setup.py` - Listing multiple files/paths
-    ❌ See AGENTS.md - Plain text, no formatting (AVOID)
-    ```
+**Configuration Drift:**
+- If you modify configuration, update **`config.example.json`** (not just generic config files).
+- Update `docs/implementation-reference.md` or `docs/config.md`.
 
-## 5. The Agent Handoff
+**Dependencies:**
+- If any new library is imported, you must update BOTH:
+  - `requirements.txt`
+  - `pyproject.toml`
 
-*   **Known Issues:**
-    *   If the implementation is functional but has caveats (e.g., "slow on first run," "edge case X not handled"), you MUST add a **"Known Issues"** section to the `dev_notes/changes/` entry.
-*   **Context Forwarding:**
-    *   When starting a new task, agents are instructed to read the previous 2 change summaries to check for "Known Issues" that might impact their work.
+### 2. Documentation Reference Formatting
 
-## Checklist for "Done"
+**Hyperlinks for Navigation:**
+- When creating a reference that users should navigate to, use markdown hyperlinks: `[text](path)`
+- Examples: `[AGENTS.md](AGENTS.md)`, `[docs/test-guide.md](docs/test-guide.md)`
 
-- [ ] `Status: Completed` set in Project Plan.
-- [ ] `dev_notes/changes/` entry created.
-- [ ] Verification command and output included in change log.
-- [ ] Temporary test scripts content saved to log and file deleted.
-- [ ] `requirements.txt` & `pyproject.toml` updated (if applicable).
-- [ ] `config.example.json` updated (if applicable).
-- [ ] `docs/` updated for new config/features.
-- [ ] "Known Issues" documented.
+**Backticks for File References in Prose:**
+- When mentioning a file inline in text, use backticks: `` `filename.md` ``
+- Examples: "The `AGENTS.md` file defines the workflow"
+
+**What NOT to Do:**
+- Do NOT use plain text file references: ❌ "See AGENTS.md" (no formatting)
+
+### 3. Pre-Commit Checklist
+
+**Code Quality:**
+- [ ] Python formatting applied
+- [ ] Linting passes
+- [ ] Type hints present
+
+**Testing:**
+- [ ] All unit tests pass: `pytest`
+- [ ] Integration tests pass (if applicable)
+
+**Project-Specific Checks:**
+- [ ] `config.example.json` updated for any new config keys
+- [ ] `requirements.txt` AND `pyproject.toml` synced
+
+## See Also
+
+- [AGENTS.md](../AGENTS.md) - Core A-E workflow
+- [Universal DoD](system-prompts/principles/definition-of-done.md) - Agent Kernel universal requirements
+- [Python DoD](system-prompts/languages/python/definition-of-done.md) - Agent Kernel language requirements
+- [Architecture](architecture.md) - System design
+- [Implementation Reference](implementation-reference.md) - Code patterns
+- [Workflows](workflows.md) - Development workflows
+
+---
+Last Updated: 2026-01-28

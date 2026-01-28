@@ -29,7 +29,7 @@ The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claud
 
 The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
 
-**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
+**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#processes) for details.
 
 ---
 Last Updated: 2026-01-28

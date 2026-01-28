@@ -519,3 +519,6 @@ For developers who want to add additional providers, see the implementation guid
 - **Architecture:** See `docs/architecture.md` for data flow diagrams
 - **Implementation:** See `docs/implementation-reference.md` for code templates
 - **Quick Start:** See `README.md` for step-by-step setup
+
+---
+Last Updated: 2026-01-28

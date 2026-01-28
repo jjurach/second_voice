@@ -309,3 +309,6 @@ cp docs/system-prompts/workflows/logs-first.md /path/to/other-project/docs/syste
 - **Can I switch workflows later?** → Yes, just run the disable/enable commands
 - **What if I don't like my workflow?** → Create a custom one that works better
 - **How do I share a workflow with other projects?** → Copy the .md file and register in their bootstrap.py
+
+---
+Last Updated: 2026-01-28

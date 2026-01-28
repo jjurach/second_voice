@@ -28,7 +28,7 @@ Second Voice is a voice-to-text processing tool with AI integration. It processe
 
 **System prompts framework:**
 - `docs/system-prompts/` - Agent kernel and workflow definitions
-- See [AGENTS.md](AGENTS.md) for complete system-prompts documentation
+- See [AGENTS.md](../AGENTS.md) for workflow details.
 
 ## Development Guidelines
 
@@ -106,3 +106,6 @@ cat config.example.json
 ---
 
 **Remember:** When in doubt, read the mandatory files first. They exist for a reason.
+
+---
+Last Updated: 2026-01-28

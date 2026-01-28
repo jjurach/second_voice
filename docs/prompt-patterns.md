@@ -770,3 +770,6 @@ If you find yourself repeating a prompt structure:
 5. Submit a PR to add to this guide
 
 Good patterns are reusable across projects and tools.
+
+---
+Last Updated: 2026-01-28

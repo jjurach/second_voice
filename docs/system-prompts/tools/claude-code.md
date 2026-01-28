@@ -4,7 +4,7 @@
 
 ## 🚨 MANDATORY READING FIRST 🚨
 
-**STOP!** Before reading this guide, you MUST first read the files listed in the "MANDATORY READING" section of [AGENTS.md](../../../AGENTS.md#mandatory-reading---read-first-every-session).
+**STOP!** Before reading this guide, you MUST first read the files listed in the "MANDATORY READING" section of [AGENTS.md](../../../AGENTS.md#mandatory-reading-read-first-every-session).
 
 **Quick links to mandatory files:**
 1. [Core Workflow](../workflows/logs-first.md) - How to approach all tasks
