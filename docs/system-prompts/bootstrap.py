@@ -13,6 +13,80 @@ import re
 from pathlib import Path
 
 
+class LinkTransformer:
+    """Transforms relative markdown links during bootstrap assembly."""
+
+    LINK_PATTERN = r'\[([^\]]+)\]\(([^)]+)\)'  # [text](path)
+
+    @staticmethod
+    def extract_anchor(link_path: str) -> tuple[str, str | None]:
+        """Split 'path/file.md#section' -> ('path/file.md', 'section')"""
+        if '#' in link_path:
+            path, anchor = link_path.split('#', 1)
+            return path, anchor
+        return link_path, None
+
+    @classmethod
+    def transform_link(cls, link_path: str, source_file: str,
+                      target_file: str, project_root: str) -> tuple[str, str | None]:
+        """
+        Transform relative link from source to target context.
+
+        Args:
+            link_path: Original link path (may include #anchor)
+            source_file: Source file path relative to project root
+            target_file: Target file path relative to project root
+            project_root: Absolute path to project root
+
+        Returns:
+            (transformed_link, warning_message)
+        """
+        # Skip external URLs
+        if link_path.startswith(('http://', 'https://', 'ftp://')):
+            return link_path, None
+
+        # Skip self-references (anchor only)
+        if link_path.startswith('#'):
+            return link_path, None
+
+        # Extract anchor if present
+        path_part, anchor = cls.extract_anchor(link_path)
+
+        # Skip absolute paths
+        if path_part.startswith('/'):
+            return link_path, None
+
+        # Only transform relative links starting with ../ or ./
+        if not (path_part.startswith('../') or path_part.startswith('./')):
+            return link_path, None
+
+        # Transform the path
+        try:
+            source_abs = Path(project_root) / source_file
+            target_abs = Path(project_root) / target_file
+
+            # Resolve link relative to source
+            link_abs = (source_abs.parent / path_part).resolve()
+
+            # Make relative to target
+            try:
+                relative = link_abs.relative_to(target_abs.parent.resolve())
+            except ValueError:
+                warning = f"Link '{link_path}' in {source_file} points outside project"
+                return link_path, warning
+
+            # Reconstruct with anchor
+            transformed = str(relative)
+            if anchor:
+                transformed = f"{transformed}#{anchor}"
+
+            return transformed, None
+
+        except Exception as e:
+            warning = f"Failed to transform link '{link_path}' in {source_file}: {e}"
+            return link_path, warning
+
+
 class Bootstrap:
     """Manages system prompts integration into AGENTS.md."""
 
@@ -57,13 +131,58 @@ class Bootstrap:
             return "javascript"
         return "unknown"
 
-    def _read_file(self, path: str) -> str:
-        """Read file content safely."""
+    def _read_file(self, path: str, transform_links: bool = False,
+                   source_file_relative: str = None,
+                   target_file_relative: str = None) -> str:
+        """
+        Read file content safely with optional link transformation.
+
+        Args:
+            path: Absolute path to source file
+            transform_links: If True, rewrite relative links for target context
+            source_file_relative: Source file path relative to project root
+            target_file_relative: Target file path relative to project root
+        """
         try:
             with open(path, "r", encoding="utf-8") as f:
-                return f.read()
+                content = f.read()
+
+            if transform_links and source_file_relative and target_file_relative:
+                content = self._transform_links_in_content(
+                    content, source_file_relative, target_file_relative
+                )
+
+            return content
         except FileNotFoundError:
             return ""
+
+    def _transform_links_in_content(self, content: str, source_file: str,
+                                    target_file: str) -> str:
+        """Transform all relative markdown links in content."""
+        transformer = LinkTransformer()
+        warnings = []
+
+        def replace_link(match):
+            link_text = match.group(1)
+            link_path = match.group(2)
+
+            transformed, warning = transformer.transform_link(
+                link_path, source_file, target_file, self.project_root
+            )
+
+            if warning:
+                warnings.append(warning)
+
+            return f"[{link_text}]({transformed})"
+
+        # Replace all markdown links
+        content = re.sub(transformer.LINK_PATTERN, replace_link, content)
+
+        # Print warnings
+        for warning in warnings:
+            print(f"⚠️  {warning}")
+
+        return content
 
     def _write_file(self, path: str, content: str) -> None:
         """Write file content (respects dry_run mode)."""
@@ -158,7 +277,7 @@ class Bootstrap:
         return updated, True
 
     def load_system_prompt(self, section_name: str, language: str = None) -> str:
-        """Load ideal state from system-prompts directory."""
+        """Load ideal state from system-prompts directory with link transformation."""
         if language is None:
             language = self._detect_language()
 
@@ -177,7 +296,17 @@ class Bootstrap:
             return ""
 
         file_path = os.path.join(self.system_prompts_dir, section_map[section_name])
-        content = self._read_file(file_path)
+        source_relative = os.path.join("docs", "system-prompts", section_map[section_name])
+        target_relative = "AGENTS.md"
+
+        # Enable link transformation
+        content = self._read_file(
+            file_path,
+            transform_links=True,
+            source_file_relative=source_relative,
+            target_file_relative=target_relative
+        )
+
         if not content:
             print(f"WARNING: Could not read: {file_path}")
         return content

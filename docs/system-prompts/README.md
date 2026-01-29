@@ -132,6 +132,39 @@ python3 bootstrap.py --disable-logs-first --commit  # Disable logs-first workflo
    - **Missing sections:** Adds them
 4. **Safe by Default:** Dry-run mode is the default; use `--commit` to write
 
+### Link Transformation
+
+Bootstrap automatically transforms relative markdown links when assembling `AGENTS.md` from component files in `docs/system-prompts/`. This ensures links work correctly in both the source files (where they're edited) and the assembled `AGENTS.md` (where agents read them).
+
+**How it works:**
+- Source files can use relative links that work in their location (e.g., `../definition-of-done.md`)
+- During assembly, links are automatically rewritten to work from `AGENTS.md`'s location at the project root
+
+**Example transformation:**
+```markdown
+# In docs/system-prompts/mandatory-reading.md (source)
+[Definition of Done](../definition-of-done.md)
+
+# After assembly in AGENTS.md (at root)
+[Definition of Done](docs/definition-of-done.md)
+```
+
+**What gets transformed:**
+- Relative paths with `../` or `./` prefixes
+- Anchors are preserved: `../file.md#section` → `docs/file.md#section`
+
+**What stays unchanged:**
+- External URLs: `https://example.com`
+- Absolute paths: `/absolute/path`
+- Self-references: `#anchor-only`
+- Non-relative paths: `file.md` (no prefix)
+
+**Benefits:**
+- Source files remain navigable in IDEs and GitHub
+- Assembled `AGENTS.md` has working links for AI agents
+- Bootstrap process is truly idempotent
+- No manual link maintenance required
+
 ## Testing Agent Kernel Tools
 
 The Agent Kernel includes a comprehensive test suite for `bootstrap.py` and `docscan.py`. Tests are located in `docs/system-prompts/tests/` and use Python's standard library only—no external dependencies required.
@@ -145,8 +178,9 @@ python3 -m unittest discover -s docs/system-prompts/tests -p "test_*.py"
 
 **Run specific test suite:**
 ```bash
-python3 docs/system-prompts/tests/test_docscan.py     # Test document scanner
-python3 docs/system-prompts/tests/test_bootstrap.py   # Test bootstrap tool
+python3 docs/system-prompts/tests/test_docscan.py              # Test document scanner
+python3 docs/system-prompts/tests/test_bootstrap.py            # Test bootstrap tool
+python3 docs/system-prompts/tests/test_link_transformation.py  # Test link transformation
 ```
 
 **Using the test runner script:**
@@ -174,6 +208,15 @@ python3 docs/system-prompts/tests/test_bootstrap.py   # Test bootstrap tool
 - Project root detection
 - MANDATORY-READING section handling
 - Safe update operations with force flag
+
+**Link Transformation Tests:**
+- Parent directory links (`../file.md` → `docs/file.md`)
+- Anchor preservation (`../file.md#section` → `docs/file.md#section`)
+- External URL preservation (`https://example.com` unchanged)
+- Absolute path preservation (`/absolute/path` unchanged)
+- Self-reference preservation (`#anchor` unchanged)
+- Current directory links (`./file.md` transformation)
+- Edge cases (multiple parent traversals, complex anchors)
 
 ### Test Requirements
 

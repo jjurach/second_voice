@@ -212,14 +212,6 @@ You must verify your documentation changes against these requirements before mar
 <!-- SECTION: PRINCIPLES -->
 # Definition of Done: Universal Principles
 
-This section is maintained by the Agent Kernel. For the complete, authoritative version, see:
-- [Universal DoD](docs/system-prompts/principles/definition-of-done.md) - Agent Kernel universal requirements
-- [Python DoD](docs/system-prompts/languages/python/definition-of-done.md) - Agent Kernel language requirements
-
-**Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)
-
----
-
 **MANDATORY:** No task is considered "Done" until all applicable criteria in this document are met. This document serves as the **State Transition Logic** for the project's development workflow.
 
 ## 1. The "Plan vs. Reality" Protocol
@@ -866,7 +858,6 @@ These files provide additional context when working on specific features:
 - **Architecture:** [docs/architecture.md](docs/architecture.md) - System design, components, and data flow
 - **Implementation Reference:** [docs/implementation-reference.md](docs/implementation-reference.md) - Code patterns, style, and conventions
 - **Workflows:** [docs/workflows.md](docs/workflows.md) - Development processes and available workflow options
-- **Templates:** [docs/templates.md](docs/templates.md) - Planning document templates
 - **Tool Guides:** [docs/system-prompts/tools/](tools/) - Guides for Aider, Claude Code, and other tools
 
 ---
