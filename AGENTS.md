@@ -210,8 +210,6 @@ You must verify your documentation changes against these requirements before mar
 <!-- END-SECTION -->
 
 <!-- SECTION: PRINCIPLES -->
-# Definition of Done: Universal Principles
-
 This section is maintained by the Agent Kernel. For the complete, authoritative version, see:
 - [Universal DoD](docs/system-prompts/principles/definition-of-done.md) - Agent Kernel universal requirements
 - [Python DoD](docs/system-prompts/languages/python/definition-of-done.md) - Agent Kernel language requirements
@@ -219,6 +217,8 @@ This section is maintained by the Agent Kernel. For the complete, authoritative 
 **Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)
 
 ---
+
+# Definition of Done: Universal Principles
 
 **MANDATORY:** No task is considered "Done" until all applicable criteria in this document are met. This document serves as the **State Transition Logic** for the project's development workflow.
 
@@ -288,6 +288,13 @@ See `docs/system-prompts/languages/python/definition-of-done.md` for Python-spec
 <!-- END-SECTION -->
 
 <!-- SECTION: PYTHON-DOD -->
+This section is maintained by the Agent Kernel. For the complete, authoritative version, see:
+- [Python DoD](docs/system-prompts/languages/python/definition-of-done.md) - Agent Kernel Python requirements
+
+**Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)
+
+---
+
 # Definition of Done: Python Specifics
 
 This document extends the universal Definition of Done (see `docs/system-prompts/principles/definition-of-done.md`) with Python-specific criteria and tools.
