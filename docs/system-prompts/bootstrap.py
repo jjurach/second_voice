@@ -276,8 +276,57 @@ class Bootstrap:
         updated = re.sub(pattern, new_section, content, flags=re.DOTALL)
         return updated, True
 
+    def _generate_cross_reference_header(self, section_name: str, language: str = None) -> str:
+        """
+        Generate cross-reference header for sections that need it.
+
+        This ensures AGENTS.md always includes attribution and links back to
+        the authoritative Agent Kernel sources, making the bootstrap process
+        truly idempotent.
+
+        Args:
+            section_name: Section identifier (e.g., "PRINCIPLES", "PYTHON-DOD")
+            language: Project language (auto-detected if None)
+
+        Returns:
+            Cross-reference header text, or empty string if not applicable
+        """
+        if language is None:
+            language = self._detect_language()
+
+        headers = {
+            "PRINCIPLES": (
+                "This section is maintained by the Agent Kernel. "
+                "For the complete, authoritative version, see:\n"
+                "- [Universal DoD](docs/system-prompts/principles/definition-of-done.md) - "
+                "Agent Kernel universal requirements\n"
+                f"- [{language.capitalize()} DoD](docs/system-prompts/languages/{language}/definition-of-done.md) - "
+                "Agent Kernel language requirements\n\n"
+                "**Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)\n\n"
+                "---\n\n"
+            ),
+            "PYTHON-DOD": (
+                "This section is maintained by the Agent Kernel. "
+                "For the complete, authoritative version, see:\n"
+                "- [Python DoD](docs/system-prompts/languages/python/definition-of-done.md) - "
+                "Agent Kernel Python requirements\n\n"
+                "**Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)\n\n"
+                "---\n\n"
+            ),
+        }
+
+        return headers.get(section_name, "")
+
     def load_system_prompt(self, section_name: str, language: str = None) -> str:
-        """Load ideal state from system-prompts directory with link transformation."""
+        """
+        Load ideal state from system-prompts directory with link transformation
+        and automatic cross-reference injection.
+
+        Cross-references are automatically added to certain sections (PRINCIPLES,
+        PYTHON-DOD, etc.) to maintain bidirectional navigation between AGENTS.md
+        and the Agent Kernel source files. This ensures the bootstrap process is
+        idempotent and prevents flip-flopping.
+        """
         if language is None:
             language = self._detect_language()
 
@@ -309,6 +358,13 @@ class Bootstrap:
 
         if not content:
             print(f"WARNING: Could not read: {file_path}")
+            return content
+
+        # Inject cross-reference header if applicable
+        header = self._generate_cross_reference_header(section_name, language)
+        if header:
+            content = header + content
+
         return content
 
     def detect_recommended_workflow(self) -> str:
