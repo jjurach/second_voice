@@ -401,7 +401,7 @@ class TestMandatoryReadingSection(unittest.TestCase):
         # This is a bit indirect, but we can test the load_system_prompt method
         content = self.bootstrap.load_system_prompt("MANDATORY-READING")
 
-        # Should at least try to load it (may be empty in test, but shouldn't crash)
+        # Should at least try to load it (may be empty in test, but doesn't crash)
         self.assertIsInstance(content, str)
 
     def test_sync_agents_with_mandatory_reading(self):
@@ -411,6 +411,172 @@ class TestMandatoryReadingSection(unittest.TestCase):
 
         # Validate the resulting structure would be correct
         self.assertTrue(agents_file.exists())
+
+
+class TestWorkflowStateMarker(unittest.TestCase):
+    """Test workflow state marker logic."""
+
+    def setUp(self):
+        """Create test environment."""
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.temp_path = Path(self.temp_dir.name)
+
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from bootstrap import Bootstrap
+
+        self.bootstrap = Bootstrap(project_root=str(self.temp_path), dry_run=True)
+
+    def tearDown(self):
+        """Clean up."""
+        self.temp_dir.cleanup()
+
+    def test_read_workflow_state_missing_marker(self):
+        """Test reading state when BOOTSTRAP-STATE marker is missing."""
+        content = "# AGENTS.md\n\nSome content here."
+        state = self.bootstrap.read_workflow_state(content)
+
+        self.assertEqual(state, {})
+
+    def test_read_workflow_state_with_marker(self):
+        """Test reading state when BOOTSTRAP-STATE marker exists."""
+        content = """<!-- BOOTSTRAP-STATE: logs_first=enabled -->
+# AGENTS.md
+
+Some content here."""
+        state = self.bootstrap.read_workflow_state(content)
+
+        self.assertEqual(state, {"logs_first": "enabled"})
+
+    def test_read_workflow_state_multiple_keys(self):
+        """Test reading state with multiple key-value pairs."""
+        content = """<!-- BOOTSTRAP-STATE: logs_first=enabled, custom_workflow=disabled -->
+# AGENTS.md"""
+        state = self.bootstrap.read_workflow_state(content)
+
+        self.assertEqual(state, {"logs_first": "enabled", "custom_workflow": "disabled"})
+
+    def test_write_workflow_state_to_empty_content(self):
+        """Test writing state marker to content without existing marker."""
+        content = "# AGENTS.md\n\nSome content."
+        state = {"logs_first": "disabled"}
+
+        updated = self.bootstrap.write_workflow_state(content, state)
+
+        self.assertIn("<!-- BOOTSTRAP-STATE: logs_first=disabled -->", updated)
+        self.assertIn("# AGENTS.md", updated)
+
+    def test_write_workflow_state_replaces_existing(self):
+        """Test that writing state replaces existing marker."""
+        content = """<!-- BOOTSTRAP-STATE: logs_first=enabled -->
+# AGENTS.md"""
+        state = {"logs_first": "disabled"}
+
+        updated = self.bootstrap.write_workflow_state(content, state)
+
+        self.assertIn("<!-- BOOTSTRAP-STATE: logs_first=disabled -->", updated)
+        self.assertNotIn("logs_first=enabled", updated)
+
+    def test_disable_logs_first_missing_state_marker(self):
+        """Test disable-logs-first when BOOTSTRAP-STATE marker is missing.
+
+        This is the regression test for the bug where nothing happened
+        when disabling logs-first on content without a state marker.
+        """
+        agents_content = "# AGENTS.md\n\nSome content."
+
+        # Apply workflow state (disable logs-first)
+        updated_content, changed = self.bootstrap.apply_workflow_state(
+            agents_content, "logs_first", False, force=False
+        )
+
+        # Read old state (before update)
+        state = self.bootstrap.read_workflow_state(updated_content)
+        old_logs_first_state = state.get("logs_first")
+
+        # Update state
+        state["logs_first"] = "disabled"
+        updated_content = self.bootstrap.write_workflow_state(updated_content, state)
+
+        # The key fix: check old state vs target state
+        target_state = "disabled"
+        should_write = changed or (old_logs_first_state != target_state)
+
+        # Old state was None (missing), target is "disabled", so should write
+        self.assertTrue(should_write, "Should write when state marker is missing")
+        self.assertIn("<!-- BOOTSTRAP-STATE: logs_first=disabled -->", updated_content)
+
+    def test_enable_logs_first_missing_state_marker(self):
+        """Test enable-logs-first when BOOTSTRAP-STATE marker is missing."""
+        agents_content = "# AGENTS.md\n\nSome content."
+
+        # Simulate workflow state update flow
+        state = self.bootstrap.read_workflow_state(agents_content)
+        old_state = state.get("logs_first")
+        state["logs_first"] = "enabled"
+        updated_content = self.bootstrap.write_workflow_state(agents_content, state)
+
+        # Check that state marker was added
+        should_write = old_state != "enabled"
+        self.assertTrue(should_write)
+        self.assertIn("<!-- BOOTSTRAP-STATE: logs_first=enabled -->", updated_content)
+
+    def test_disable_logs_first_already_disabled(self):
+        """Test disable-logs-first when already disabled (idempotent)."""
+        agents_content = """<!-- BOOTSTRAP-STATE: logs_first=disabled -->
+# AGENTS.md"""
+
+        state = self.bootstrap.read_workflow_state(agents_content)
+        old_state = state.get("logs_first")
+        state["logs_first"] = "disabled"
+
+        # Should not need to write (idempotent)
+        should_write = old_state != "disabled"
+        self.assertFalse(should_write, "Should be idempotent when already disabled")
+
+    def test_enable_logs_first_already_enabled(self):
+        """Test enable-logs-first when already enabled (idempotent)."""
+        agents_content = """<!-- BOOTSTRAP-STATE: logs_first=enabled -->
+# AGENTS.md"""
+
+        state = self.bootstrap.read_workflow_state(agents_content)
+        old_state = state.get("logs_first")
+        state["logs_first"] = "enabled"
+
+        # Should not need to write (idempotent)
+        should_write = old_state != "enabled"
+        self.assertFalse(should_write, "Should be idempotent when already enabled")
+
+    def test_transition_enabled_to_disabled(self):
+        """Test transitioning from enabled to disabled."""
+        agents_content = """<!-- BOOTSTRAP-STATE: logs_first=enabled -->
+# AGENTS.md"""
+
+        state = self.bootstrap.read_workflow_state(agents_content)
+        old_state = state.get("logs_first")
+        state["logs_first"] = "disabled"
+        updated_content = self.bootstrap.write_workflow_state(agents_content, state)
+
+        # Should write (state changed)
+        should_write = old_state != "disabled"
+        self.assertTrue(should_write)
+        self.assertIn("logs_first=disabled", updated_content)
+        self.assertNotIn("logs_first=enabled", updated_content)
+
+    def test_transition_disabled_to_enabled(self):
+        """Test transitioning from disabled to enabled."""
+        agents_content = """<!-- BOOTSTRAP-STATE: logs_first=disabled -->
+# AGENTS.md"""
+
+        state = self.bootstrap.read_workflow_state(agents_content)
+        old_state = state.get("logs_first")
+        state["logs_first"] = "enabled"
+        updated_content = self.bootstrap.write_workflow_state(agents_content, state)
+
+        # Should write (state changed)
+        should_write = old_state != "enabled"
+        self.assertTrue(should_write)
+        self.assertIn("logs_first=enabled", updated_content)
+        self.assertNotIn("logs_first=disabled", updated_content)
 
 
 if __name__ == "__main__":

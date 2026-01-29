@@ -1097,10 +1097,11 @@ Examples:
 
         # Update workflow state marker
         state = bootstrap.read_workflow_state(updated_content)
+        old_logs_first_state = state.get("logs_first")  # Save old value before update
         state["logs_first"] = "enabled" if enable else "disabled"
         updated_content = bootstrap.write_workflow_state(updated_content, state)
 
-        if changed or (state.get("logs_first") != ("enabled" if enable else "disabled")):
+        if changed or (old_logs_first_state != ("enabled" if enable else "disabled")):
             bootstrap._write_file(bootstrap.agents_file, updated_content)
             if not args.commit:
                 print("[DRY RUN] Changes would be applied. Use --commit to save.")
