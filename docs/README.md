@@ -79,4 +79,4 @@ The Agent Kernel provides reusable workflows and standards:
 - **[AGENTS.md](../AGENTS.md)** - Agent workflow and rules
 
 ---
-Last Updated: 2026-01-28
+Last Updated: 2026-01-29

@@ -212,6 +212,14 @@ You must verify your documentation changes against these requirements before mar
 <!-- SECTION: PRINCIPLES -->
 # Definition of Done: Universal Principles
 
+This section is maintained by the Agent Kernel. For the complete, authoritative version, see:
+- [Universal DoD](docs/system-prompts/principles/definition-of-done.md) - Agent Kernel universal requirements
+- [Python DoD](docs/system-prompts/languages/python/definition-of-done.md) - Agent Kernel language requirements
+
+**Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)
+
+---
+
 **MANDATORY:** No task is considered "Done" until all applicable criteria in this document are met. This document serves as the **State Transition Logic** for the project's development workflow.
 
 ## 1. The "Plan vs. Reality" Protocol
@@ -881,4 +889,4 @@ If you can't answer these, **re-read the mandatory files now**. This isn't punis
 **Remember:** Reading is REQUIRED, not suggested. These files are in your context for a reason.
 <!-- END-SECTION -->
 ---
-Last Updated: 2026-01-28
+Last Updated: 2026-01-29

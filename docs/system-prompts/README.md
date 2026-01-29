@@ -788,72 +788,6 @@ Processes are specialized, one-time or periodic maintenance operations. Located 
 
 ## Project Integration
 
-This Agent Kernel is integrated into the **Google Personal MCP Server** project with the following extensions:
-
-### Entry Points
-
-- **[AGENTS.md](../../AGENTS.md)** - Main agent instructions combining Agent Kernel workflows with project-specific requirements
-- **[docs/definition-of-done.md](../definition-of-done.md)** - Project-specific DoD extending Agent Kernel universal and Python DoD
-- **[CLAUDE.md](../../CLAUDE.md)** - Claude Code specific instructions
-- **[docs/workflows.md](../workflows.md)** - Project-specific development workflows
-
-### Project-Specific Extensions
-
-The project adds domain-specific requirements for:
-
-**MCP Tool Development:**
-- Standard tool template with request ID tracking
-- Structured error responses with credential masking
-- Audit logging for all tool calls
-- Service locator pattern for resource access
-
-**Google API Integration:**
-- OAuth scope management and re-authentication requirements
-- Service class patterns using GoogleContext
-- API mocking strategies for testing
-- Retry logic and rate limiting patterns
-
-**Security & Configuration:**
-- Credential masking in all errors and logs
-- Profile-based authentication system
-- Resource alias configuration management
-- Access control for Drive operations
-
-See [docs/definition-of-done.md](../definition-of-done.md) for complete project-specific requirements.
-
-### Sync Status
-
-- **Bootstrap sync:** Completed 2026-01-26
-- **Last integration update:** 2026-01-27
-- **Sections synchronized:** CORE-WORKFLOW, PRINCIPLES, PYTHON-CODE-QUALITY, PYTHON-TESTING, PYTHON-DEPENDENCIES
-
-### Documentation Structure
-
-```
-project-root/
-├── AGENTS.md                           # Combined: Agent Kernel + project extensions
-├── CLAUDE.md                           # Claude Code instructions
-├── docs/
-│   ├── definition-of-done.md          # Project DoD (extends Agent Kernel)
-│   ├── architecture.md                # Project architecture
-│   ├── implementation-reference.md    # Implementation patterns
-│   ├── workflows.md                   # Project workflows (extends Agent Kernel)
-│   ├── examples/                      # Project-specific examples
-│   └── system-prompts/                # Agent Kernel (this directory)
-│       ├── README.md                  # This file
-│       ├── principles/                # Universal principles
-│       ├── languages/                 # Language-specific standards
-│       ├── templates/                 # Document templates
-│       ├── workflows/                 # Workflow documentation
-│       └── tools/                     # Tool-specific guides
-└── dev_notes/                         # Runtime documentation
-    ├── specs/                         # Specifications
-    ├── project_plans/                 # Project plans
-    └── changes/                       # Change documentation
-```
-
-## Project Integration
-
 This Agent Kernel is integrated into the **Second Voice** project with the following extensions:
 
 ### Entry Points
@@ -881,8 +815,8 @@ See [docs/definition-of-done.md](../definition-of-done.md) for complete project-
 
 ### Sync Status
 
-- **Bootstrap sync:** Completed 2026-01-28
-- **Last integration update:** 2026-01-28
+- **Bootstrap sync:** Completed 2026-01-29
+- **Last integration update:** 2026-01-29
 - **Sections synchronized:** CORE-WORKFLOW, PRINCIPLES, PYTHON-DOD
 
 ### Documentation Structure
