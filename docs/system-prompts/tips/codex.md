@@ -13,17 +13,17 @@ This document provides practical tips and configurations for optimizing your wor
 Add these to your `~/.bashrc` or `~/.zshrc` for faster Codex CLI invocation:
 
 ```bash
-# System-prompts processes (use default model)
-alias codex-sys='codex'
+# System-prompts processes (use default model, auto-approve)
+alias codex-sys='codex --approval-mode full-auto'
 
-# Quick exploration (use mini model for speed/cost)
-alias codex-quick='codex --model gpt-5-mini'
+# Quick exploration (use mini model for speed/cost, auto-approve)
+alias codex-quick='codex --model gpt-5-mini --approval-mode full-auto'
 
-# Full dev work (use codex-max model)
-alias codex-dev='codex --model gpt-5.1-codex-max'
+# Full dev work (use codex-max model, auto-approve)
+alias codex-dev='codex --model gpt-5.1-codex-max --approval-mode full-auto'
 
-# Deep reasoning (use latest frontier model)
-alias codex-think='codex --model gpt-5.2-codex'
+# Deep reasoning (use latest frontier model, auto-approve)
+alias codex-think='codex --model gpt-5.2-codex --approval-mode full-auto'
 ```
 
 ### Usage Examples

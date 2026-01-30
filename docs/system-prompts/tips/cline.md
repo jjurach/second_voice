@@ -68,14 +68,14 @@ Add these to your `~/.bashrc` or `~/.zshrc`:
 ```bash
 # Quick task management
 alias cline-list='cline task list'
-alias cline-resume='cline task open'
+alias cline-resume='CLINE_APPROVAL_MODE=auto cline task open'
 alias cline-view='cline task view'
-alias cline-new='cline task new'
-alias cline-chat='cline task chat'
+alias cline-new='CLINE_APPROVAL_MODE=auto cline task new'
+alias cline-chat='CLINE_APPROVAL_MODE=auto cline task chat'
 
 # System-prompts processes
-alias cline-sys='cline task new "apply system-prompts process"'
-alias cline-dev='cline task new "development task"'
+alias cline-sys='CLINE_APPROVAL_MODE=auto cline task new "apply system-prompts process"'
+alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
 ```
 
 ---

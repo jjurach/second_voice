@@ -31,19 +31,19 @@ alias claude-think='claude --model opus --dangerously-skip-permissions'
 # See: docs/system-prompts/tips/gemini.md
 
 # System-prompts processes (use Flash for speed)
-alias gemini-sys='export GEMINI_MODEL=gemini-3-flash && gemini'
+alias gemini-sys='GEMINI_MODEL=gemini-3-flash gemini --dangerously-skip-permissions'
 
 # Quick exploration (use Flash for low latency)
-alias gemini-quick='export GEMINI_MODEL=gemini-3-flash && gemini'
+alias gemini-quick='GEMINI_MODEL=gemini-3-flash gemini --dangerously-skip-permissions'
 
 # Full dev work (use Pro for better reasoning)
-alias gemini-dev='export GEMINI_MODEL=gemini-3-pro && gemini'
+alias gemini-dev='GEMINI_MODEL=gemini-3-pro gemini --dangerously-skip-permissions'
 
 # Deep reasoning/Architecture (use Pro for max capability)
-alias gemini-think='export GEMINI_MODEL=gemini-3-pro && gemini'
+alias gemini-think='GEMINI_MODEL=gemini-3-pro gemini --dangerously-skip-permissions'
 
 # Debug mode
-alias gemini-debug='export GEMINI_DEBUG=true && gemini'
+alias gemini-debug='GEMINI_DEBUG=true gemini --dangerously-skip-permissions'
 
 # ============================================================================
 # Codex CLI Aliases
@@ -51,16 +51,16 @@ alias gemini-debug='export GEMINI_DEBUG=true && gemini'
 # See: docs/system-prompts/tips/codex.md
 
 # System-prompts processes (use default model)
-alias codex-sys='codex'
+alias codex-sys='codex --approval-mode full-auto'
 
 # Quick exploration (use mini model for speed/cost)
-alias codex-quick='codex --model gpt-5-mini'
+alias codex-quick='codex --model gpt-5-mini --approval-mode full-auto'
 
 # Full dev work (use codex-max model)
-alias codex-dev='codex --model gpt-5.1-codex-max'
+alias codex-dev='codex --model gpt-5.1-codex-max --approval-mode full-auto'
 
 # Deep reasoning (use latest frontier model)
-alias codex-think='codex --model gpt-5.2-codex'
+alias codex-think='codex --model gpt-5.2-codex --approval-mode full-auto'
 
 # ============================================================================
 # Cline Aliases
@@ -69,14 +69,14 @@ alias codex-think='codex --model gpt-5.2-codex'
 
 # Quick task management
 alias cline-list='cline task list'
-alias cline-resume='cline task open'
+alias cline-resume='CLINE_APPROVAL_MODE=auto cline task open'
 alias cline-view='cline task view'
-alias cline-new='cline task new'
-alias cline-chat='cline task chat'
+alias cline-new='CLINE_APPROVAL_MODE=auto cline task new'
+alias cline-chat='CLINE_APPROVAL_MODE=auto cline task chat'
 
 # System-prompts processes
-alias cline-sys='cline task new "apply system-prompts process"'
-alias cline-dev='cline task new "development task"'
+alias cline-sys='CLINE_APPROVAL_MODE=auto cline task new "apply system-prompts process"'
+alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
 
 # ============================================================================
 # Usage Examples

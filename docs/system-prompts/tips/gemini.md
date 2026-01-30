@@ -13,20 +13,20 @@ This document provides practical tips and configurations for optimizing your wor
 Add these to your `~/.bashrc` or `~/.zshrc` for faster Gemini CLI invocation:
 
 ```bash
-# System-prompts processes (use Flash for speed)
-alias gemini-sys='export GEMINI_MODEL=gemini-3-flash && gemini'
+# System-prompts processes (use Flash for speed, skip permissions)
+alias gemini-sys='GEMINI_MODEL=gemini-3-flash gemini --dangerously-skip-permissions'
 
-# Quick exploration (use Flash for low latency)
-alias gemini-quick='export GEMINI_MODEL=gemini-3-flash && gemini'
+# Quick exploration (use Flash for low latency, skip permissions)
+alias gemini-quick='GEMINI_MODEL=gemini-3-flash gemini --dangerously-skip-permissions'
 
-# Full dev work (use Pro for better reasoning)
-alias gemini-dev='export GEMINI_MODEL=gemini-3-pro && gemini'
+# Full dev work (use Pro for better reasoning, skip permissions)
+alias gemini-dev='GEMINI_MODEL=gemini-3-pro gemini --dangerously-skip-permissions'
 
-# Deep reasoning/Architecture (use Pro for max capability)
-alias gemini-think='export GEMINI_MODEL=gemini-3-pro && gemini'
+# Deep reasoning/Architecture (use Pro for max capability, skip permissions)
+alias gemini-think='GEMINI_MODEL=gemini-3-pro gemini --dangerously-skip-permissions'
 
 # Debug mode (show verbose output)
-alias gemini-debug='export GEMINI_DEBUG=true && gemini'
+alias gemini-debug='GEMINI_DEBUG=true gemini --dangerously-skip-permissions'
 ```
 
 ### Usage Examples
