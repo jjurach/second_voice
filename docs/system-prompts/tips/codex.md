@@ -580,7 +580,7 @@ codex-dev 'show me a summary of changes and suggest a commit message, but do not
 - [docs/system-prompts/tools/codex.md](../tools/codex.md) - Comprehensive Codex guide for AGENTS.md workflow
 - [docs/system-prompts/processes/README.md](../processes/README.md) - Available processes
 - [docs/system-prompts/workflows/README.md](../workflows/README.md) - Available workflows
-- [AGENTS.md](../../AGENTS.md) - Core workflow for AI agents
+- [AGENTS.md](../../../AGENTS.md) - Core workflow for AI agents
 
 ---
 

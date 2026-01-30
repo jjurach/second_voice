@@ -557,7 +557,7 @@ cline task new 'implement feature'
 - [docs/system-prompts/tools/cline.md](../tools/cline.md) - Comprehensive Cline guide for AGENTS.md workflow
 - [docs/system-prompts/processes/README.md](../processes/README.md) - Available processes
 - [docs/system-prompts/workflows/README.md](../workflows/README.md) - Available workflows
-- [AGENTS.md](../../AGENTS.md) - Core workflow for AI agents
+- [AGENTS.md](../../../AGENTS.md) - Core workflow for AI agents
 
 ---
 

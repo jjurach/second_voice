@@ -604,7 +604,7 @@ claude-dev 'show me a summary of changes and suggest a commit message, but do no
 - [`docs/system-prompts/tools/claude-code.md`](tools/claude-code.md) - Comprehensive Claude Code guide
 - [`docs/system-prompts/processes/README.md`](processes/README.md) - Available processes
 - [`docs/system-prompts/workflows/README.md`](workflows/README.md) - Available workflows
-- [CLAUDE.md](../../CLAUDE.md) - Claude Code entry point for this project
+- [CLAUDE.md](../../../CLAUDE.md) - Claude Code entry point for this project
 
 ---
 
