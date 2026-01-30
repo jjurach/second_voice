@@ -67,16 +67,20 @@ alias codex-think='codex --model gpt-5.2-codex --approval-mode full-auto'
 # ============================================================================
 # See: docs/system-prompts/tips/cline.md
 
-# Quick task management
+# Quick task management (no auto-approval)
 alias cline-list='cline task list'
-alias cline-resume='CLINE_APPROVAL_MODE=auto cline task open'
+alias cline-resume='cline task open'
 alias cline-view='cline task view'
-alias cline-new='CLINE_APPROVAL_MODE=auto cline task new'
-alias cline-chat='CLINE_APPROVAL_MODE=auto cline task chat'
+
+# Development tasks (auto-approved)
+alias cline-dev='cline --yolo --mode act'
+alias cline-quick='cline --yolo --mode act'
 
 # System-prompts processes
-alias cline-sys='CLINE_APPROVAL_MODE=auto cline task new "apply system-prompts process"'
-alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
+alias cline-sys='cline --yolo --mode act'
+
+# One-shot commands
+alias cline-ask='cline --yolo --mode act'
 
 # ============================================================================
 # Usage Examples
@@ -101,10 +105,12 @@ alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
 #   codex-think 'review system architecture'
 #
 # Cline:
-#   cline-list
-#   cline-resume 1760501486669
-#   cline-new 'implement feature X'
-#   cline-sys
+#   cline-list                                             # List recent tasks
+#   cline-resume 1760501486669                            # Resume a task
+#   cline-dev 'implement OAuth authentication'            # Create development task (auto-approved)
+#   cline-quick 'refactor auth module'                    # Quick task (auto-approved)
+#   cline-sys 'apply document-integrity-scan process'     # Apply system-prompts process
+#   cline-ask 'explain this error'                        # One-shot command (auto-approved)
 #
 # Session Resumption:
 #   claude --continue                    # Resume most recent

@@ -68,14 +68,42 @@ Add these to your `~/.bashrc` or `~/.zshrc`:
 ```bash
 # Quick task management
 alias cline-list='cline task list'
-alias cline-resume='CLINE_APPROVAL_MODE=auto cline task open'
+alias cline-resume='cline task open'
 alias cline-view='cline task view'
-alias cline-new='CLINE_APPROVAL_MODE=auto cline task new'
-alias cline-chat='CLINE_APPROVAL_MODE=auto cline task chat'
+
+# Development tasks (auto-approved)
+alias cline-dev='cline --yolo --mode act'
+alias cline-quick='cline --yolo --mode act'
 
 # System-prompts processes
-alias cline-sys='CLINE_APPROVAL_MODE=auto cline task new "apply system-prompts process"'
-alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
+alias cline-sys='cline --yolo --mode act'
+
+# One-shot commands
+alias cline-ask='cline --yolo --mode act'
+```
+
+**Flag explanations:**
+- `--yolo`: Auto-approve all actions (skip permission prompts)
+- `--mode act`: Use Act Mode for execution
+- Direct description/command follows flags (no `task new` needed)
+
+**Usage examples:**
+```bash
+# Create development task
+cline-dev 'implement OAuth authentication'
+
+# Quick task
+cline-quick 'refactor auth module'
+
+# System-prompts process
+cline-sys 'apply document-integrity-scan process'
+
+# One-shot command
+cline-ask 'explain this error'
+
+# Task management (without flags)
+cline-list                      # List recent tasks
+cline-resume 1760501486669     # Resume specific task
 ```
 
 ---
@@ -161,6 +189,14 @@ cline config set openai.apiKey YOUR_API_KEY
 # Set default model
 cline config set model claude-sonnet-4-5
 ```
+
+### Command Line Flags
+
+Key flags for CLI usage:
+- `--yolo`: Auto-approve all actions (no confirmation prompts)
+- `--mode <plan|act>`: Set workflow mode (default: plan)
+- `--no-interactive`: Run without additional prompts
+- `--oneshot`: Execute a single command and exit
 
 ### Plan and Act Modes
 
