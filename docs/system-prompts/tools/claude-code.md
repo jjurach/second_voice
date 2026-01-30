@@ -490,11 +490,11 @@ CLAUDE.md (entry point for this tool)
 ↓
 AGENTS.md (core workflow - all projects)
 ↓
-tools-capabilities.md (what each tool can do)
+`tools-capabilities.md` (what each tool can do)
 ↓
-workflow-mapping.md (how AGENTS.md maps to Claude Code)
+`workflow-mapping.md` (how AGENTS.md maps to Claude Code)
 ↓
-prompt-patterns.md (prompt structures that work)
+`prompt-patterns.md` (prompt structures that work)
 ↓
 This document (Claude Code specifics)
 ```
@@ -503,14 +503,14 @@ This document (Claude Code specifics)
 1. Look at your request
 2. Follow AGENTS.md Step A-E
 3. Use Claude Code tools as shown above
-4. Reference prompt-patterns.md for request phrasing
+4. Reference `prompt-patterns.md` for request phrasing
 
 ## Getting Help
 
 **Questions about:**
-- **AGENTS.md workflow?** → Read AGENTS.md + workflow-mapping.md
-- **Tool capabilities?** → Read tools-capabilities.md
-- **How to phrase requests?** → Read prompt-patterns.md
+- **AGENTS.md workflow?** → Read AGENTS.md + `workflow-mapping.md`
+- **Tool capabilities?** → Read `tools-capabilities.md`
+- **How to phrase requests?** → Read `prompt-patterns.md`
 - **Claude Code specifics?** → You're reading it now!
 
 ## Examples
@@ -589,4 +589,4 @@ Claude Code:
 
 ---
 
-Start using Claude Code with confidence! Follow AGENTS.md, use this guide for Claude Code specifics, and reference prompt-patterns.md for phrasing your requests.
+Start using Claude Code with confidence! Follow AGENTS.md, use this guide for Claude Code specifics, and reference `prompt-patterns.md` for phrasing your requests.

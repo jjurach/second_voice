@@ -765,7 +765,7 @@ Processes are specialized, one-time or periodic maintenance operations. Located 
 ### Process Invocation Examples
 
 **Correct invocations (user explicitly requests):**
-- "Follow the bootstrap-project process in docs/system-prompts/processes/bootstrap-project.md"
+- "Follow the bootstrap-project process in `docs/system-prompts/processes/bootstrap-project.md`"
 - "Run the document integrity scan"
 - "Create a Claude Code entry point following the tool-entry-points process"
 - "Switch to logs-first workflow" (requires AGENTS.md modification)

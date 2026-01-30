@@ -199,7 +199,7 @@ Same as Claude Code
 ### Final: Verification & Completion
 
 **Universal Requirements:**
-All must satisfy DEFINITION-OF-DONE.md:
+All must satisfy `DEFINITION-OF-DONE.md`:
 - [ ] Tests pass
 - [ ] Code follows patterns
 - [ ] No secrets in commits

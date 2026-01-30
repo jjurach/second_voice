@@ -102,7 +102,7 @@ You will:
 **✅ THIS PROCESS MODIFIES:**
 - `AGENTS.md` - Project's main agent instructions
 - `README.md` - Project's main documentation
-- `[TOOL].md` - Tool-specific entry files (CLAUDE.md, AIDER.md, etc.)
+- `[TOOL].md` - Tool-specific entry files (`CLAUDE.md`, `.aider.md`, etc.)
 - `docs/*.md` - Project-specific documentation files
 - `dev_notes/` - Change logs and planning documents
 
@@ -143,7 +143,7 @@ find . -name "*.md" -type f ! -path "./venv/*" ! -path "./node_modules/*" | sort
 **Make note of:**
 - Does AGENTS.md already exist? (will be overwritten by bootstrap)
 - What files exist in docs/? (potential duplication targets)
-- Are there tool-specific entry files? (CLAUDE.md, AIDER.md, etc.)
+- Are there tool-specific entry files? (`CLAUDE.md`, `.aider.md`, etc.)
 - Is there a definition-of-done.md? (likely needs consolidation)
 
 ### Step 0.3: Check for Obvious Issues
@@ -269,7 +269,7 @@ wc -l /tmp/md_files.txt
 ```
 
 **Categorize files:**
-- **Root entry points:** AGENTS.md, README.md, CONTRIBUTING.md, CLAUDE.md, etc.
+- **Root entry points:** AGENTS.md, README.md, `CONTRIBUTING.md`, CLAUDE.md, etc.
 - **docs/ files:** Project documentation
 - **docs/system-prompts/:** Agent Kernel (don't modify these)
 - **dev_notes/:** Runtime documentation (ok as-is)
@@ -462,7 +462,7 @@ The project follows the Agent Kernel template system. For complete template docu
 Development notes and session transcripts are stored in `dev_notes/` using the format:
 
 \```
-dev_notes/subdir/YYYY-MM-DD_HH-MM-SS_description.md
+`dev_notes/subdir/YYYY-MM-DD_HH-MM-SS_description.md`
 \```
 
 ### Planning Documents
@@ -576,7 +576,7 @@ Last Updated: YYYY-MM-DD
 ```
 
 **Content sources:**
-- Existing docs/development.md, docs/overview.md
+- Existing docs/development.md, `docs/overview.md`
 - README.md (often has architecture section)
 - Source code comments
 - Project structure analysis
@@ -655,7 +655,7 @@ Last Updated: YYYY-MM-DD
 ```
 
 **Content sources:**
-- Existing docs/development.md, docs/mcp-development-guide.md, etc.
+- Existing docs/development.md, `docs/mcp-development-guide.md`, etc.
 - Extract common patterns from codebase
 - Test files (for testing patterns)
 
@@ -972,7 +972,7 @@ find docs -name "*.md" -type f ! -path "*/system-prompts/*" -exec wc -l {} \; | 
 - Is it tool-specific content that's already in system-prompts/tools/?
 
 **Common duplication targets:**
-- Tool-specific workflow files (e.g., docs/claude-code-workflows.md) - often duplicates system-prompts/tools/claude-code.md
+- Tool-specific workflow files (e.g., `docs/claude-code-workflows.md`) - often duplicates `system-prompts/tools/claude-code.md`
 - Generic development guides - may duplicate language-specific DoD
 - Generic testing guides - may duplicate language-specific DoD
 
@@ -1052,7 +1052,7 @@ This section is maintained by the Agent Kernel. For the complete, authoritative 
 
 ### Step 5.2: Enhance Tool Entry Files
 
-**If project has tool-specific entry files** (CLAUDE.md, AIDER.md, etc.):
+**If project has tool-specific entry files** (`CLAUDE.md`, `.aider.md`, etc.):
 
 **Add System Architecture section:**
 
@@ -1327,7 +1327,7 @@ python3 docs/system-prompts/docscan.py
 - "Back-reference to project file without conditional marking" - This is expected for project integration
 - "Plain-text file reference should use backticks" - Style issue, non-critical
 - "Entry file exceeds 20 lines" - Fine if file is well-organized
-- "File doesn't follow lowercase-kebab.md convention" - Entry files like AGENTS.md intentionally use UPPERCASE
+- "File doesn't follow `lowercase-kebab.md` convention" - Entry files like AGENTS.md intentionally use UPPERCASE
 
 **If errors found:**
 
@@ -1411,13 +1411,13 @@ ls -1 *.md | grep -v "^[A-Z]" && echo "❌ Root files should be UPPERCASE.md" ||
 find docs -maxdepth 1 -name "*.md" ! -name "*-*" ! -name "README.md" | while read f; do
   basename="$(basename "$f")"
   if [[ "$basename" =~ [A-Z] ]]; then
-    echo "⚠️  $f should use lowercase-kebab.md format"
+    echo "⚠️  $f should use `lowercase-kebab.md` format"
   fi
 done
 
 # Check dev_notes use timestamp format
 find dev_notes -name "*.md" ! -name "20*" 2>/dev/null | while read f; do
-  echo "⚠️  $f should use YYYY-MM-DD_HH-MM-SS_description.md format"
+  echo "⚠️  $f should use `YYYY-MM-DD_HH-MM-SS_description.md` format"
 done
 ```
 

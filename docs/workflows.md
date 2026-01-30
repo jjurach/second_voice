@@ -279,7 +279,7 @@ python3 docs/system-prompts/bootstrap.py --analyze-workflow
 1. Create `docs/system-prompts/workflows/new-workflow.md`
 2. Add to bootstrap.py `section_map`
 3. Add command-line args to bootstrap.py
-4. Document in this file (docs/workflows.md)
+4. Document in this file (`docs/workflows.md`)
 5. Update `docs/system-prompts/workflows/README.md`
 
 ### For Other Projects

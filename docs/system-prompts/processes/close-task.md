@@ -92,7 +92,7 @@ pytest tests/ -v
 #### 2.2 Optimization for Documentation-Only Changes
 
 **Optimization Rule:**
-- For **documentation-only changes**, do not execute regression tests or apply other measures of definition-of-done.md not specific to documentation changes.
+- For **documentation-only changes**, do not execute regression tests or apply other measures of `definition-of-done.md` not specific to documentation changes.
 - Alternatively, execute regression tests **only for source which our session changed**.
 - If work involved both code and documentation, standard regression testing (Phase 2.1) applies.
 

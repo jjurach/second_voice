@@ -69,7 +69,7 @@ Resolution:
 1. Identify all files in `docs/system-prompts/` and subdirectories
 2. For each file, extract all markdown links
 3. Categorize links:
-   - ✅ **Safe:** External URLs, anchors, other system-prompts files, entry points (AGENTS.md, CLAUDE.md, GEMINI.md, AIDER.md, CLINE.md)
+   - ✅ **Safe:** External URLs, anchors, other system-prompts files, entry points (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.aider.md`, `.clinerules`)
    - ⚠️ **Conditional:** Links outside system-prompts that are marked with "(if present)" or similar
    - ❌ **Problematic:** Links outside system-prompts without conditional marking
 4. Report problematic references
@@ -86,7 +86,7 @@ See [AGENTS.md](../AGENTS.md) for workflow details.
 ```markdown
 <!-- In docs/system-prompts/tools/aider.md -->
 For project-specific configuration, see [aider-config]
-(docs/tool-specific-guides/aider.md) *(if this file exists in your project)*.
+(`docs/tool-specific-guides/aider.md`) *(if this file exists in your project)*.
 ```
 - Target: Outside system-prompts
 - Marked: *(if this file exists in your project)*
@@ -206,7 +206,7 @@ README.md:
    - Verify exact names match
    - Verify they exist in expected locations (project root)
 3. For documentation files in docs/:
-   - Verify lowercase-kebab.md naming pattern
+   - Verify `lowercase-kebab.md` naming pattern
    - Allow exceptions for established patterns (like dev_notes/ with timestamp format)
 4. Report any violations
 
@@ -295,7 +295,7 @@ must contain text indicating they are conditional:
   - "(if exists)"
   - Similar conditional language
 
-Exception: Links to entry points (AGENTS.md, CLAUDE.md, GEMINI.md, AIDER.md, CLINE.md)
+Exception: Links to entry points (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.aider.md`, `.clinerules`)
 are always safe (these files must exist in projects using AGENTS.md)
 ```
 
@@ -318,7 +318,7 @@ Never use plain text:
   ❌ check docs/file.md (no formatting)
 
 Exemptions:
-  Entry point files (AGENTS.md, CLAUDE.md, AIDER.md, CLINE.md, GEMINI.md)
+  Entry point files (`AGENTS.md`, `CLAUDE.md`, `.aider.md`, `.clinerules`, `GEMINI.md`)
   are exempt from reference-formatting checks.
 
   Rationale:
@@ -352,13 +352,13 @@ Project-specific guides:
 ### Rule 5: Naming Conventions
 ```
 Documentation files in docs/ directory:
-  Pattern: lowercase-kebab.md
+  Pattern: `lowercase-kebab.md`
   Exception: none currently
 
 Auto-discovered entry points:
   Pattern: {TOOL}.md (uppercase)
   Location: Project root
-  Examples: AGENTS.md, CLAUDE.md, AIDER.md, CLINE.md, GEMINI.md
+  Examples: `AGENTS.md`, `CLAUDE.md`, `.aider.md`, `.clinerules`, `GEMINI.md`
 
 Timestamped files (dev_notes/):
   Pattern: YYYY-MM-DD_HH-MM-SS_description.md
