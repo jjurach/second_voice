@@ -155,9 +155,9 @@ gemini-dev
 
 ## Project-Specific Settings
 
-### `GEMINI.md` Configuration
+### `.gemini/GEMINI.md` Configuration
 
-Ensure your `GEMINI.md` in the project root is up to date. It drives Gemini's context.
+Ensure your `GEMINI.md` in `.gemini/GEMINI.md` is up to date. It drives Gemini's context.
 
 ```markdown
 # Second Voice - Gemini Instructions

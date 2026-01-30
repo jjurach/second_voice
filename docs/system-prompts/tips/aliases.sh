@@ -31,19 +31,19 @@ alias claude-think='claude --model opus --dangerously-skip-permissions'
 # See: docs/system-prompts/tips/gemini.md
 
 # System-prompts processes (use Flash for speed)
-alias gemini-sys='GEMINI_MODEL=gemini-3-flash gemini --yolo'
+alias gemini-sys='GEMINI_MODEL=gemini-3-flash-preview gemini --yolo --prompt'
 
 # Quick exploration (use Flash for low latency)
-alias gemini-quick='GEMINI_MODEL=gemini-3-flash gemini --yolo'
+alias gemini-quick='GEMINI_MODEL=gemini-3-flash-preview gemini --yolo --prompt'
 
 # Full dev work (use Pro for better reasoning)
-alias gemini-dev='GEMINI_MODEL=gemini-3-pro gemini --yolo'
+alias gemini-dev='GEMINI_MODEL=gemini-3-pro-preview gemini --yolo --prompt'
 
 # Deep reasoning/Architecture (use Pro for max capability)
-alias gemini-think='GEMINI_MODEL=gemini-3-pro gemini --yolo'
+alias gemini-think='GEMINI_MODEL=gemini-3-pro-preview gemini --yolo --prompt'
 
 # Debug mode
-alias gemini-debug='GEMINI_DEBUG=true gemini --yolo'
+alias gemini-debug='GEMINI_DEBUG=true gemini --yolo --prompt'
 
 # ============================================================================
 # Codex CLI Aliases
@@ -89,10 +89,10 @@ alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
 #   claude-think 'design the caching architecture'
 #
 # Gemini CLI:
-#   gemini-sys (then ask: 'apply document-integrity-scan process')
-#   gemini-dev (then ask: 'implement OAuth authentication')
-#   gemini-quick (then ask: 'find all error handling code')
-#   gemini-think (then ask: 'design the caching architecture')
+#   gemini-sys 'apply document-integrity-scan process'
+#   gemini-dev 'implement OAuth authentication'
+#   gemini-quick 'find all error handling code'
+#   gemini-think 'design the caching architecture'
 #
 # Codex CLI:
 #   codex-sys 'apply close-task process'

@@ -265,7 +265,7 @@ claude-code
 ```
 
 **Documentation:**
-- Entry point: [CLAUDE.md](CLAUDE.md)
+- Entry point: [.claude/CLAUDE.md](.claude/CLAUDE.md)
 - Complete guide: [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)
 
 ---
@@ -321,6 +321,7 @@ cline
 - Web search integration
 
 **Documentation:**
+- Entry point: [.gemini/GEMINI.md](.gemini/GEMINI.md)
 - Status & guide: [docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)
 - Help us test! See guide for how to contribute.
 
@@ -354,7 +355,8 @@ Regardless of tool, all development follows **AGENTS.md:**
 | Document | Purpose |
 |----------|---------|
 | [AGENTS.md](AGENTS.md) | **Core workflow - READ FIRST** |
-| [CLAUDE.md](CLAUDE.md) | Claude Code entry point |
+| [.claude/CLAUDE.md](.claude/CLAUDE.md) | Claude Code entry point |
+| [.gemini/GEMINI.md](.gemini/GEMINI.md) | Gemini CLI entry point |
 | [docs/tools-capabilities.md](docs/tools-capabilities.md) | What each tool can do |
 | [docs/workflow-mapping.md](docs/workflow-mapping.md) | How AGENTS.md maps to each tool |
 | [docs/prompt-patterns.md](docs/prompt-patterns.md) | Universal prompt structures |
