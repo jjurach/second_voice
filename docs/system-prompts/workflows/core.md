@@ -8,11 +8,12 @@
 1.  **Is it a simple question?** → Answer it directly.
 2.  **Is it a Trivial Change?** → Make the change directly. No documentation required.
 3.  **Is it just to fix tests or to fix broken usage?** → Make the change directly. No documentation required.
-4.  **Is it a Research/Documentation Change?** → Make the change directly. No extra documentation required.
+4.  **Is it a Research/Documentation Change?** → Make the change directly. No project plan required, but for non-trivial documentation work, create a timestamped change log in `dev_notes/changes/` marked with `Status: ad-hoc`.
 5.  **Is it anything else?** → Announce you will create a **Project Plan**.
 
 > **Trivial Change Definition:** Non-functional changes like fixing typos in comments or code formatting.
 > **Research/Documentation Change:** Requests which culminate ONLY into writes to markdown documents in the root folder or in docs/ or in `dev_notes`.
+> **Non-Trivial Documentation:** Creating new documentation files, substantial rewrites, or establishing new patterns/conventions. These skip project plans but still require change documentation for the audit trail.
 
 **Step B: Process Spec File (If Required)**
 - When a prompt involves planning, represent the planning in `dev_notes/specs`

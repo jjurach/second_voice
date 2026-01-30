@@ -231,7 +231,7 @@ Install and configure pytest, then add unit tests for critical code paths (confi
 
 **Purpose:** Document what was actually implemented and verify it works. Used in `dev_notes/changes/`.
 
-**When to create:** After completing implementation steps (Step E of Core Workflow).
+**When to create:** After completing implementation steps (Step E of Core Workflow), OR after completing non-trivial documentation work (even without a project plan).
 
 **Filename:** `dev_notes/changes/YYYY-MM-DD_HH-MM-SS_description.md`
 
@@ -241,9 +241,9 @@ Install and configure pytest, then add unit tests for critical code paths (confi
 # Change Documentation: [What Changed]
 
 **Date:** YYYY-MM-DD HH-MM-SS
-**Status:** [In Progress | Completed]
+**Status:** [In Progress | Completed | ad-hoc]
 **Type:** [Feature | Bug Fix | Refactor | Testing | Infrastructure | Documentation]
-**Related Project Plan:** `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md` (if applicable)
+**Related Project Plan:** `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md` (if applicable, or "N/A" for ad-hoc changes)
 
 ## Summary
 [1-2 sentences of what was accomplished and the impact]
@@ -424,6 +424,60 @@ tests/test_modes.py ......................................... [100%]
 Recorder module 86% coverage - lines 88-92, 106-107, 110-113 untested (exception handling in edge cases during stream initialization). These don't affect functionality in normal operation.
 ```
 
+### Ad-Hoc Change Documentation Example
+
+When documentation work is done without a project plan (per workflow exemptions), use `Status: ad-hoc`:
+
+```markdown
+# Change Documentation: Claude Code Workflow Optimization Guide
+
+**Date:** 2026-01-29 15-30-00
+**Status:** ad-hoc
+**Type:** Documentation
+**Related Project Plan:** N/A
+
+## Summary
+Created comprehensive workflow optimization guide for Claude Code users, including shell aliases, model selection guidance, permission management, and cost optimization strategies.
+
+## Changes Made
+
+### 1. New Documentation File
+
+**Files:**
+- `docs/system-prompts/claude-tips.md` - Created new 478-line workflow optimization guide
+
+**Details:**
+- Documented recommended shell aliases (claude-sys, claude-quick, claude-dev, claude-think)
+- Provided model selection guidance (haiku/sonnet/opus use cases)
+- Explained --dangerously-skip-permissions flag usage and safety considerations
+- Included system-prompts process invocation patterns
+- Added cost optimization strategies
+- Documented Git integration best practices
+
+## Files Created
+- `docs/system-prompts/claude-tips.md` (478 lines)
+
+## Verification
+
+✅ File follows lowercase-kebab.md naming convention
+✅ Markdown formatting validated
+✅ All internal links verified
+✅ Code examples tested
+✅ Committed to git with appropriate message
+
+## Integration with Definition of Done
+
+This change satisfies:
+- ✅ Documentation quality standards (proper formatting, clear structure)
+- ✅ File naming conventions (lowercase-kebab.md)
+- ✅ No broken links
+- ✅ Git committed with co-author attribution
+
+## Known Issues
+
+None - documentation is complete and ready for use.
+```
+
 ---
 
 ## 4. Best Practices for All Templates
@@ -443,13 +497,24 @@ Recorder module 86% coverage - lines 88-92, 106-107, 110-113 untested (exception
 ### Status Field
 - **Spec Files:** `Under Review`, `Approved`, `In Progress`
 - **Project Plans:** `Draft`, `Approved`, `In Progress`, `Completed`, `WONT-DO`
-- **Change Documentation:** `In Progress`, `Completed`
+- **Change Documentation:** `In Progress`, `Completed`, `ad-hoc`
 
 **WONT-DO Status:**
 Use `WONT-DO` for project plans that are cancelled or indefinitely postponed. When marking a plan as WONT-DO:
 - Update the Status header to include the reason: `Status: WONT-DO - Reason here`
 - Add a section at the top explaining why the plan is not being implemented
 - Keep the plan for historical reference and to avoid repeating the same analysis
+
+**ad-hoc Status:**
+Use `ad-hoc` for change documentation that was created without a formal project plan. This applies to:
+- Non-trivial documentation work (creating new docs, substantial rewrites)
+- Quick fixes or improvements that skip the planning phase
+- Research/Documentation changes per the workflow exemptions
+
+When marking as ad-hoc:
+- Set `Status: ad-hoc` in the header
+- Set `Related Project Plan: N/A` (no project plan exists)
+- Still include full verification and change details
 
 ### Cross-References
 - Project Plans reference related Spec Files
@@ -540,7 +605,7 @@ See `docs/definition-of-done.md` for complete checklist.
 |---|---|---|---|---|
 | **Spec File** | `dev_notes/specs/` | Step B of workflow | `Under Review`, `Approved` | `2026-01-25_18-46-25_add-tests.md` |
 | **Project Plan** | `dev_notes/project_plans/` | Step C of workflow | `Draft`, `Approved`, `Completed`, `WONT-DO` | `2026-01-25_18-46-25_test-plan.md` |
-| **Change Doc** | `dev_notes/changes/` | Step E of workflow | `In Progress`, `Completed` | `2026-01-25_18-50-00_pytest-tests.md` |
+| **Change Doc** | `dev_notes/changes/` | Step E of workflow OR ad-hoc doc work | `In Progress`, `Completed`, `ad-hoc` | `2026-01-25_18-50-00_pytest-tests.md` |
 
 ---
 
