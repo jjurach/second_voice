@@ -218,6 +218,65 @@ README.md:
 
 ---
 
+### Layer 7: Alias Verification
+
+**Goal:** Ensure all shell aliases referenced in tips documents are defined in aliases.sh.
+
+**Process:**
+1. Scan all `.md` files in `docs/system-prompts/tips/` directory
+2. Extract alias references from markdown (looking for `alias name=` patterns in code blocks)
+3. Read `docs/system-prompts/tips/aliases.sh`
+4. Verify each referenced alias exists in aliases.sh
+5. Report any missing aliases
+
+**Alias pattern detection:**
+- Matches lines like: `alias claude-sys='claude --model sonnet'`
+- Matches lines like: `# Use claude-dev for development`
+- Matches inline references like: `` `claude-quick` ``
+- Extracts alias names: claude-sys, claude-dev, claude-quick, codex-sys, cline-list, etc.
+
+**Verification:**
+```
+tips/claude-code.md references:
+  → claude-sys ✅ (found in aliases.sh)
+  → claude-quick ✅ (found in aliases.sh)
+  → claude-dev ✅ (found in aliases.sh)
+  → claude-think ✅ (found in aliases.sh)
+
+tips/codex.md references:
+  → codex-sys ✅ (found in aliases.sh)
+  → codex-quick ✅ (found in aliases.sh)
+  → codex-dev ✅ (found in aliases.sh)
+  → codex-think ✅ (found in aliases.sh)
+
+tips/cline.md references:
+  → cline-list ✅ (found in aliases.sh)
+  → cline-resume ✅ (found in aliases.sh)
+  → cline-view ✅ (found in aliases.sh)
+  → cline-new ✅ (found in aliases.sh)
+  → cline-chat ✅ (found in aliases.sh)
+  → cline-sys ✅ (found in aliases.sh)
+  → cline-dev ✅ (found in aliases.sh)
+```
+
+**Failure Example:**
+```
+tips/claude-code.md references:
+  → claude-sys ✅ (found in aliases.sh)
+  → claude-experimental ❌ (NOT found in aliases.sh)
+
+Result: Alias verification failed
+Recommendation: Add missing alias to aliases.sh or remove reference from tips
+```
+
+**Rationale:**
+- Ensures aliases.sh is complete and up-to-date
+- Prevents documentation drift (docs mention aliases that don't exist)
+- Makes it easy for users to source all aliases at once
+- Provides single source of truth for alias definitions
+
+---
+
 ## Constraint Rules
 
 The scan enforces these rules. Each can be customized or extended:
@@ -316,6 +375,29 @@ All tool guides must be referenced from:
 Missing references indicate:
   - New tool guide created but not linked
   - Guides need to be registered in project docs
+```
+
+### Rule 7: Alias Consistency
+
+```
+All shell aliases referenced in tips/ documents must be defined in aliases.sh.
+
+Verification process:
+  1. Scan all markdown files in docs/system-prompts/tips/
+  2. Extract alias references (alias definitions and usage examples)
+  3. Verify each alias exists in docs/system-prompts/tips/aliases.sh
+  4. Report missing aliases
+
+Patterns to detect:
+  - Alias definitions: alias claude-sys='command'
+  - Inline references: `claude-dev` in prose
+  - Usage examples: claude-quick 'task'
+
+Rationale:
+  - Single source of truth for alias definitions
+  - Prevents documentation drift
+  - Ensures users can source all aliases at once
+  - Makes aliases easy to discover and load
 ```
 
 ---
