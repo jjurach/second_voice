@@ -465,6 +465,33 @@ cat ~/.cline/x/tasks/<TASK_ID>/task_metadata.json | jq '.cost'
 
 ---
 
+## Enabling and Customizing MCP Services for One-Shot Invocations
+
+Cline relies on configuration files for MCP, but you can target them in one-shot commands.
+
+### 1. Pre-Configuration
+
+MCP servers must be defined in your `~/.cline/mcp_settings.json` (or via the extension settings). They are loaded automatically when Cline starts.
+
+### 2. Targeted Invocations
+
+Instruct Cline to use specific tools in your prompt.
+
+```bash
+# Explicitly request the tool
+cline task new \
+  "Use the 'postgres-mcp' server to inspect the 'users' table schema"
+```
+
+### 3. Guardrails for Autonomous Tasks
+
+Since Cline is autonomous, it will stop and ask for permission for MCP tool use unless you have enabled "Auto-approve".
+
+*   **For One-Shot Safety:** Stick to the default **Manual Approval** mode for any task involving external side effects (database writes, API POSTs).
+*   **For Trusted Read-Only:** You can configure auto-approval for specific read-only tools if the CLI supports granular permissions, otherwise, keep it interactive or monitor the output.
+
+---
+
 ## Integration with Git
 
 ### Git Operations

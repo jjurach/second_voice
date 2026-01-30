@@ -539,6 +539,21 @@ codex-quick 'verify OAuth2 implementation follows security best practices'
 
 ---
 
+## Enabling and Customizing MCP Services
+
+**Note:** Codex CLI currently **does not** have native support for the Model Context Protocol (MCP).
+
+### Recommendation
+
+If your autonomous task requires MCP tools (database access, slack integration, specialized API tools), use **Gemini CLI** or **Cline** instead.
+
+```bash
+# Instead of codex-dev...
+gemini-dev --enable-mcp "task requiring mcp tools"
+```
+
+---
+
 ## Integration with Git
 
 ### Safe Git Practices

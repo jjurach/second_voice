@@ -563,6 +563,31 @@ claude-quick 'verify OAuth2 implementation follows security best practices'
 
 ---
 
+## Enabling and Customizing MCP Services for One-Shot Invocations
+
+To use MCP servers (Model Context Protocol) in a single, autonomous command:
+
+### 1. The `--mcp-server` Flag
+
+Pass server configurations directly to the command (if supported by your version) or ensure they are configured in your config file.
+
+```bash
+# Example: Run with tools available (if configured)
+claude-dev 'use the postgres-mcp tool to migrate the users table'
+```
+
+### 2. Guardrailed Execution
+
+For autonomous tasks involving external tools, ensure you use safe permission settings:
+
+```bash
+# Require approval for tool use (default behavior safe for one-shots)
+claude-dev --approval-policy "on-request" \
+  'analyze the database schema and generate a report'
+```
+
+---
+
 ## Integration with Git
 
 ### Safe Git Practices

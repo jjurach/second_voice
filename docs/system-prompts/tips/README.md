@@ -11,6 +11,7 @@ This directory contains **optional** workflow optimization guides for different 
 Workflow optimization tips for:
 
 - **[claude-code.md](claude-code.md)** - Claude Code CLI tips (shell aliases, session resumption, model selection)
+- **[gemini.md](gemini.md)** - Gemini CLI tips (model selection, ReAct loop patterns, web-assisted dev)
 - **[codex.md](codex.md)** - Codex CLI tips (session management, model selection, cost optimization)
 - **[cline.md](cline.md)** - Cline (VS Code extension + CLI) tips (task management, Plan/Act modes)
 

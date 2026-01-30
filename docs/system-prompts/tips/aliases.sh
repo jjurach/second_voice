@@ -26,6 +26,26 @@ alias claude-dev='claude --model sonnet --dangerously-skip-permissions'
 alias claude-think='claude --model opus --dangerously-skip-permissions'
 
 # ============================================================================
+# Gemini CLI Aliases
+# ============================================================================
+# See: docs/system-prompts/tips/gemini.md
+
+# System-prompts processes (use Flash for speed)
+alias gemini-sys='export GEMINI_MODEL=gemini-3-flash && gemini'
+
+# Quick exploration (use Flash for low latency)
+alias gemini-quick='export GEMINI_MODEL=gemini-3-flash && gemini'
+
+# Full dev work (use Pro for better reasoning)
+alias gemini-dev='export GEMINI_MODEL=gemini-3-pro && gemini'
+
+# Deep reasoning/Architecture (use Pro for max capability)
+alias gemini-think='export GEMINI_MODEL=gemini-3-pro && gemini'
+
+# Debug mode
+alias gemini-debug='export GEMINI_DEBUG=true && gemini'
+
+# ============================================================================
 # Codex CLI Aliases
 # ============================================================================
 # See: docs/system-prompts/tips/codex.md
@@ -68,6 +88,12 @@ alias cline-dev='cline task new "development task"'
 #   claude-quick 'find all error handling code'
 #   claude-think 'design the caching architecture'
 #
+# Gemini CLI:
+#   gemini-sys (then ask: 'apply document-integrity-scan process')
+#   gemini-dev (then ask: 'implement OAuth authentication')
+#   gemini-quick (then ask: 'find all error handling code')
+#   gemini-think (then ask: 'design the caching architecture')
+#
 # Codex CLI:
 #   codex-sys 'apply close-task process'
 #   codex-dev 'refactor authentication module'
@@ -92,5 +118,5 @@ alias cline-dev='cline task new "development task"'
 # Optional: Print loaded message
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "AI Coding Tool Aliases loaded"
-    echo "Available: claude-{sys,quick,dev,think}, codex-{sys,quick,dev,think}, cline-{list,resume,view,new,chat,sys,dev}"
+    echo "Available: claude-*, gemini-*, codex-*, cline-*"
 fi
