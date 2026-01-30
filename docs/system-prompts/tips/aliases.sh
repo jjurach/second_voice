@@ -95,7 +95,7 @@ alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
 #   gemini-think 'design the caching architecture'
 #
 # Codex CLI:
-#   codex-sys 'apply close-task process'
+#   codex-sys 'apply close-project process'
 #   codex-dev 'refactor authentication module'
 #   codex-quick 'list all TODOs'
 #   codex-think 'review system architecture'

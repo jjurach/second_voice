@@ -201,8 +201,8 @@ cline task new 'apply document-integrity-scan process and fix issues'
 # Bootstrap project
 cline task new 'apply bootstrap-project process'
 
-# Close task
-cline task new 'apply close-task process'
+# Close project
+cline task new 'apply close-project process'
 ```
 
 **Via VS Code Extension:**
@@ -218,7 +218,7 @@ cline task new 'apply close-task process'
 |---------|---------|-------------|
 | **document-integrity-scan** | `apply document-integrity-scan` | Validate documentation correctness |
 | **bootstrap-project** | `apply bootstrap-project` | Initialize/update Agent Kernel |
-| **close-task** | `apply close-task process` | Properly complete and land work |
+| **close-project** | `apply close-project process` | Properly complete and land work |
 
 ---
 
@@ -251,7 +251,7 @@ cline task new 'implement user authentication with OAuth2'
 cline task open <TASK_ID>
 ```
 
-### Pattern 3: Development → Close Task
+### Pattern 3: Development → Close Project
 
 ```bash
 # Step 1: Implement feature
@@ -260,11 +260,11 @@ cline task new 'implement OAuth authentication'
 # Step 2: Verify and test
 # (Cline runs tests automatically if configured)
 
-# Step 3: Close task properly
-cline task new 'apply close-task process'
+# Step 3: Close project properly
+cline task new 'apply close-project process'
 ```
 
-**What close-task does:**
+**What close-project does:**
 1. ✅ Verifies Definition of Done criteria
 2. ✅ Runs tests (aborts if non-trivial failures)
 3. ✅ Checks/creates change documentation

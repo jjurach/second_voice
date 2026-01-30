@@ -96,7 +96,7 @@ ALLOWED_BACK_REFERENCES = {
         "../../definition-of-done.md",
         "../../mandatory.md",
     },
-    "docs/system-prompts/processes/close-task.md": {
+    "docs/system-prompts/processes/close-project.md": {
         "../../definition-of-done.md",
     },
 }
