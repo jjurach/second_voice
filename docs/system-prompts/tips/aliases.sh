@@ -31,19 +31,19 @@ alias claude-think='claude --model opus --dangerously-skip-permissions'
 # See: docs/system-prompts/tips/gemini.md
 
 # System-prompts processes (use Flash for speed)
-alias gemini-sys='GEMINI_MODEL=gemini-3-flash gemini --dangerously-skip-permissions'
+alias gemini-sys='GEMINI_MODEL=gemini-3-flash gemini --yolo'
 
 # Quick exploration (use Flash for low latency)
-alias gemini-quick='GEMINI_MODEL=gemini-3-flash gemini --dangerously-skip-permissions'
+alias gemini-quick='GEMINI_MODEL=gemini-3-flash gemini --yolo'
 
 # Full dev work (use Pro for better reasoning)
-alias gemini-dev='GEMINI_MODEL=gemini-3-pro gemini --dangerously-skip-permissions'
+alias gemini-dev='GEMINI_MODEL=gemini-3-pro gemini --yolo'
 
 # Deep reasoning/Architecture (use Pro for max capability)
-alias gemini-think='GEMINI_MODEL=gemini-3-pro gemini --dangerously-skip-permissions'
+alias gemini-think='GEMINI_MODEL=gemini-3-pro gemini --yolo'
 
 # Debug mode
-alias gemini-debug='GEMINI_DEBUG=true gemini --dangerously-skip-permissions'
+alias gemini-debug='GEMINI_DEBUG=true gemini --yolo'
 
 # ============================================================================
 # Codex CLI Aliases

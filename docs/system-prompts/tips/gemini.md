@@ -14,19 +14,19 @@ Add these to your `~/.bashrc` or `~/.zshrc` for faster Gemini CLI invocation:
 
 ```bash
 # System-prompts processes (use Flash for speed, skip permissions)
-alias gemini-sys='GEMINI_MODEL=gemini-3-flash gemini --dangerously-skip-permissions'
+alias gemini-sys='GEMINI_MODEL=gemini-3-flash gemini --yolo'
 
 # Quick exploration (use Flash for low latency, skip permissions)
-alias gemini-quick='GEMINI_MODEL=gemini-3-flash gemini --dangerously-skip-permissions'
+alias gemini-quick='GEMINI_MODEL=gemini-3-flash gemini --yolo'
 
 # Full dev work (use Pro for better reasoning, skip permissions)
-alias gemini-dev='GEMINI_MODEL=gemini-3-pro gemini --dangerously-skip-permissions'
+alias gemini-dev='GEMINI_MODEL=gemini-3-pro gemini --yolo'
 
 # Deep reasoning/Architecture (use Pro for max capability, skip permissions)
-alias gemini-think='GEMINI_MODEL=gemini-3-pro gemini --dangerously-skip-permissions'
+alias gemini-think='GEMINI_MODEL=gemini-3-pro gemini --yolo'
 
 # Debug mode (show verbose output)
-alias gemini-debug='GEMINI_DEBUG=true gemini --dangerously-skip-permissions'
+alias gemini-debug='GEMINI_DEBUG=true gemini --yolo'
 ```
 
 ### Usage Examples
@@ -122,7 +122,7 @@ Gemini CLI emphasizes conversational interaction. Instead of explicit modes, it 
 
 ```text
 User: "Implement the login feature"
-Gemini: "I'll start by analyzing the requirements. I'll read src/auth.py..."
+Gemini: "I\'ll start by analyzing the requirements. I\'ll read src/auth.py..."
 Gemini: "I have a plan. 1. Create LoginRequest class. 2. Add route. Proceed?"
 User: "Yes, but use JWT."
 Gemini: "Understood. Updating plan to use JWT..."
@@ -226,7 +226,7 @@ gemini-dev --enable-mcp \
 
 When using `--enable-mcp`, Gemini has access to all configured servers.
 
-*   **Best Practice:** Do not use `--dangerously-skip-permissions` (if available) combined with `--enable-mcp` unless you are in a sandboxed environment.
+*   **Best Practice:** Do not use `--yolo` (if available) combined with `--enable-mcp` unless you are in a sandboxed environment.
 *   **Approval:** Gemini will ask for confirmation before executing MCP tool calls.
 
 ### 3. MCP Configuration
@@ -244,3 +244,4 @@ gemini --list-mcp-servers
 ---
 
 Last Updated: 2026-01-29
+```
