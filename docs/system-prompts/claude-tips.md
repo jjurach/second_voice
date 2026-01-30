@@ -145,6 +145,7 @@ claude-sys 'scan docs'
 |---------|---------|-------------|
 | **document-integrity-scan** | `claude-sys 'apply document-integrity-scan'` | Validate documentation correctness |
 | **bootstrap-project** | `claude-sys 'apply bootstrap-project'` | Initialize/update Agent Kernel |
+| **close-task** | `claude-dev 'apply close-task process'` | Properly complete and land work before ending session |
 
 ### Common Process Commands
 
@@ -160,6 +161,10 @@ claude-sys 'apply bootstrap-project with --analyze-workflow flag'
 
 # Check current bootstrap state
 claude-sys 'what is the current bootstrap state?'
+
+# Close task (wrap up work properly)
+claude-dev 'apply close-task process'
+claude-dev 'close this task and commit changes'
 ```
 
 ---
@@ -198,6 +203,39 @@ claude-dev 'fix the broken links reported in the scan'
 # Step 3: Re-validate
 claude-sys 'apply document-integrity-scan process'
 ```
+
+### Pattern 4: Development → Close Task
+
+**Complete development cycle with proper task closure:**
+
+```bash
+# Step 1: Implement the feature
+claude-dev 'implement user authentication with OAuth2'
+
+# Step 2: Run tests and verify
+claude-dev 'run tests and verify all pass'
+
+# Step 3: Close the task properly
+claude-dev 'apply close-task process'
+```
+
+**What close-task does:**
+1. ✅ Verifies Definition of Done criteria
+2. ✅ Runs tests (aborts if non-trivial failures)
+3. ✅ Checks/creates change documentation
+4. ✅ Commits changes with proper attribution
+5. ✅ Reports final status
+
+**When to use close-task:**
+- ✅ At end of development sessions
+- ✅ After completing a feature
+- ✅ Before switching contexts
+- ✅ When ready to commit work
+
+**When close-task will abort:**
+- ❌ Tests fail for non-trivial reasons (logic errors)
+- ❌ Unexpected files in source tree
+- ❌ Definition of Done criteria not met
 
 ---
 
