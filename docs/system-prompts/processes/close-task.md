@@ -590,14 +590,14 @@ Skipped (documentation-only change)
 
 Phase 3: Change Documentation
 Creating ad-hoc change documentation...
-✅ Created: dev_notes/changes/2026-01-29_15-30-00_claude-tips.md
+✅ Created: dev_notes/changes/2026-01-29_15-30-00_tips/claude-code.md
 ✅ Status: ad-hoc
 ✅ Related Plan: N/A
 
 Phase 4: Commit
 Staged:
-  - docs/system-prompts/claude-tips.md (new)
-  - dev_notes/changes/2026-01-29_15-30-00_claude-tips.md (new)
+  - docs/system-prompts/tips/claude-code.md (new)
+  - dev_notes/changes/2026-01-29_15-30-00_tips/claude-code.md (new)
 
 ✅ Committed: docs: add Claude Code workflow optimization guide [fb0c396]
 
@@ -607,10 +607,10 @@ Phase 5: Summary
 Summary: Created comprehensive workflow optimization guide for Claude Code users
 
 Commit: fb0c396
-Change Docs: dev_notes/changes/2026-01-29_15-30-00_claude-tips.md (ad-hoc)
+Change Docs: dev_notes/changes/2026-01-29_15-30-00_tips/claude-code.md (ad-hoc)
 
 Files Created:
-  - docs/system-prompts/claude-tips.md (478 lines)
+  - docs/system-prompts/tips/claude-code.md (478 lines)
 ```
 
 ---

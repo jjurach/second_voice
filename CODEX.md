@@ -1,4 +1,4 @@
-# Claude Code Instructions
+# Codex CLI Instructions
 
 This project follows the **AGENTS.md** workflow.
 
@@ -6,15 +6,15 @@ This project follows the **AGENTS.md** workflow.
 
 - **Read First:** [AGENTS.md](AGENTS.md)
 - **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
-- **Tool Guide:** [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)
+- **Tool Guide:** [docs/system-prompts/tools/codex.md](docs/system-prompts/tools/codex.md)
 - **Workflows:** [docs/workflows.md](docs/workflows.md)
 
-## For Claude Code Users
+## For Codex CLI Users
 
-The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)** guide covers:
+The **[docs/system-prompts/tools/codex.md](docs/system-prompts/tools/codex.md)** guide covers:
 - Installation and discovery
 - Workflow mapping to AGENTS.md
-- All tools and approval gates
+- Session management and resumption
 - Common patterns and examples
 
 ## System Architecture
@@ -35,7 +35,7 @@ The Agent Kernel provides specialized processes (bootstrap-project, document-int
 
 For workflow optimization and convenience (shell aliases, model selection, session resumption, etc.), see:
 
-- **[docs/system-prompts/tips/claude-code.md](docs/system-prompts/tips/claude-code.md)** - Claude Code workflow optimization tips (optional)
+- **[docs/system-prompts/tips/codex.md](docs/system-prompts/tips/codex.md)** - Codex CLI workflow optimization tips (optional)
 
 **Note:** These tips are supplementary and not required for using the Agent Kernel workflows.
 

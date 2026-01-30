@@ -444,7 +444,7 @@ Created comprehensive workflow optimization guide for Claude Code users, includi
 ### 1. New Documentation File
 
 **Files:**
-- `docs/system-prompts/claude-tips.md` - Created new 478-line workflow optimization guide
+- `docs/system-prompts/tips/claude-code.md` - Created new 478-line workflow optimization guide
 
 **Details:**
 - Documented recommended shell aliases (claude-sys, claude-quick, claude-dev, claude-think)
@@ -455,7 +455,7 @@ Created comprehensive workflow optimization guide for Claude Code users, includi
 - Documented Git integration best practices
 
 ## Files Created
-- `docs/system-prompts/claude-tips.md` (478 lines)
+- `docs/system-prompts/tips/claude-code.md` (478 lines)
 
 ## Verification
 

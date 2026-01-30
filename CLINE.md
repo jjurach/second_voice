@@ -31,5 +31,13 @@ The Agent Kernel provides specialized processes (bootstrap-project, document-int
 
 **IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#processes) for details.
 
+## Optional: Workflow Optimization Tips
+
+For workflow optimization and convenience (CLI commands, model selection, task management, etc.), see:
+
+- **[docs/system-prompts/tips/cline.md](docs/system-prompts/tips/cline.md)** - Cline workflow optimization tips (optional)
+
+**Note:** These tips are supplementary and not required for using the Agent Kernel workflows.
+
 ---
 Last Updated: 2026-01-29
