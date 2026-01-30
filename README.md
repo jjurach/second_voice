@@ -286,7 +286,7 @@ aider
 ```
 
 **Documentation:**
-- Configuration: `.aider.conf` (create from [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md))
+- Configuration: `.aider.conf.yml` (see [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md))
 - Complete guide: [docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)
 
 ---
@@ -307,7 +307,7 @@ cline
 ```
 
 **Documentation:**
-- Entry point: Create `CLINE.md` in project root
+- Entry point: `.clinerules` in project root
 - Complete guide: [docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)
 
 ---

@@ -37,10 +37,10 @@ cline
 
 ## How Cline Discovers Project Instructions
 
-Cline looks for a `CLINE.md` file in the project root. This file serves the same purpose as `CLAUDE.md` and `GEMINI.md` in other tools.
+Cline looks for a `.clinerules` file in the project root. This file serves the same purpose as `CLAUDE.md` and `GEMINI.md` in other tools.
 
-**Discovery order:**
-1. **Project Root:** `./CLINE.md` (This is what we use)
+**Discovery:**
+1. **Project Root:** `./.clinerules` (This is what we use)
 2. **Home Directory:** `~/.cline/CLINE.md` (fallback)
 
 ## Configuration
@@ -155,15 +155,16 @@ Cline: [Adds feature while maintaining previous changes]
 
 ## Error Handling & Troubleshooting
 
-**Problem:** "CLINE.md not found"
-**Solution:** Create a CLINE.md file in project root:
+**Problem:** ".clinerules not found"
+**Solution:** Create a .clinerules file in project root:
+
 ```bash
-cat > CLINE.md << 'EOF'
+cat > .clinerules << 'EOF'
 # Project - Cline Instructions
 
-This project follows the AGENTS.md workflow.
-- See AGENTS.md for core development workflow
-- See docs/definition-of-done.md for completion criteria
+This project follows AGENTS.md workflow.
+- See AGENTS.md for core workflow
+- See `docs/definition-of-done.md` for completion criteria
 EOF
 ```
 
@@ -204,7 +205,7 @@ User: "Run pytest and show the full output"
 | **Git** | `Bash(git ...)` | `run_shell_command(git ...)` |
 | **Task Tracking** | Built-in (TaskCreate) | **Manual** (via dev_notes/) |
 | **Context** | ~200k tokens | Depends on model |
-| **Entry Point** | `CLAUDE.md` | `CLINE.md` |
+| **Entry Point** | `CLAUDE.md` | `.clinerules` |
 | **Shell Integration** | Full Bash tool | Via subprocess |
 | **Multi-file edits** | Good | **Excellent** |
 | **Auto-commit** | Manual | ✅ Automatic |
@@ -235,4 +236,4 @@ cline --help                    # Show help
 - [Cline Repository](https://github.com/cline/cline)
 - [Official Cline Documentation](https://docs.cline.ai)
 - AGENTS.md - Core workflow all tools follow
-- docs/definition-of-done.md - Completion criteria
+- `docs/definition-of-done.md` - Completion criteria

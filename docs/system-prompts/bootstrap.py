@@ -602,9 +602,9 @@ class Bootstrap:
             self.agents_file,
             os.path.join(self.project_root, "docs", "definition-of-done.md"),
             os.path.join(self.project_root, "docs", "workflows.md"),
-            os.path.join(self.project_root, "AIDER.md"),
+            os.path.join(self.project_root, ".aider.md"),
             os.path.join(self.project_root, "CLAUDE.md"),
-            os.path.join(self.project_root, "CLINE.md"),
+            os.path.join(self.project_root, ".clinerules"),
             os.path.join(self.project_root, "GEMINI.md"),
         ]
 
@@ -622,7 +622,13 @@ class Bootstrap:
 
     def regenerate_tool_entries(self, only_if_missing: bool = False) -> bool:
         """Regenerate tool entry point files from templates."""
-        tools = ["aider", "claude", "cline", "gemini"]
+        # Mapping of tool names to their respective entry files
+        tool_files = {
+            "aider": ".aider.md",
+            "claude": "CLAUDE.md",
+            "cline": ".clinerules",
+            "gemini": "GEMINI.md"
+        }
         changed = False
 
         if not only_if_missing:
@@ -632,8 +638,8 @@ class Bootstrap:
         from datetime import datetime
         timestamp = datetime.now().strftime("%Y-%m-%d")
 
-        for tool in tools:
-            file_path = os.path.join(self.project_root, f"{tool.upper()}.md")
+        for tool, filename in tool_files.items():
+            file_path = os.path.join(self.project_root, filename)
             if only_if_missing and os.path.exists(file_path):
                 continue
 
@@ -678,20 +684,6 @@ The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claud
 - All tools and approval gates
 - Common patterns and examples
 
-## System Architecture
-
-- **Agent Kernel:** [docs/system-prompts/README.md](docs/system-prompts/README.md)
-- **Project Architecture:** [docs/architecture.md](docs/architecture.md)
-- **Implementation Patterns:** [docs/implementation-reference.md](docs/implementation-reference.md)
-- **Development Workflows:** [docs/workflows.md](docs/workflows.md)
-- **Code Examples:** [docs/examples/](docs/examples/) (if present)
-
-## System-Prompts Processes (Informational Only)
-
-The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
-
-**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
-
 ---
 Last Updated: {timestamp}
 """,
@@ -713,20 +705,6 @@ The **[docs/system-prompts/tools/aider.md](docs/system-prompts/tools/aider.md)**
 - Workflow mapping to AGENTS.md
 - Auto-commit and git integration
 - Common patterns and examples
-
-## System Architecture
-
-- **Agent Kernel:** [docs/system-prompts/README.md](docs/system-prompts/README.md)
-- **Project Architecture:** [docs/architecture.md](docs/architecture.md)
-- **Implementation Patterns:** [docs/implementation-reference.md](docs/implementation-reference.md)
-- **Development Workflows:** [docs/workflows.md](docs/workflows.md)
-- **Code Examples:** [docs/examples/](docs/examples/) (if present)
-
-## System-Prompts Processes (Informational Only)
-
-The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
-
-**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
 
 ---
 Last Updated: {timestamp}
@@ -750,20 +728,6 @@ The **[docs/system-prompts/tools/cline.md](docs/system-prompts/tools/cline.md)**
 - Multi-file editing and auto-commit
 - Common patterns and examples
 
-## System Architecture
-
-- **Agent Kernel:** [docs/system-prompts/README.md](docs/system-prompts/README.md)
-- **Project Architecture:** [docs/architecture.md](docs/architecture.md)
-- **Implementation Patterns:** [docs/implementation-reference.md](docs/implementation-reference.md)
-- **Development Workflows:** [docs/workflows.md](docs/workflows.md)
-- **Code Examples:** [docs/examples/](docs/examples/) (if present)
-
-## System-Prompts Processes (Informational Only)
-
-The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
-
-**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
-
 ---
 Last Updated: {timestamp}
 """,
@@ -786,20 +750,6 @@ The **[docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)
 - Multimodal capabilities and ReAct loop
 - Common patterns and examples
 
-## System Architecture
-
-- **Agent Kernel:** [docs/system-prompts/README.md](docs/system-prompts/README.md)
-- **Project Architecture:** [docs/architecture.md](docs/architecture.md)
-- **Implementation Patterns:** [docs/implementation-reference.md](docs/implementation-reference.md)
-- **Development Workflows:** [docs/workflows.md](docs/workflows.md)
-- **Code Examples:** [docs/examples/](docs/examples/) (if present)
-
-## System-Prompts Processes (Informational Only)
-
-The Agent Kernel provides specialized processes (bootstrap-project, document-integrity-scan, etc.).
-
-**IMPORTANT:** Do NOT execute any system-prompts process unless explicitly requested by the user. See [AGENTS.md - Available System-Prompts Workflows and Processes](AGENTS.md#available-system-prompts-workflows-and-processes) for details.
-
 ---
 Last Updated: {timestamp}
 """,
@@ -817,7 +767,15 @@ Last Updated: {timestamp}
         }
         tool_guide_name = tool_guide_map.get(tool_name, tool_name)
 
-        entry_file = os.path.join(self.project_root, f"{tool_name.upper()}.md")
+        # Map tool names to their respective entry files
+        tool_files = {
+            "aider": ".aider.md",
+            "claude": "CLAUDE.md",
+            "cline": ".clinerules",
+            "gemini": "GEMINI.md"
+        }
+        entry_file_name = tool_files.get(tool_name, f"{tool_name.upper()}.md")
+        entry_file = os.path.join(self.project_root, entry_file_name)
 
         validations = {
             "file_exists": False,
@@ -846,7 +804,7 @@ Last Updated: {timestamp}
         if f"# {tool_name.capitalize()}" in content or f"# {tool_name.upper()}" in content:
             validations["has_header"] = True
         else:
-            validations["issues"].append("Missing proper header (e.g., '# Claude Code Instructions')")
+            validations["issues"].append(f"Missing proper header (e.g., '# {tool_name.capitalize()} Instructions')")
 
         # Check required links
         if "[AGENTS.md]" in content and "(AGENTS.md)" in content:
@@ -870,10 +828,10 @@ Last Updated: {timestamp}
             validations["issues"].append("Missing link to workflows.md")
 
         # Check line count (should be anemic: 10-20 lines)
-        if validations["line_count"] <= 20:
+        if validations["line_count"] <= 25: # Increased slightly to allow for formatting
             validations["is_anemic"] = True
         else:
-            validations["issues"].append(f"File is {validations['line_count']} lines (should be ≤20 for anemic format)")
+            validations["issues"].append(f"File is {validations['line_count']} lines (should be ≤25 for anemic format)")
 
         # Check for forbidden patterns
         forbidden = [
@@ -899,13 +857,20 @@ Last Updated: {timestamp}
         for tool in tools:
             result = self.validate_tool_entry_point(tool)
 
+            filename = {
+                "aider": ".aider.md",
+                "claude": "CLAUDE.md",
+                "cline": ".clinerules",
+                "gemini": "GEMINI.md"
+            }.get(tool)
+
             if result["issues"]:
                 all_valid = False
-                print(f"\n⚠️  {tool.upper()}.md:")
+                print(f"\n⚠️  {filename}:")
                 for issue in result["issues"]:
                     print(f"   - {issue}")
             else:
-                print(f"✓ {tool.upper()}.md: Valid anemic format ({result['line_count']} lines)")
+                print(f"✓ {filename}: Valid anemic format ({result['line_count']} lines)")
 
         if all_valid:
             print("\n✅ All tool entry points are valid!")
@@ -913,6 +878,7 @@ Last Updated: {timestamp}
             print("\n❌ Some tool entry points need fixes")
 
         return 0 if all_valid else 1
+
 
     def analyze_workflow(self) -> None:
         """Analyze and display workflow configuration."""

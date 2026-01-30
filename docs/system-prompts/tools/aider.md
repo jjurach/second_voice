@@ -39,234 +39,24 @@ aider
 
 ## How Aider Discovers Project Instructions
 
-Aider automatically reads `AGENTS.md` from the project root and uses it to guide development work. This means no special configuration is needed—just follow the AGENTS.md workflow and Aider will respect it.
+Aider reads `AGENTS.md` and any other files specified in `.aider.conf.yml`. We use this to ensure Aider has full context from our core workflow and hidden entry point.
 
 **Discovery order:**
-1. `./AGENTS.md` (Project Root - **This is what Aider reads**)
-2. `.aider.conf.yml` (Optional Aider-specific configuration)
-
-## How Aider Differs from Claude Code
-
-| Feature | Claude Code | Aider |
-|---------|---|---|
-| **Approval Gates** | ✅ Built-in (ExitPlanMode) | ❌ None (changes apply immediately) |
-| **Task Tracking** | ✅ TaskCreate/TaskUpdate | ❌ None (manual tracking) |
-| **Git Integration** | Manual (Bash) | ✅ Automatic (auto-commits) |
-| **Code Awareness** | Good | ✅ Excellent (understands diffs) |
-| **File Editing** | Via Edit tool | ✅ Direct (shows diffs) |
-| **Configuration** | CLAUDE.md | `.aider.conf.yml` |
-| **Web Search** | ✅ Yes | ⚠️ Depends on model |
-
-**Key Difference:** Aider changes code **immediately** without approval gates. This is fundamentally different from Claude Code.
-
-## Aider Philosophy & Architecture
-
-Aider uses **trust-based collaboration** with a **cascade agent** that handles multi-step edits:
-- You provide direction in natural language
-- Aider makes coordinated changes across multiple files (cascade agent)
-- Shows diffs of every change (intent tracking: edits, terminal, clipboard)
-- You review changes in git with readable commits
-- You can undo with `git undo` if needed
-- Automatic linting and testing on every change
-- In-the-loop approvals for controlled code changes
-
-This **trust-based model** means AGENTS.md needs light adaptation for Aider—approval is conversational rather than explicit gates like Claude Code's ExitPlanMode().
-
-## AGENTS.md Workflow - Aider Adaptation
-
-### Step A: Analyze & Declare Intent ✅ Same
-Aider analyzes your request and determines scope.
-
-**Aider does this conversationally:**
-```
-You: "Add caching to API responses"
-Aider: "I'll create a cache module, integrate with API routes,
-        and add tests. Should I proceed?"
-```
-
-### Step B: Create Spec File ✅ Same
-Create spec file in `dev_notes/specs/YYYY-MM-DD_HH-MM-SS_*.md`
-
-**How to do it in Aider:**
-```
-You: "Create a spec file in dev_notes/specs/ for this feature.
-     Include requirements, acceptance criteria, and test plan."
-
-Aider: Creates the spec file directly
-      (Shows the content it's creating)
-```
-
-### Step C: Create Project Plan ✅ Same
-Create plan file in `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_*.md`
-
-**How to do it in Aider:**
-```
-You: "Create a project plan in dev_notes/project_plans/ with
-     step-by-step implementation approach."
-
-Aider: Creates the plan file
-      (Shows proposed approach)
-```
-
-### Step D: AWAIT APPROVAL ⚠️ DIFFERENT
-**Aider doesn't have built-in approval gates.**
-
-**Instead, use conversational approval:**
-
-```
-You: "Here's the plan I want you to follow:
-     1. Create cache module
-     2. Integrate with API
-     3. Add tests
-
-     Should I proceed?"
-
-Aider: "Yes, I'll implement this."
-```
-
-**Important differences:**
-- ❌ No ExitPlanMode() (doesn't exist in Aider)
-- ✅ Ask directly: "Should I proceed?"
-- ✅ Aider will clarify if unsure
-- ✅ You maintain control by asking before each step
-
-### Step E: Implement & Document ✅ Same
-Execute steps, create change docs, commit
-
-**Aider does:**
-```
-1. Make changes (shown as diffs)
-2. You can approve (press Enter) or ask for changes
-3. Changes are applied to files
-4. Aider can create change documentation
-5. Git auto-commits changes
-```
-
-## Key Aider Features
-
-### Automatic Git Management
-**Aider auto-commits after changes:**
-```
-You: "Add authentication"
-Aider: Makes changes
-       Shows diffs
-       Auto-commits with generated message
-```
-
-You can see commits:
-```bash
-git log --oneline  # See auto-generated commits
-git diff HEAD~3    # See what Aider changed
-```
-
-### Code-Aware Editing
-**Aider understands code structure:**
-```
-You: "In the User model, add an is_active field"
-Aider: Finds the User model
-       Understands the class structure
-       Adds the field in the right place
-       Shows diff for approval
-```
-
-### Diff Preview
-**Before applying changes, see the diff:**
-```
-Aider shows:
-  src/models/user.py
-  + is_active = BooleanField(default=True)
-
-You can: Accept (Enter) or Ask for changes
-```
-
-### Conversation History
-**Aider remembers context:**
-```
-You: "Add user authentication"
-     [Aider implements]
-
-You: "Now add password reset functionality"
-     [Aider knows the context from auth work]
-```
-
-### Shell Access
-**Run commands directly:**
-```
-You: "Run the tests"
-Aider: Executes pytest
-       Shows output
-
-You: "Tests are failing in test_cache.py"
-Aider: Can view that file and fix it
-```
-
-## AGENTS.md Adaptation for Aider
-
-Since Aider doesn't have approval gates, **adapt like this:**
-
-### For Trivial Changes
-```
-Aider doesn't need approval for typos, simple fixes:
-You: "Fix the typo in README line 42"
-Aider: Fixes it
-       Auto-commits
-```
-
-### For Features (With Approval)
-```
-You: "I want to add caching. Here's the plan:
-     1. Create cache.py module
-     2. Integrate with API routes
-     3. Add tests
-
-     Should I do this?"
-
-Aider: "Yes, I'll implement step by step."
-       [Makes changes, shows diffs]
-
-You: Review diffs
-     Say "OK" to accept
-     Or "Let's change..." to modify
-```
-
-### For Experiments
-```
-You: "Try implementing the feature this way..."
-Aider: Makes changes
-       Shows diffs
-
-You: "Actually, let's do it differently"
-git undo  # Undo with git
-You: "Here's the new approach..."
-Aider: Tries the new way
-```
+1. `./AGENTS.md` (Project Root)
+2. `.aider.md` (Hidden entry point, loaded via config)
+3. `.aider.conf.yml` (Configuration)
 
 ## Configuration
 
-### .aider.conf.yml
-Create `.aider.conf.yml` in project root:
+Ensure your `.aider.conf.yml` includes the following in the `read` list:
 
 ```yaml
-# Aider Configuration
-# Reference: https://aider.chat/docs/config/aider_conf.html
-
-# Model settings
-model: gpt-4o
-
-# Git settings
-auto-commits: true
-attribute-author: true
-attribute-committer: true
-
 # Project Context
 read:
   - AGENTS.md
+  - .aider.md
   - docs/definition-of-done.md
-  - docs/workflow-mapping.md
-
-# Testing
-auto-test: false
-test-cmd: pytest
+  - `docs/workflow-mapping.md`
 ```
 
 ### Context Loading
@@ -535,7 +325,7 @@ CLAUDE.md or README
   ↓
 AGENTS.md (core workflow)
   ↓
-workflow-mapping.md (how it maps to Aider)
+`workflow-mapping.md` (how it maps to Aider)
   ↓
 This document (Aider specifics)
   ↓
@@ -645,4 +435,4 @@ You: "Review diffs"
 - You want tight git integration
 - Working solo or in small teams
 
-**Both can follow AGENTS.md** with appropriate adaptations shown in workflow-mapping.md.
+**Both can follow AGENTS.md** with appropriate adaptations shown in `workflow-mapping.md`.

@@ -29,14 +29,14 @@ This document clarifies which file names are **tool-specific standards**, which 
 | File/Pattern | Auto-Discovered? | Required? | Can Rename? | Purpose |
 |---|---|---|---|---|
 | `CLAUDE.md` | ✅ Claude Code | Yes for claude-cli | No | Claude entry point |
-| `.aider.conf` | ✅ Aider | Yes for aider | No | Aider config |
+| `.aider.md` | ✅ Aider | Yes for aider | No | Aider entry point (hidden) |
+| `.clinerules` | ✅ Cline | Yes for cline | No | Cline entry point (hidden) |
 | `pytest.ini` | ✅ pytest | Recommended | No | Test configuration |
 | `AGENTS.md` | ❌ No | Core principle | Yes, but update links | Workflow definition |
 | `docs/tools-capabilities.md` | ❌ No | No (reference only) | ✅ YES - just update links | Capability matrix |
 | `docs/workflow-mapping.md` | ❌ No | No (reference only) | ✅ YES - just update links | Workflow guide |
 | `docs/prompt-patterns.md` | ❌ No | No (reference only) | ✅ YES - just update links | Prompt examples |
 | `docs/file-naming-conventions.md` | ❌ No | No (reference only) | ✅ YES - just update links | Naming guidelines |
-| `docs/tool-specific-guides/` | ❌ No | No (reference only) | ✅ YES - just update links | Per-tool guides |
 | `dev_notes/specs/` | ❌ No | Core principle | No (timestamp format) | Spec files |
 | `dev_notes/project_plans/` | ❌ No | Core principle | No (timestamp format) | Plan files |
 | `dev_notes/changes/` | ❌ No | Core principle | No (timestamp format) | Change docs |
@@ -62,30 +62,29 @@ These files are **automatically discovered and read** by the tools. Their names 
 See AGENTS.md for the complete workflow.
 ```
 
-### .aider.conf
+### .aider.md & .aider.conf.yml
 - **Discovered by:** Aider CLI
-- **Auto-loaded:** Yes, automatically read when using `aider`
+- **Auto-loaded:** Yes, automatically read when using `aider` (via config)
+- **Cannot rename:** ❌ No - tool looks for these specific names
+- **Purpose:** Aider entry point and configuration
+- **Current status:** ✅ Created and configured
+- **Content:** Aider instructions + reference to AGENTS.md
+
+### .clinerules
+- **Discovered by:** Cline
+- **Auto-loaded:** Yes, automatically read by Cline extension/CLI
 - **Cannot rename:** ❌ No - tool looks for this specific name
-- **Purpose:** Aider-specific configuration
-- **Current status:** ⚠️ Not yet created (optional for your project)
-- **Content:** Aider configuration + reference to AGENTS.md
+- **Purpose:** Cline entry point containing project instructions
+- **Current status:** ✅ Created in project root
+- **Content:** Should reference AGENTS.md
 
-**Example:**
-```yaml
-[aider]
-# Aider config options
-auto-commits = true
 
-# Reference to AGENTS.md workflow
-# See AGENTS.md for approval and documentation practices
-```
-
-### .gemini-cli.yaml or similar
-- **Discovered by:** Gemini CLI (if it exists)
-- **Auto-loaded:** Probably (TBD)
-- **Cannot rename:** ❌ Probably not - tool will look for specific name
-- **Purpose:** Gemini-specific configuration
-- **Current status:** ❓ Unknown (tool not fully supported yet)
+### GEMINI.md
+- **Discovered by:** Gemini CLI
+- **Auto-loaded:** Yes, automatically read when using `gemini`
+- **Cannot rename:** ❌ No - tool looks for this specific name
+- **Purpose:** Gemini-specific instructions
+- **Current status:** ✅ Created
 
 ### pytest.ini
 - **Discovered by:** pytest
@@ -105,7 +104,7 @@ These files are **NOT automatically discovered**. They exist only because other 
 - **Auto-discovered:** ❌ No
 - **Location:** docs/ folder ✅
 - **Naming:** lowercase-kebab.md ✅
-- **Referenced by:** README.md, AGENTS.md, workflow-mapping.md
+- **Referenced by:** README.md, AGENTS.md, `workflow-mapping.md`
 - **Can rename:** ✅ YES - if you update links everywhere
 - **Follow convention:** Already follows lowercase-kebab style
 
@@ -113,7 +112,7 @@ These files are **NOT automatically discovered**. They exist only because other 
 - **Auto-discovered:** ❌ No
 - **Location:** docs/ folder ✅
 - **Naming:** lowercase-kebab.md ✅
-- **Referenced by:** AGENTS.md, README.md, tools-capabilities.md
+- **Referenced by:** AGENTS.md, README.md, `tools-capabilities.md`
 - **Can rename:** ✅ YES - if you update links everywhere
 - **Follow convention:** Already follows lowercase-kebab style
 
@@ -311,8 +310,8 @@ project:
   instructions: AGENTS.md
   tools: gemini
   context-files:
-    - docs/tools-capabilities.md
-    - docs/workflow-mapping.md
+    - `docs/tools-capabilities.md`
+    - `docs/workflow-mapping.md`
     - docs/tool-specific-guides/gemini.md
 ```
 
@@ -365,7 +364,7 @@ project:
 2. **For Aider:** Create .aider.conf if you want Aider support (optional)
 3. **For Gemini/Codex:** Create guides when testing those tools
 4. **Link everything:** Update README.md to reference all documents
-5. **Document this:** Share this FILE-NAMING-CONVENTIONS.md with team
+5. **Document this:** Share this `FILE-NAMING-CONVENTIONS.md` with team
 
 The key principle: **Auto-discovered files have fixed names. Everything else is flexible as long as links are updated.**
 

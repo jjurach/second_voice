@@ -16,6 +16,7 @@ attribute-committer: true
 # Load core instructions into context window
 read:
   - AGENTS.md
+  - .aider.md
   - docs/definition-of-done.md
   - docs/workflow-mapping.md
 

@@ -162,21 +162,16 @@ git revert <commit-hash>  # Revert specific commit
 
 ## Verification Status
 
+
+
 - ✅ CLI Tool exists and is actively maintained
+
 - ✅ Native `AGENTS.md` discovery with fallback chain
+
 - ✅ GPT-5.2 optimization for long-horizon tasks
+
 - ✅ Agent Skills for reusable task bundles
+
 - ✅ Sandboxed execution (macOS/Linux)
+
 - ✅ Workflow compatible with `second_voice` AGENTS.md
-
-## Quick Reference
-
-| Task | Command |
-|------|---------|
-| Start interactive | `codex` |
-| Use approval mode | `codex --approval-mode suggest` |
-| Skip approval (CI) | `codex --approval-mode full-auto` |
-| Use specific provider | `codex --provider anthropic` |
-| Use specific skill | `$skill-name` (in chat) |
-| View logs | `codex --debug` |
-| Set config | `~/.codex/config.yaml` |

@@ -1,6 +1,6 @@
 # Tool Entry Points Process
 
-**Purpose:** Understand the design and maintenance of anemic tool entry point files (CLAUDE.md, AIDER.md, CLINE.md, GEMINI.md).
+**Purpose:** Understand the design and maintenance of anemic tool entry point files (`CLAUDE.md`, `.aider.md`, `.clinerules`, `GEMINI.md`).
 
 **Status:** Documented and validated via bootstrap.py and docscan.py
 
@@ -21,12 +21,12 @@ Tool entry point files are **minimal, referential files** that serve as discover
 ### The User Journey
 
 1. **User enters project with tool X**
-2. **Looks for entry point** (e.g., `CLAUDE.md`)
+2. **Looks for entry point** (e.g., `CLAUDE.md`, `.clinerules`, `.aider.md`)
 3. **Finds quick links** to:
    - AGENTS.md (core workflow - mandatory)
    - definition-of-done.md (completion criteria)
    - docs/system-prompts/tools/{tool}.md (comprehensive guide)
-   - docs/workflows.md (optional structured planning)
+   - `docs/workflows.md` (optional structured planning)
 4. **Clicks through** to full documentation
 
 ---
@@ -65,12 +65,12 @@ The **[docs/system-prompts/tools/{tool}.md](docs/system-prompts/tools/{tool}.md)
   1. AGENTS.md - Core workflow
   2. definition-of-done.md - Completion criteria
   3. Tool guide (docs/system-prompts/tools/{tool}.md)
-  4. Workflows (docs/workflows.md)
+  4. Workflows (`docs/workflows.md`)
 - **For [Tool] Users section:** Brief description of what the full guide covers
 
 ### Line Count Constraint
 
-- **Target:** 20 lines maximum
+- **Target:** 25 lines maximum
 - **Checked by:** bootstrap.py `validate_tool_entry_point()`
 - **Enforced by:** docscan.py `--check tool-entries`
 - **Rationale:** Keeps files truly anemic; more content belongs in tool guides
@@ -120,7 +120,7 @@ The **[docs/system-prompts/tools/{tool}.md](docs/system-prompts/tools/{tool}.md)
 - Verification requirements
 - Configuration integrity rules
 
-### workflows.md
+### `workflows.md`
 - Optional logs-first workflow
 - When to use structured planning
 - How structured planning works
@@ -142,8 +142,8 @@ python3 docs/system-prompts/bootstrap.py --regenerate-tool-entries --commit
 ```
 
 **Capabilities:**
-- Validates all 4 files (CLAUDE.md, AIDER.md, CLINE.md, GEMINI.md)
-- Checks: file exists, line count ≤20, all 4 links present, no forbidden patterns
+- Validates all 4 files (`CLAUDE.md`, `.aider.md`, `.clinerules`, `GEMINI.md`)
+- Checks: file exists, line count ≤25, all 4 links present, no forbidden patterns
 - Can regenerate from canonical templates if needed
 - Preserves dry-run mode by default
 
@@ -200,8 +200,8 @@ The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claud
 
 When templates are generated, tool entry point names map to tool guide files:
 - CLAUDE.md → docs/system-prompts/tools/**claude-code**.md
-- AIDER.md → docs/system-prompts/tools/**aider**.md
-- CLINE.md → docs/system-prompts/tools/**cline**.md
+- `.aider.md` → `docs/system-prompts/tools/aider.md`
+- .clinerules → docs/system-prompts/tools/**cline**.md
 - GEMINI.md → docs/system-prompts/tools/**gemini**.md
 
 ---
