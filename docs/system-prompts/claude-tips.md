@@ -41,6 +41,18 @@ claude-dev 'fix the bug in the login flow'
 # Complex architectural decisions
 claude-think 'review the system architecture and suggest improvements'
 claude-think 'design the caching strategy for this application'
+
+# Session resumption (works with all aliases)
+claude --continue                    # Resume most recent session
+claude -c                            # Short form
+claude --resume oauth-impl           # Resume named session
+claude -r oauth-impl                 # Short form
+
+# Aliases work with resumption flags
+claude-dev --continue 'fix tests and close task'
+claude-quick --continue 'summarize what we were working on'
+claude-sys -c 'apply document-integrity-scan'
+claude-think --resume complex-refactor 'continue architectural review'
 ```
 
 ---
@@ -236,6 +248,89 @@ claude-dev 'apply close-task process'
 - ❌ Tests fail for non-trivial reasons (logic errors)
 - ❌ Unexpected files in source tree
 - ❌ Definition of Done criteria not met
+
+### Pattern 5: Resuming Previous Sessions
+
+**Claude Code has built-in session resumption** - each session is stored and can be continued later with full context:
+
+```bash
+# Resume the most recent session
+claude --continue
+claude -c
+
+# Resume a named session (best practice)
+claude --resume auth-refactor
+claude -r auth-refactor
+
+# Interactive session picker (browse all sessions)
+claude --resume
+claude -r
+
+# Resume with alias and continue work
+claude-dev --continue 'fix the test failures and apply close-task process'
+```
+
+**Best practice workflow:**
+
+```bash
+# Session 1: Start work, name it, tests fail
+claude-dev 'implement OAuth authentication'
+> /rename oauth-implementation
+# Session ends (tests failed, need to stop)
+
+# Session 2: Resume by name with full context
+claude --resume oauth-implementation
+# Claude remembers everything from session 1
+# Fix issues, then:
+> apply close-task process
+```
+
+**Why this works:**
+- Claude Code stores full conversation history per session
+- Sessions are local to the project directory
+- Resuming restores complete context automatically
+- No need to manually read files or reconstruct state
+
+**Session management tips:**
+
+```bash
+# Always name important sessions (inside Claude)
+> /rename feature-name
+
+# Resume by name is easier than browsing
+claude -r feature-name
+
+# Fork a session to try different approaches
+claude --resume feature-name --fork-session
+```
+
+**Combining aliases with resumption flags:**
+
+```bash
+# Continue with sonnet (dev work)
+claude-dev --continue
+claude-dev -c 'fix the tests and apply close-task'
+
+# Continue with haiku (quick check)
+claude-quick --continue 'what were we working on?'
+claude-quick -c 'summarize recent changes'
+
+# Resume named sessions with specific models
+claude-dev --resume oauth-impl 'continue OAuth implementation'
+claude-think --resume arch-review 'continue architectural analysis'
+claude-sys --resume docscan-fixes 'finish fixing documentation'
+
+# Short forms work too
+claude-dev -r oauth-impl 'fix remaining issues'
+claude-quick -c 'quick status check'
+```
+
+**Alternative: Manual context reconstruction** (if session is lost/unavailable):
+
+```bash
+# Read change documentation to understand previous work
+claude-dev 'read dev_notes/changes/2026-01-29_14-22-00_add-oauth-auth.md and continue implementing OAuth'
+```
 
 ---
 

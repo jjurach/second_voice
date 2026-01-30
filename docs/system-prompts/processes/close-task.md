@@ -657,6 +657,56 @@ Files Created:
 - Session 2: Implement Phase 2, update change docs
 - Session 3: Finish implementation, finalize change docs, run close-task
 
+### "How do I resume a previous session?"
+
+**Use case:** Tests failed, session ended, need to continue work later.
+
+**Built-in Claude Code resumption:**
+
+```bash
+# Resume the most recent session
+claude --continue
+claude -c
+
+# Resume a named session (best practice: name your sessions with /rename)
+claude --resume auth-refactor
+claude -r auth-refactor
+
+# Interactive session picker (browse and select)
+claude --resume
+claude -r
+
+# Continue with alias and apply close-task
+claude-dev --continue 'fix the test failures and apply close-task process'
+```
+
+**Best practice:**
+1. **Name your sessions** during work: Use `/rename session-name` inside Claude
+2. **Resume by name** later: `claude --resume session-name`
+3. Claude will have full context from the previous conversation
+4. Continue work and apply close-task when ready
+
+**Example workflow:**
+
+```bash
+# During session 1 (tests fail, need to stop)
+> /rename oauth-implementation
+# Session ends
+
+# Later, resume and complete
+claude --resume oauth-implementation
+# Claude has full context from previous session
+# Fix issues, then:
+> apply close-task process
+```
+
+**Alternative: Manual context reconstruction** (if session was lost):
+
+```bash
+# Read change documentation to understand what was being worked on
+claude-dev 'read dev_notes/changes/2026-01-29_14-22-00_add-oauth-auth.md and continue the work'
+```
+
 ---
 
 ## See Also
