@@ -196,6 +196,16 @@ Check that the change documentation includes:
 - [ ] **Known Issues:** Any caveats, limitations, or future work noted
 - [ ] **Integration with DoD:** Explicit checklist against Definition of Done
 
+#### 3.3 Archive Inbox Requests
+
+**Goal:** Ensure handled inbox requests are properly archived.
+
+- [ ] Identify any `dev_notes/inbox/` files addressed by this session
+- [ ] Move them to `dev_notes/inbox-archive/`
+- [ ] Rename with timestamp: `YYYY-MM-DD_HH-MM-SS_original-name.md`
+- [ ] Verify `dev_notes/inbox/` is clean (or only contains unrelated items)
+- [ ] *Note: This serves as a backstop if the logs-first workflow didn't already archive them.*
+
 ---
 
 ### Phase 4: Commit Changes
@@ -228,6 +238,7 @@ git add src/
 git add tests/
 git add requirements.txt
 git add dev_notes/changes/YYYY-MM-DD_HH-MM-SS_description.md
+git add dev_notes/inbox/ dev_notes/inbox-archive/  # If inbox items were archived
 ```
 
 **For documentation-only changes:**
@@ -235,12 +246,14 @@ git add dev_notes/changes/YYYY-MM-DD_HH-MM-SS_description.md
 # Stage docs and change documentation together
 git add docs/
 git add dev_notes/changes/YYYY-MM-DD_HH-MM-SS_description.md
+git add dev_notes/inbox/ dev_notes/inbox-archive/  # If inbox items were archived
 ```
 
 **For project plan updates:**
 ```bash
 # Stage completed plan status update
 git add dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md
+git add dev_notes/inbox/ dev_notes/inbox-archive/  # If inbox items were archived
 ```
 
 #### 4.3 Create Commit
