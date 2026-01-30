@@ -26,6 +26,21 @@ Unlike **workflows/** (which describe how agents execute tasks), **processes/** 
 
 **Automated via:** `docscan.py` (see below)
 
+### Close Task
+
+**File:** [close-task.md](./close-task.md)
+
+**Description:** Comprehensive process for properly completing and landing work before ending an agentic session.
+
+**What it covers:**
+1. **Definition of Done Verification** - All quality criteria are met
+2. **Test Execution** - All tests pass before committing
+3. **Change Documentation** - Audit trail is complete
+4. **Git Commit** - Changes are properly saved with attribution
+5. **Abort Criteria** - When to stop and request human intervention
+
+**When to use:** At the end of any development session to ensure proper task closure.
+
 ## Automated Tools
 
 ### docscan.py
