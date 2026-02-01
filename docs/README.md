@@ -10,7 +10,7 @@ Complete documentation for Second Voice.
 
 **For Developers:**
 - Read **[README.md](../README.md)** - Project overview
-- See **[Contributing](../docs/contributing.md)** - How to contribute (if exists)
+- See **[Contributing](contributing.md)** - How to contribute
 - Review **[Architecture](architecture.md)** - System design
 
 ## For AI Agents

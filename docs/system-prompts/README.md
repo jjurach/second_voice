@@ -849,3 +849,6 @@ project-root/
 Agent Kernel v1.0 - January 2026
 
 For updates, issues, or contributions, refer to your project's development guidelines.
+
+---
+Last Updated: 2026-02-01
