@@ -17,6 +17,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+test = [
+    "pytest",
+]
 gui = ["tkinter"]
 dev = [
     "pytest",
