@@ -27,7 +27,16 @@ class TestCliArgumentParsing:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 # Import and run main to test argument parsing
@@ -63,7 +72,15 @@ class TestCliArgumentParsing:
                     file=None,
                     debug=False,
                     verbose=False,
-                    no_edit=False
+                    no_edit=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -91,7 +108,15 @@ class TestCliArgumentParsing:
                     file=None,
                     debug=False,
                     verbose=False,
-                    no_edit=False
+                    no_edit=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -121,7 +146,15 @@ class TestCliArgumentParsing:
                     file=None,
                     debug=True,
                     verbose=False,
-                    no_edit=False
+                    no_edit=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -149,7 +182,15 @@ class TestCliArgumentParsing:
                     file=None,
                     debug=False,
                     verbose=True,
-                    no_edit=False
+                    no_edit=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -181,7 +222,16 @@ class TestCliFileInputHandling:
                     keep_files=False,
                     file=str(nonexistent_file),
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -208,7 +258,16 @@ class TestCliFileInputHandling:
                         keep_files=False,
                         file=str(test_file),
                         debug=False,
-                        verbose=False
+                        verbose=False,
+                        input_provider='default',
+                        keep_remote=False,
+                        audio_file=None,
+                        text_file=None,
+                        output_file=None,
+                        record_only=False,
+                        transcribe_only=False,
+                        translate_only=False,
+                        no_edit=False,
                     )
 
                     with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -235,7 +294,16 @@ class TestCliFileInputHandling:
                     keep_files=False,
                     file=str(invalid_file),
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -276,7 +344,15 @@ class TestCliFileInputHandling:
                     file=str(audio_file),
                     debug=False,
                     verbose=False,
-                    no_edit=False
+                    no_edit=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -306,7 +382,16 @@ class TestCliModeDetection:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -330,7 +415,16 @@ class TestCliModeDetection:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -361,7 +455,16 @@ class TestCliModeDetection:
                         keep_files=False,
                         file=tmp_path,
                         debug=False,
-                        verbose=False
+                        verbose=False,
+                        input_provider='default',
+                        keep_remote=False,
+                        audio_file=None,
+                        text_file=None,
+                        output_file=None,
+                        record_only=False,
+                        transcribe_only=False,
+                        translate_only=False,
+                        no_edit=False,
                     )
 
                     with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -393,7 +496,16 @@ class TestCliErrorHandling:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager'):
@@ -414,7 +526,16 @@ class TestCliErrorHandling:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -442,7 +563,16 @@ class TestCliErrorHandling:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -518,7 +648,16 @@ class TestCliResourceCleanup:
                     keep_files=False,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -545,7 +684,16 @@ class TestCliResourceCleanup:
                     keep_files=True,
                     file=None,
                     debug=False,
-                    verbose=False
+                    verbose=False,
+                    input_provider='default',
+                    keep_remote=False,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    no_edit=False,
                 )
 
                 with mock.patch('cli.run.ConfigurationManager') as mock_config:
@@ -563,3 +711,159 @@ class TestCliResourceCleanup:
 
                 # Verify cleanup was NOT called
                 mock_recorder.return_value.cleanup_temp_files.assert_not_called()
+
+
+class TestGoogleDriveArguments:
+    """Test Google Drive input provider arguments."""
+
+    def test_input_provider_google_drive_argument(self):
+        """Test --input-provider google-drive argument parsing."""
+        with mock.patch('sys.argv', ['run.py', '--input-provider', 'google-drive']):
+            with mock.patch('argparse.ArgumentParser.parse_args') as mock_parse:
+                mock_parse.return_value = mock.MagicMock(
+                    mode='auto',
+                    input_provider='google-drive',
+                    keep_remote=False,
+                    keep_files=False,
+                    file=None,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    debug=False,
+                    verbose=False,
+                    no_edit=False
+                )
+
+                with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key, default=None):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key, default)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
+                    with mock.patch('cli.run.get_audio_file', return_value=Path('/tmp/test.aac')):
+                        with mock.patch('cli.run.AudioRecorder'):
+                            with mock.patch('cli.run.AIProcessor'):
+                                with mock.patch('cli.run.detect_mode', return_value='menu'):
+                                    with mock.patch('cli.run.get_mode'):
+                                        main()
+
+                # Verify argument was parsed
+                assert mock_parse.return_value.input_provider == 'google-drive'
+
+    def test_keep_remote_flag(self):
+        """Test --keep-remote flag parsing."""
+        with mock.patch('sys.argv', ['run.py', '--input-provider', 'google-drive', '--keep-remote']):
+            with mock.patch('argparse.ArgumentParser.parse_args') as mock_parse:
+                mock_parse.return_value = mock.MagicMock(
+                    mode='auto',
+                    input_provider='google-drive',
+                    keep_remote=True,
+                    keep_files=False,
+                    file=None,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    debug=False,
+                    verbose=False,
+                    no_edit=False
+                )
+
+                with mock.patch('cli.run.ConfigurationManager') as mock_config:
+                    def config_get_side_effect(key, default=None):
+                        defaults = {'keep_files': False, 'temp_dir': '/tmp', 'input_file': None}
+                        return defaults.get(key, default)
+                    mock_config.return_value.get.side_effect = config_get_side_effect
+
+                    with mock.patch('cli.run.get_audio_file', return_value=Path('/tmp/test.aac')):
+                        with mock.patch('cli.run.AudioRecorder'):
+                            with mock.patch('cli.run.AIProcessor'):
+                                with mock.patch('cli.run.detect_mode', return_value='menu'):
+                                    with mock.patch('cli.run.get_mode'):
+                                        main()
+
+                # Verify flag was set
+                assert mock_parse.return_value.keep_remote is True
+
+    def test_keep_remote_without_google_drive_fails(self):
+        """Test --keep-remote without --input-provider google-drive fails validation."""
+        with mock.patch('sys.argv', ['run.py', '--keep-remote']):
+            with mock.patch('argparse.ArgumentParser.parse_args') as mock_parse:
+                mock_parse.return_value = mock.MagicMock(
+                    mode='auto',
+                    input_provider='default',
+                    keep_remote=True,
+                    keep_files=False,
+                    file=None,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    debug=False,
+                    verbose=False
+                )
+
+                # This should exit due to validation error
+                with pytest.raises(SystemExit) as exc_info:
+                    main()
+
+                assert exc_info.value.code == 3
+
+    def test_google_drive_with_record_only_fails(self):
+        """Test --input-provider google-drive with --record-only fails validation."""
+        with mock.patch('sys.argv', ['run.py', '--input-provider', 'google-drive', '--record-only']):
+            with mock.patch('argparse.ArgumentParser.parse_args') as mock_parse:
+                mock_parse.return_value = mock.MagicMock(
+                    mode='auto',
+                    input_provider='google-drive',
+                    keep_remote=False,
+                    keep_files=False,
+                    file=None,
+                    audio_file=None,
+                    text_file=None,
+                    output_file=None,
+                    record_only=True,
+                    transcribe_only=False,
+                    translate_only=False,
+                    debug=False,
+                    verbose=False
+                )
+
+                # This should exit due to validation error
+                with pytest.raises(SystemExit) as exc_info:
+                    main()
+
+                assert exc_info.value.code == 3
+
+    def test_google_drive_with_audio_file_fails(self):
+        """Test --input-provider google-drive with --audio-file fails validation."""
+        with mock.patch('sys.argv', ['run.py', '--input-provider', 'google-drive', '--audio-file', 'test.mp3']):
+            with mock.patch('argparse.ArgumentParser.parse_args') as mock_parse:
+                mock_parse.return_value = mock.MagicMock(
+                    mode='auto',
+                    input_provider='google-drive',
+                    keep_remote=False,
+                    keep_files=False,
+                    file=None,
+                    audio_file='test.mp3',
+                    text_file=None,
+                    output_file=None,
+                    record_only=False,
+                    transcribe_only=False,
+                    translate_only=False,
+                    debug=False,
+                    verbose=False
+                )
+
+                # This should exit due to validation error
+                with pytest.raises(SystemExit) as exc_info:
+                    main()
+
+                assert exc_info.value.code == 3

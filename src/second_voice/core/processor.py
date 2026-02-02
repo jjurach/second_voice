@@ -496,6 +496,15 @@ class AIProcessor:
                 timeout=timeout
             )
             logger.debug(f"OpenRouter response: status={response.status_code}")
+
+            # Log response body for non-200 status codes before raising
+            if response.status_code != 200:
+                try:
+                    error_body = response.text
+                    logger.error(f"OpenRouter API error {response.status_code}: {error_body}")
+                except Exception:
+                    pass
+
             response.raise_for_status()
             result = response.json()
             content = result['choices'][0]['message']['content']
@@ -504,6 +513,22 @@ class AIProcessor:
         except requests.Timeout as e:
             error_msg = f"OpenRouter request timeout after {timeout}s"
             logger.error(f"{error_msg}: {e}")
+            print(f"LLM processing error: {error_msg}")
+            return f"Error: {error_msg}"
+        except requests.HTTPError as e:
+            status_code = e.response.status_code if e.response else "unknown"
+            error_body = e.response.text if e.response else ""
+
+            if status_code == 401:
+                error_msg = "Invalid or missing OpenRouter API key"
+            elif status_code == 404:
+                error_msg = f"OpenRouter model not found (model: {model}). Check model name."
+            elif status_code == 429:
+                error_msg = "OpenRouter rate limit exceeded"
+            else:
+                error_msg = f"OpenRouter API error {status_code}"
+
+            logger.error(f"{error_msg}: {error_body}")
             print(f"LLM processing error: {error_msg}")
             return f"Error: {error_msg}"
         except requests.RequestException as e:

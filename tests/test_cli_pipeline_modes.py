@@ -1,6 +1,6 @@
 """
 Unit tests for CLI pipeline modes and new workflow options.
-Tests --record-only, --transcribe-only, --translate-only, --edit, and file parameters.
+Tests --record-only, --transcribe-only, --translate-only, --no-edit, and file parameters.
 """
 import os
 import sys
@@ -57,8 +57,11 @@ class TestValidatePipelineArgs:
         args = mock.MagicMock(
             transcribe_only=True,
             translate_only=False,
+            record_only=False,
             audio_file='/path/to/audio.wav',
-            text_file=None
+            text_file=None,
+            input_provider='default',
+            keep_remote=False
         )
 
         # Should not raise
@@ -69,8 +72,11 @@ class TestValidatePipelineArgs:
         args = mock.MagicMock(
             transcribe_only=False,
             translate_only=True,
+            record_only=False,
             audio_file=None,
-            text_file='/path/to/text.txt'
+            text_file='/path/to/text.txt',
+            input_provider='default',
+            keep_remote=False
         )
 
         # Should not raise
@@ -83,7 +89,9 @@ class TestValidatePipelineArgs:
             translate_only=False,
             record_only=False,
             audio_file=None,
-            text_file=None
+            text_file=None,
+            input_provider='default',
+            keep_remote=False
         )
 
         # Should not raise

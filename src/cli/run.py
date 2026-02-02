@@ -34,6 +34,24 @@ def validate_pipeline_mode_args(args):
         print("\nUsage: second-voice --translate-only --text-file <path> [--output-file <path>]")
         sys.exit(3)
 
+    # Validate input provider arguments
+    input_provider = getattr(args, 'input_provider', 'default')
+    keep_remote = getattr(args, 'keep_remote', False)
+    record_only = getattr(args, 'record_only', False)
+    audio_file = getattr(args, 'audio_file', None)
+
+    if keep_remote and input_provider != 'google-drive':
+        print("Error: --keep-remote only valid with --input-provider google-drive")
+        sys.exit(3)
+
+    if input_provider == 'google-drive':
+        if record_only:
+            print("Error: --input-provider google-drive conflicts with --record-only")
+            sys.exit(3)
+        if audio_file:
+            print("Error: --input-provider google-drive conflicts with --audio-file")
+            sys.exit(3)
+
 
 def validate_output_file(file_path, operation_name):
     """Validate output file doesn't already exist."""
@@ -190,6 +208,42 @@ def run_translate_only(config, args, processor):
         return 1
 
 
+def get_audio_file(args, config):
+    """Determine audio file source based on input provider.
+
+    Args:
+        args: Parsed command-line arguments.
+        config: ConfigurationManager instance.
+
+    Returns:
+        Path to audio file, or None if no file available.
+    """
+    input_provider = getattr(args, 'input_provider', 'default')
+    keep_remote = getattr(args, 'keep_remote', False)
+    audio_file = getattr(args, 'audio_file', None)
+
+    if input_provider == 'google-drive':
+        from second_voice.providers import GoogleDriveProvider
+        try:
+            provider = GoogleDriveProvider(config, keep_remote=keep_remote)
+            archive_path = provider.fetch_and_archive()
+            if archive_path is None:
+                print("No files found in Google Drive folder")
+                return None
+            print(f"Fetched from Google Drive: {archive_path}")
+            return archive_path
+        except Exception as e:
+            print(f"Error fetching from Google Drive: {e}")
+            return None
+
+    elif audio_file:
+        return Path(audio_file)
+
+    else:
+        # Default: record via mic (existing behavior)
+        return None  # Signals to use recording
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Second Voice - AI Assistant",
@@ -214,6 +268,16 @@ Pipeline mode examples:
     pipeline_group.add_argument('--translate-only', action='store_true',
                                 help="Translate/process existing text file (requires --text-file)")
 
+    # Input provider options
+    input_group = parser.add_argument_group("Input Provider")
+    input_group.add_argument('--input-provider',
+                            choices=['default', 'google-drive'],
+                            default='default',
+                            help="Input source: 'default' (record), 'google-drive' (fetch from Drive)")
+    input_group.add_argument('--keep-remote',
+                            action='store_true',
+                            help="Keep remote file after download (only with --input-provider google-drive)")
+
     # File parameters
     parser.add_argument('--file', type=str,
                         help="Input audio file to process (bypasses recording)")
@@ -225,12 +289,10 @@ Pipeline mode examples:
                         help="Output file path (for --translate-only)")
 
     # Editor options
-    parser.add_argument('--edit', action='store_true',
-                        help="Open editor after processing (default: no)")
     parser.add_argument('--editor-command', type=str,
                         help="Editor command to use (e.g., 'code --wait', 'emacs')")
     parser.add_argument('--no-edit', action='store_true',
-                        help="(Deprecated) Skip editor after file processing")
+                        help="Skip editor after file processing")
 
     # General options
     parser.add_argument('--keep-files', action='store_true',
@@ -297,56 +359,67 @@ Pipeline mode examples:
     if args.verbose:
         config.set('verbose', True)
 
+    if args.no_edit:
+        config.set('no_edit', True)
+
     # Handle --file as alias for --audio-file (for backward compatibility)
     file_arg = get_str_arg(args, 'file')
     if file_arg and not audio_file:
         audio_file = file_arg
         args.audio_file = file_arg
 
-    # Validate and set input file for normal mode (not pipeline mode)
-    if audio_file and isinstance(audio_file, str) and not (record_only is True or transcribe_only is True or translate_only is True):
-        input_file_path = audio_file
+    # Get input file from provider (for normal mode, not pipeline modes)
+    input_provider = getattr(args, 'input_provider', 'default')
+    if not (record_only is True or transcribe_only is True or translate_only is True):
+        if input_provider == 'google-drive':
+            # Fetch from Google Drive
+            fetched_file = get_audio_file(args, config)
+            if fetched_file:
+                config.set('input_file', str(fetched_file))
+        elif audio_file and isinstance(audio_file, str):
+            # Validate and set input file for normal mode
+            input_file_path = audio_file
 
-        # Validate file exists for input mode
-        if not os.path.exists(input_file_path):
-            print(f"Error: Input file not found: {input_file_path}")
-            sys.exit(1)
+            # Validate file exists for input mode
+            if not os.path.exists(input_file_path):
+                print(f"Error: Input file not found: {input_file_path}")
+                sys.exit(1)
 
-        # Validate file is readable
-        if not os.access(input_file_path, os.R_OK):
-            print(f"Error: Input file not readable: {input_file_path}")
-            sys.exit(1)
+            # Validate file is readable
+            if not os.access(input_file_path, os.R_OK):
+                print(f"Error: Input file not readable: {input_file_path}")
+                sys.exit(1)
 
-        # Validate file format (handle both soundfile and AAC formats)
-        try:
-            from second_voice.audio.aac_handler import AACHandler
-            import soundfile as sf
+            # Validate file format (handle both soundfile and AAC formats)
+            try:
+                from second_voice.audio.aac_handler import AACHandler
+                import soundfile as sf
 
-            # Check if it's an AAC file
-            if AACHandler.is_aac_file(input_file_path):
-                # Validate AAC file
-                valid, error_msg = AACHandler.validate_aac_file(input_file_path)
-                if not valid:
-                    print(f"Error: {error_msg}")
-                    sys.exit(1)
+                # Check if it's an AAC file
+                if AACHandler.is_aac_file(input_file_path):
+                    # Validate AAC file
+                    valid, error_msg = AACHandler.validate_aac_file(input_file_path)
+                    if not valid:
+                        print(f"Error: {error_msg}")
+                        sys.exit(1)
 
-                # Get AAC file info if verbose
-                if args.verbose:
-                    duration = AACHandler.get_duration(input_file_path)
-                    if duration:
-                        print(f"Detected AAC audio: {duration:.1f}s")
-                    else:
-                        print(f"Detected AAC audio file")
-            else:
-                # Use soundfile for other formats
-                info = sf.info(input_file_path)
-                if args.verbose:
-                    print(f"Detected audio: {info.samplerate}Hz, {info.channels}ch, {info.duration:.1f}s")
-        except Exception as e:
-            print(f"Error: Invalid audio file: {e}")
-            sys.exit(1)
+                    # Get AAC file info if verbose
+                    if args.verbose:
+                        duration = AACHandler.get_duration(input_file_path)
+                        if duration:
+                            print(f"Detected AAC audio: {duration:.1f}s")
+                        else:
+                            print(f"Detected AAC audio file")
+                else:
+                    # Use soundfile for other formats
+                    info = sf.info(input_file_path)
+                    if args.verbose:
+                        print(f"Detected audio: {info.samplerate}Hz, {info.channels}ch, {info.duration:.1f}s")
+            except Exception as e:
+                print(f"Error: Invalid audio file: {e}")
+                sys.exit(1)
 
-        config.set('input_file', input_file_path)
+            config.set('input_file', input_file_path)
 
     # Init engine
     try:
@@ -389,11 +462,6 @@ Pipeline mode examples:
     try:
         mode = get_mode(mode_name, config, recorder, processor)
         output_file = mode.run()
-
-        # NEW: Handle editor invocation (Phase 4 - changed default to no-edit)
-        edit_flag = getattr(args, 'edit', False)
-        if edit_flag is True and output_file:
-            invoke_editor(output_file, config, args)
     except Exception as e:
         print(f"Error initializing mode {mode_name}: {e}")
         sys.exit(1)

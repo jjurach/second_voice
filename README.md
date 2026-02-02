@@ -41,7 +41,12 @@ python3 src/cli/run.py
 ### Command Line Options
 
 ```bash
-usage: run.py [-h] [--mode {auto,gui,tui,menu}] [--keep-files] [--file FILE]
+usage: run.py [-h] [--mode {auto,gui,tui,menu}]
+              [--input-provider {default,google-drive}] [--keep-remote]
+              [--record-only | --transcribe-only | --translate-only]
+              [--keep-files] [--file FILE] [--audio-file AUDIO_FILE]
+              [--text-file TEXT_FILE] [--output-file OUTPUT_FILE]
+              [--no-edit] [--editor-command CMD] [--debug] [--verbose]
 
 Second Voice - AI Assistant
 
@@ -49,10 +54,31 @@ optional arguments:
   -h, --help            show this help message and exit
   --mode {auto,gui,tui,menu}
                         Interaction mode (default: menu)
-  --keep-files          Keep temporary files (recordings, transcripts) after execution
+
+Input Provider:
+  --input-provider {default,google-drive}
+                        Input source: 'default' (record), 'google-drive' (fetch from Drive)
+  --keep-remote         Keep remote file after download (only with --input-provider google-drive)
+
+Pipeline Modes:
+  --record-only         Record audio and exit (no transcription or translation)
+  --transcribe-only     Transcribe existing audio file (requires --audio-file)
+  --translate-only      Translate/process existing text file (requires --text-file)
+
+File Options:
   --file FILE           Input audio file to process (bypasses recording)
-  --edit                Open editor after processing (default: no)
+  --audio-file FILE     Audio file path (input for --transcribe-only, output for --record-only)
+  --text-file FILE      Text file path (input for --translate-only, output for --transcribe-only)
+  --output-file FILE    Output file path (for --translate-only)
+
+Editor Options:
+  --no-edit             Skip editor after processing (default: invoke editor)
   --editor-command CMD  Specify custom editor command (e.g., 'code --wait', 'emacs')
+
+General Options:
+  --keep-files          Keep temporary files (recordings, transcripts) after execution
+  --debug               Enable debug logging
+  --verbose             Enable verbose output
 ```
 
 ### Pipeline Modes
@@ -92,6 +118,64 @@ python3 src/cli/run.py --translate-only --text-file transcript.txt
 python3 src/cli/run.py --translate-only --text-file transcript.txt --output-file final.md
 ```
 
+### Google Drive Input Provider
+
+Second Voice can automatically fetch voice recordings from Google Drive instead of recording from your microphone. This is useful for processing recordings made on mobile devices.
+
+#### Prerequisites
+
+1. Set up Google authentication using [google-personal-mcp](https://github.com/anthropics/mcp-google):
+   ```bash
+   # Install google-personal-mcp
+   npm install -g @anthropic/google-personal-mcp
+
+   # Follow setup instructions to create OAuth credentials
+   # This will create credentials in ~/.config/google-personal-mcp/profiles/default/
+   ```
+
+2. Upload voice recordings to a Google Drive folder (default: `/Voice Recordings`)
+
+#### Usage
+
+Fetch and process the earliest file from Google Drive:
+
+```bash
+# Fetch from Google Drive and process
+python3 src/cli/run.py --input-provider google-drive
+
+# Keep the remote file after download
+python3 src/cli/run.py --input-provider google-drive --keep-remote
+```
+
+#### How It Works
+
+1. **Fetch:** Downloads the lexicographically earliest file from the configured Google Drive folder
+2. **Archive:** Moves the file to `dev_notes/inbox-archive/` with timestamp from the remote file
+3. **Process:** Transcribes and processes the audio through the normal workflow
+4. **Output:** Saves the final .md file to `dev_notes/inbox/` with matching timestamp
+5. **Cleanup:** Deletes the remote file (unless `--keep-remote` is specified)
+
+#### Configuration
+
+Configure Google Drive settings in `~/.config/second_voice/settings.json`:
+
+```json
+{
+  "google_drive": {
+    "profile": "default",
+    "folder": "/Voice Recordings",
+    "inbox_dir": "dev_notes/inbox",
+    "archive_dir": "dev_notes/inbox-archive"
+  }
+}
+```
+
+Or use environment variables:
+- `SECOND_VOICE_GOOGLE_PROFILE`: Google authentication profile name
+- `SECOND_VOICE_GOOGLE_FOLDER`: Google Drive folder path
+- `SECOND_VOICE_INBOX_DIR`: Local inbox directory for output files
+- `SECOND_VOICE_ARCHIVE_DIR`: Archive directory for downloaded audio
+
 #### Full Pipeline Example
 
 Chain pipeline modes for complete workflow:
@@ -109,15 +193,15 @@ python3 src/cli/run.py --translate-only --text-file transcript.txt --output-file
 
 ### Editor Behavior
 
-**Default:** No editor is invoked by default. To enable editor:
+**Default:** Editor is invoked by default. To skip editor:
 
 ```bash
-# Open editor after processing (uses $EDITOR env var or 'nano' by default)
-python3 src/cli/run.py --edit
+# Skip editor after processing
+python3 src/cli/run.py --no-edit
 
 # Specify custom editor
-python3 src/cli/run.py --edit --editor-command "code --wait"
-python3 src/cli/run.py --edit --editor-command "emacs"
+python3 src/cli/run.py --editor-command "code --wait"
+python3 src/cli/run.py --editor-command "emacs"
 ```
 
 **Editor Resolution:** The following command sources are checked in order:
