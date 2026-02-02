@@ -8,3 +8,6 @@ pytest-cov
 requests-mock
 mutagen>=1.46
 pydub>=0.25
+google-api-python-client>=2.90
+google-auth-oauthlib>=1.2
+google-auth>=2.26

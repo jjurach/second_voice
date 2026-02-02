@@ -118,14 +118,72 @@ class MenuMode(BaseMode):
         print("[3] Clear context")
         print("[4] Quit")
 
+    def _save_output_for_google_drive(self, output: str, audio_path: str) -> Optional[str]:
+        """Save output .md file to inbox directory with timestamp from audio file.
+
+        Args:
+            output: The final output text to save
+            audio_path: Path to the archived audio file
+
+        Returns:
+            Path to saved output file, or None if saving failed
+        """
+        try:
+            from pathlib import Path
+            audio_file = Path(audio_path)
+
+            # Extract timestamp and base name from audio file
+            # Expected format: YYYY-MM-DD_HH-MM-SS_name.ext
+            stem = audio_file.stem
+            parts = stem.split('_', 2)  # Split into [YYYY-MM-DD, HH-MM-SS, name]
+
+            if len(parts) >= 2:
+                # Reconstruct timestamp and name
+                timestamp = f"{parts[0]}_{parts[1]}"
+                name = parts[2] if len(parts) > 2 else "recording"
+            else:
+                # Fallback if filename doesn't match expected format
+                from ..utils.timestamp import get_timestamp
+                timestamp = get_timestamp()
+                name = stem
+
+            # Create output filename in inbox directory
+            inbox_dir = Path(self.config.get('google_drive.inbox_dir', 'dev_notes/inbox'))
+            inbox_dir.mkdir(parents=True, exist_ok=True)
+
+            output_filename = f"{timestamp}_{name}.md"
+            output_path = inbox_dir / output_filename
+
+            # Ensure unique filename
+            counter = 1
+            while output_path.exists():
+                output_filename = f"{timestamp}_{name}-{counter}.md"
+                output_path = inbox_dir / output_filename
+                counter += 1
+
+            # Save output
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(output)
+
+            print(f"✓ Output saved: {output_path}")
+            return str(output_path)
+        except Exception as e:
+            print(f"Warning: Could not save output to inbox: {e}")
+            return None
+
     def run(self):
         """
         Main menu-driven workflow for Second Voice.
         """
         context = None
+        output_file = None
 
         # Check for input file
         input_file = self.config.get('input_file')
+        is_google_drive_input = input_file and str(input_file).startswith(
+            str(self.config.get('google_drive.archive_dir', 'dev_notes/inbox-archive'))
+        )
+
         if input_file and os.path.exists(input_file):
             print(f"Processing input file: {input_file}")
             # Process the file directly as if option 1 was selected
@@ -143,11 +201,15 @@ class MenuMode(BaseMode):
                     self.show_status("⌛ Processing...")
                     output = self.processor.process_text(transcription, context)
 
+                    # For Google Drive input, save output to inbox before editor
+                    if is_google_drive_input:
+                        output_file = self._save_output_for_google_drive(output, input_file)
+
                     # Skip editor if --no-edit flag is set
                     if self.config.get('no_edit'):
                         print(f"📋 Output: {output}")
                         self.cleanup()
-                        return
+                        return output_file
 
                     # Review output
                     edited_output = self.review_output(output, context)
@@ -156,8 +218,18 @@ class MenuMode(BaseMode):
                     context = edited_output
                     self.processor.save_context(context)
 
+                    # Update output file with edited content for Google Drive input
+                    if is_google_drive_input and output_file:
+                        try:
+                            with open(output_file, 'w', encoding='utf-8') as f:
+                                f.write(edited_output)
+                            print(f"✓ Output updated: {output_file}")
+                        except Exception as e:
+                            print(f"Warning: Could not update output file: {e}")
+
                 print("\nInput file processed.")
                 # We don't delete the input file
+                return output_file
 
             except Exception as e:
                 # Check if transcription file exists for recovery
@@ -168,6 +240,7 @@ class MenuMode(BaseMode):
                     print(f"✓ Transcription saved to: {whisper_file}")
                 else:
                     print(f"Error processing input file: {e}")
+                return None
 
         while True:
             try:

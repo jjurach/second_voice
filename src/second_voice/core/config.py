@@ -22,6 +22,12 @@ class ConfigurationManager:
             'sample_rate': 16000,
             'channels': 1,
             'device': None  # auto-select
+        },
+        'google_drive': {
+            'profile': 'default',
+            'folder': '/Voice Recordings',
+            'inbox_dir': 'dev_notes/inbox',
+            'archive_dir': 'dev_notes/inbox-archive'
         }
     }
 
@@ -59,6 +65,16 @@ class ConfigurationManager:
         config['stt_provider'] = os.environ.get('SECOND_VOICE_STT_PROVIDER', config['stt_provider'])
         config['llm_provider'] = os.environ.get('SECOND_VOICE_LLM_PROVIDER', config['llm_provider'])
 
+        # Google Drive environment variable overrides
+        if 'SECOND_VOICE_GOOGLE_PROFILE' in os.environ:
+            config['google_drive']['profile'] = os.environ['SECOND_VOICE_GOOGLE_PROFILE']
+        if 'SECOND_VOICE_GOOGLE_FOLDER' in os.environ:
+            config['google_drive']['folder'] = os.environ['SECOND_VOICE_GOOGLE_FOLDER']
+        if 'SECOND_VOICE_INBOX_DIR' in os.environ:
+            config['google_drive']['inbox_dir'] = os.environ['SECOND_VOICE_INBOX_DIR']
+        if 'SECOND_VOICE_ARCHIVE_DIR' in os.environ:
+            config['google_drive']['archive_dir'] = os.environ['SECOND_VOICE_ARCHIVE_DIR']
+
         # Ensure temp directory exists and is writable
         temp_dir = config['temp_dir']
         pathlib.Path(temp_dir).mkdir(parents=True, exist_ok=True)
@@ -72,7 +88,21 @@ class ConfigurationManager:
             json.dump(self.config, f, indent=4)
 
     def get(self, key, default=None):
-        """Get a configuration value."""
+        """
+        Get a configuration value.
+        Supports dot notation for nested values (e.g., 'google_drive.profile').
+        """
+        if '.' in key:
+            keys = key.split('.')
+            value = self.config
+            for k in keys:
+                if isinstance(value, dict):
+                    value = value.get(k)
+                    if value is None:
+                        return default
+                else:
+                    return default
+            return value
         return self.config.get(key, default)
 
     def set(self, key, value):
