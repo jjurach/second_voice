@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Google Drive API scopes
 SCOPES = [
-    "https://www.googleapis.com/auth/drive.readonly",
-    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive",
 ]
 
 
@@ -71,6 +70,10 @@ class DriveClient:
             creds = Credentials.from_authorized_user_file(
                 str(token_path), SCOPES
             )
+            # Check if token has required scopes (may fail if scopes changed)
+            if creds and not creds.has_scopes(SCOPES):
+                logger.info("Token exists but lacks required scopes. Re-authenticating.")
+                creds = None
 
         # Refresh token if expired
         if creds and creds.expired and creds.refresh_token:
