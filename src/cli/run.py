@@ -355,12 +355,24 @@ Pipeline mode examples:
 
     if args.debug:
         config.set('debug', True)
+        # Enable debug logging
+        import logging
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        logging.debug("Debug mode enabled")
 
     if args.verbose:
         config.set('verbose', True)
+        print("Verbose mode enabled")
 
     if args.no_edit:
         config.set('no_edit', True)
+
+    # Store output file in config for menu mode access
+    if output_file and isinstance(output_file, str):
+        config.set('output_file', output_file)
 
     # Handle --file as alias for --audio-file (for backward compatibility)
     file_arg = get_str_arg(args, 'file')

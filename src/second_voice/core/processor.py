@@ -80,13 +80,18 @@ class AIProcessor:
         :param recording_timestamp: Timestamp from recording for matching
         """
         temp_dir = self.config.get('temp_dir', './tmp')
+        os.makedirs(temp_dir, exist_ok=True)
         whisper_path = create_whisper_filename(temp_dir, recording_timestamp)
         try:
             with open(whisper_path, 'w', encoding='utf-8') as f:
                 f.write(transcript)
             logger.info(f"Whisper output saved: {whisper_path}")
+            if self.config.get('debug'):
+                print(f"Debug: Saved whisper transcript to {whisper_path}")
         except Exception as e:
             logger.warning(f"Could not save whisper output: {e}")
+            if self.config.get('debug'):
+                print(f"Debug: Failed to save whisper output: {e}")
 
     def process_with_headers_and_fallback(self, transcript: str, recording_path: Optional[str] = None,
                                           context: Optional[str] = None) -> str:
@@ -429,7 +434,7 @@ class AIProcessor:
 
     def _process_openrouter(self, text: str, context: Optional[str] = None) -> str:
         """
-        Process text using OpenRouter LLM.
+        Process text using OpenRouter LLM with automatic model fallback.
 
         :param text: User input/instruction
         :param context: Optional previous conversation context
@@ -439,8 +444,46 @@ class AIProcessor:
             raise ValueError("OpenRouter API key not configured")
 
         timeout = self.config.get('openrouter_timeout', 60)
-        model = self.config.get('openrouter_llm_model', self.config.get('llm_model', 'openai/gpt-oss-120b:free'))
-        logger.debug(f"OpenRouter LLM config - model: {model}, timeout: {timeout}s")
+
+        # Define fallback model chain - diverse set of FREE models
+        # Extracted from OpenRouter's current available free models (29 total)
+        # Prioritized by size/quality for text cleanup tasks
+        fallback_models = [
+            # Tier 1: Large, high-quality models
+            'meta-llama/llama-3.3-70b-instruct',        # 70B, excellent quality
+            'nousresearch/hermes-3-llama-3.1-405b',     # 405B, state-of-art
+            'google/gemma-3-27b-it',                    # 27B, good quality
+            'qwen/qwen3-next-80b-a3b-instruct',         # 80B, powerful
+            'openai/gpt-oss-120b',                      # 120B, good general purpose
+
+            # Tier 2: Medium-sized reliable models
+            'google/gemma-3-12b-it',                    # 12B, good balance
+            'mistralai/mistral-small-3.1-24b-instruct', # 24B, fast
+            'meta-llama/llama-3.2-3b-instruct',         # 3B, lightweight
+            'arcee-ai/trinity-large-preview',           # Large, preview
+            'upstage/solar-pro-3',                      # Optimized for text
+
+            # Tier 3: Alternative providers
+            'google/gemma-3-4b-it',                     # 4B, very fast
+            'openai/gpt-oss-20b',                       # 20B, alternative
+            'qwen/qwen3-coder',                         # 480B, coder-optimized
+            'z-ai/glm-4.5-air',                         # GLM model, multilingual
+            'deepseek/deepseek-r1-0528',                # DeepSeek reasoning
+
+            # Tier 4: Other free options
+            'nvidia/nemotron-3-nano-30b-a3b',           # NVIDIA model
+            'arcee-ai/trinity-mini',                    # Smaller trinity
+            'qwen/qwen3-4b',                            # Qwen small
+            'liquid/lfm-2.5-1.2b-instruct',             # LiquidAI small
+        ]
+
+        # Get user-configured model and add to front if specified
+        user_model = self.config.get('openrouter_llm_model', self.config.get('llm_model'))
+        if user_model and user_model not in fallback_models:
+            fallback_models.insert(0, user_model)
+
+        model = fallback_models[0]
+        logger.debug(f"OpenRouter LLM config - primary model: {model}, timeout: {timeout}s, fallback chain: {len(fallback_models)} models")
 
         # Build system prompt for cleanup operations
         system_prompt = (
@@ -462,79 +505,112 @@ class AIProcessor:
                 "perform that transformation instead. Still output only the result, no preamble."
             )
 
-        try:
-            # Prepare messages with cleanup system prompt and optional context
-            messages = [
-                {
-                    "role": "system",
-                    "content": system_prompt
-                }
-            ]
+        # Prepare messages with cleanup system prompt and optional context
+        messages = [
+            {
+                "role": "system",
+                "content": system_prompt
+            }
+        ]
 
-            if context:
-                messages.append({
-                    "role": "system",
-                    "content": f"Previous conversation context: {context}"
-                })
-
+        if context:
             messages.append({
-                "role": "user",
-                "content": text
+                "role": "system",
+                "content": f"Previous conversation context: {context}"
             })
 
-            logger.debug(f"Sending request to OpenRouter API with model: {model}")
-            response = requests.post(
-                'https://openrouter.ai/api/v1/chat/completions',
-                headers={
-                    'Authorization': f'Bearer {self.api_keys["openrouter"]}',
-                    'Content-Type': 'application/json'
-                },
-                json={
-                    'model': model,
-                    'messages': messages
-                },
-                timeout=timeout
-            )
-            logger.debug(f"OpenRouter response: status={response.status_code}")
+        messages.append({
+            "role": "user",
+            "content": text
+        })
 
-            # Log response body for non-200 status codes before raising
-            if response.status_code != 200:
-                try:
-                    error_body = response.text
-                    logger.error(f"OpenRouter API error {response.status_code}: {error_body}")
-                except Exception:
-                    pass
+        # Try each model in the fallback chain
+        last_error = None
+        for model_index, model in enumerate(fallback_models):
+            try:
+                logger.debug(f"Attempting OpenRouter request with model {model_index + 1}/{len(fallback_models)}: {model}")
+                response = requests.post(
+                    'https://openrouter.ai/api/v1/chat/completions',
+                    headers={
+                        'Authorization': f'Bearer {self.api_keys["openrouter"]}',
+                        'Content-Type': 'application/json'
+                    },
+                    json={
+                        'model': model,
+                        'messages': messages
+                    },
+                    timeout=timeout
+                )
+                logger.debug(f"OpenRouter response: status={response.status_code}")
 
-            response.raise_for_status()
-            result = response.json()
-            content = result['choices'][0]['message']['content']
-            logger.debug(f"OpenRouter processing successful, response length: {len(content)}")
-            return content
-        except requests.Timeout as e:
-            error_msg = f"OpenRouter request timeout after {timeout}s"
-            logger.error(f"{error_msg}: {e}")
-            print(f"LLM processing error: {error_msg}")
-            return f"Error: {error_msg}"
-        except requests.HTTPError as e:
-            status_code = e.response.status_code if e.response else "unknown"
-            error_body = e.response.text if e.response else ""
+                # Log response body for non-200 status codes before raising
+                if response.status_code != 200:
+                    try:
+                        error_body = response.text
+                        logger.error(f"OpenRouter API error {response.status_code} with model {model}: {error_body}")
+                    except Exception:
+                        pass
 
-            if status_code == 401:
-                error_msg = "Invalid or missing OpenRouter API key"
-            elif status_code == 404:
-                error_msg = f"OpenRouter model not found (model: {model}). Check model name."
-            elif status_code == 429:
-                error_msg = "OpenRouter rate limit exceeded"
-            else:
-                error_msg = f"OpenRouter API error {status_code}"
+                response.raise_for_status()
+                result = response.json()
+                content = result['choices'][0]['message']['content']
+                logger.info(f"OpenRouter processing successful with model: {model} (attempt {model_index + 1}/{len(fallback_models)})")
+                logger.debug(f"Response length: {len(content)}")
 
-            logger.error(f"{error_msg}: {error_body}")
-            print(f"LLM processing error: {error_msg}")
-            return f"Error: {error_msg}"
-        except requests.RequestException as e:
-            logger.error(f"OpenRouter request error: {type(e).__name__}: {e}")
-            print(f"LLM processing error: {e}")
-            return f"Error processing request: {e}"
+                # Success - print fallback notice if we didn't use the first model
+                if model_index > 0:
+                    print(f"Note: Used fallback model {model} after {model_index} failure(s)")
+
+                return content
+
+            except requests.HTTPError as e:
+                status_code = e.response.status_code if e.response else "unknown"
+                error_body = e.response.text if e.response else ""
+
+                # Parse error details for better logging
+                if status_code == 401:
+                    error_msg = "Invalid or missing OpenRouter API key"
+                elif status_code == 404:
+                    error_msg = f"Model not found: {model}"
+                elif status_code == 429:
+                    error_msg = f"Rate limit exceeded for model: {model}"
+                else:
+                    error_msg = f"API error {status_code} for model {model}"
+
+                logger.warning(f"{error_msg}. Error body: {error_body}")
+                last_error = error_msg
+
+                # If this is the last model, don't try more
+                if model_index >= len(fallback_models) - 1:
+                    break
+
+                # Try next model
+                logger.info(f"Trying next fallback model...")
+                continue
+
+            except requests.Timeout as e:
+                error_msg = f"Request timeout after {timeout}s with model {model}"
+                logger.warning(f"{error_msg}: {e}")
+                last_error = error_msg
+
+                if model_index >= len(fallback_models) - 1:
+                    break
+                continue
+
+            except requests.RequestException as e:
+                error_msg = f"Request error with model {model}: {type(e).__name__}"
+                logger.warning(f"{error_msg}: {e}")
+                last_error = error_msg
+
+                if model_index >= len(fallback_models) - 1:
+                    break
+                continue
+
+        # All models failed - report the error
+        error_summary = f"All {len(fallback_models)} OpenRouter models failed. Last error: {last_error}"
+        logger.error(error_summary)
+        print(f"LLM processing error: {error_summary}")
+        return f"Error: {error_summary}"
 
     def save_context(self, context: str, max_context_length: int = 1000):
         """

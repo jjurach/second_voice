@@ -175,14 +175,27 @@ class MenuMode(BaseMode):
         """
         Main menu-driven workflow for Second Voice.
         """
+        import logging
+        logger = logging.getLogger(__name__)
+
         context = None
         output_file = None
 
-        # Check for input file
+        # Check for input file and output file from CLI
         input_file = self.config.get('input_file')
+        cli_output_file = self.config.get('output_file')
         is_google_drive_input = input_file and str(input_file).startswith(
             str(self.config.get('google_drive.archive_dir', 'dev_notes/inbox-archive'))
         )
+
+        # Debug logging
+        if self.config.get('debug'):
+            logger.debug(f"MenuMode.run() starting")
+            logger.debug(f"  input_file: {input_file}")
+            logger.debug(f"  cli_output_file: {cli_output_file}")
+            logger.debug(f"  is_google_drive_input: {is_google_drive_input}")
+            logger.debug(f"  no_edit: {self.config.get('no_edit')}")
+            logger.debug(f"  keep_files: {self.config.get('keep_files')}")
 
         if input_file and os.path.exists(input_file):
             print(f"Processing input file: {input_file}")
@@ -199,15 +212,34 @@ class MenuMode(BaseMode):
 
                     # Process with LLM
                     self.show_status("⌛ Processing...")
-                    output = self.processor.process_text(transcription, context)
+                    output = self.processor.process_with_headers_and_fallback(
+                        transcription,
+                        recording_path=input_file,
+                        context=context
+                    )
 
-                    # For Google Drive input, save output to inbox before editor
-                    if is_google_drive_input:
+                    # Determine where to save output
+                    # Priority: CLI --output-file > Google Drive inbox > None
+                    if cli_output_file:
+                        output_file = cli_output_file
+                    elif is_google_drive_input:
                         output_file = self._save_output_for_google_drive(output, input_file)
+
+                    # Save output to file if specified
+                    if output_file:
+                        try:
+                            os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
+                            with open(output_file, 'w', encoding='utf-8') as f:
+                                f.write(output)
+                            print(f"✓ Output saved: {output_file}")
+                        except Exception as e:
+                            print(f"Warning: Could not save output file: {e}")
+                            output_file = None
 
                     # Skip editor if --no-edit flag is set
                     if self.config.get('no_edit'):
-                        print(f"📋 Output: {output}")
+                        if not output_file:
+                            print(f"📋 Output: {output}")
                         self.cleanup()
                         return output_file
 
@@ -218,8 +250,8 @@ class MenuMode(BaseMode):
                     context = edited_output
                     self.processor.save_context(context)
 
-                    # Update output file with edited content for Google Drive input
-                    if is_google_drive_input and output_file:
+                    # Update output file with edited content if file was specified
+                    if output_file:
                         try:
                             with open(output_file, 'w', encoding='utf-8') as f:
                                 f.write(edited_output)
@@ -250,29 +282,79 @@ class MenuMode(BaseMode):
                 if choice == '1':  # Record
                     audio_path = self.start_recording()
                     if audio_path:
+                        # Generate timestamp for whisper file tracking
+                        from ..utils.timestamp import get_timestamp, create_whisper_filename
+                        recording_timestamp = get_timestamp()
+
                         # Transcribe
                         self.show_status("⌛ Transcribing...")
-                        transcription = self.processor.transcribe(audio_path)
-                        
-                        if transcription:
-                            self.show_transcription(transcription)
-                            
-                            # Process with LLM
-                            self.show_status("⌛ Processing...")
-                            output = self.processor.process_text(transcription, context)
-                            
-                            # Review output
-                            edited_output = self.review_output(output, context)
-                            
-                            # Update context
-                            context = edited_output
-                            self.processor.save_context(context)
-                        
-                        # Clean up temporary audio file (but protect user-provided input files)
-                        input_file = self.config.get('input_file')
-                        if not self.config.get('keep_files'):
-                            if audio_path != input_file:
-                                os.unlink(audio_path)
+                        try:
+                            transcription = self.processor.transcribe(audio_path, recording_timestamp)
+
+                            if transcription:
+                                self.show_transcription(transcription)
+
+                                # Process with LLM
+                                self.show_status("⌛ Processing...")
+                                output = self.processor.process_with_headers_and_fallback(
+                                    transcription,
+                                    recording_path=audio_path,
+                                    context=context
+                                )
+
+                                # Save to CLI output file if specified
+                                if cli_output_file:
+                                    try:
+                                        os.makedirs(os.path.dirname(cli_output_file) or '.', exist_ok=True)
+                                        with open(cli_output_file, 'w', encoding='utf-8') as f:
+                                            f.write(output)
+                                        print(f"✓ Output saved: {cli_output_file}")
+                                        output_file = cli_output_file
+                                    except Exception as e:
+                                        print(f"Warning: Could not save output file: {e}")
+
+                                # Skip editor if --no-edit flag is set
+                                if self.config.get('no_edit'):
+                                    if not cli_output_file:
+                                        print(f"📋 Output: {output}")
+                                    # Update context even without editing
+                                    context = output
+                                    self.processor.save_context(context)
+                                else:
+                                    # Review output
+                                    edited_output = self.review_output(output, context)
+
+                                    # Update context
+                                    context = edited_output
+                                    self.processor.save_context(context)
+
+                                    # Update CLI output file with edited content if specified
+                                    if cli_output_file:
+                                        try:
+                                            with open(cli_output_file, 'w', encoding='utf-8') as f:
+                                                f.write(edited_output)
+                                            print(f"✓ Output updated: {cli_output_file}")
+                                        except Exception as e:
+                                            print(f"Warning: Could not update output file: {e}")
+
+                                # Clean up temporary audio file (but protect user-provided input files)
+                                input_file = self.config.get('input_file')
+                                if not self.config.get('keep_files'):
+                                    if audio_path != input_file:
+                                        os.unlink(audio_path)
+                            else:
+                                # Transcription failed - keep files for debugging
+                                print(f"⚠️ Transcription failed - keeping audio file: {audio_path}")
+                                whisper_file = create_whisper_filename(self.processor.config.get('temp_dir', './tmp'), recording_timestamp)
+                                if os.path.exists(whisper_file):
+                                    print(f"⚠️ Kept whisper output: {whisper_file}")
+                        except Exception as e:
+                            # Processing failed - keep files for debugging
+                            print(f"⚠️ Error during processing: {e}")
+                            print(f"⚠️ Kept audio file for debugging: {audio_path}")
+                            whisper_file = create_whisper_filename(self.processor.config.get('temp_dir', './tmp'), recording_timestamp)
+                            if os.path.exists(whisper_file):
+                                print(f"⚠️ Kept whisper output: {whisper_file}")
 
                 elif choice == '2':  # Show context
                     current_context = context or self.processor.load_context()
