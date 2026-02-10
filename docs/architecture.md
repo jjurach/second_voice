@@ -164,13 +164,56 @@ See `docs/providers.md` for detailed provider documentation.
 
 ## Recursive Context Feature
 
-The application maintains session memory (`last_output`) for iterative refinement:
+The application maintains session memory for iterative refinement:
 
-1. **Initial Input:** "Build a python script for X" → Result saved to context
-2. **Refinement:** "Convert that to use a Class" → LLM receives both context and new instruction
-3. **LLM Logic:** System prompt detects references to previous output ("it", "this", "that") and transforms accordingly
+1. **Context Storage:** Previous output is saved to `tmp-context.txt` after each iteration
+2. **Context Retrieval:** On next recording, the context is loaded and passed to the LLM via the prompt
+3. **LLM Processing:** The LLM receives ONLY the processed/cooked output from the previous iteration (NOT the original raw text)
+4. **System Prompt:** Contains instructions for speech cleanup: removing stutters, consolidating ideas, improving grammar
 
-This enables voice-driven iteration without re-stating the entire context.
+**Current Limitation:** The LLM does NOT currently receive both the original raw text AND the processed text. Only the processed text from the previous iteration is available in context. This is a key architectural limitation identified for future enhancement.
+
+This enables voice-driven iteration, but without visibility into the original raw speech from previous rounds.
 
 ---
-Last Updated: 2026-01-28
+
+## Editor Integration
+
+**Single-Editor Launch (Currently Implemented):**
+- After LLM processing, output is written to a temporary file
+- User launches `$EDITOR` (or configured editor like Obsidian) to review the output
+- Edited content becomes the new context for the next iteration
+- Menu mode shows context alongside output for review
+
+**Dual-Pane Interactive UI (Planned - Not Implemented):**
+- Documented in this architecture but NOT yet implemented
+- Would allow real-time chat-based refinement alongside text editing
+- Requires significant UI rewrite and architectural changes
+
+---
+
+## Current Workflow Summary
+
+The actual implemented workflow is:
+
+```
+1. Record audio (user speaks)
+   ↓
+2. Transcribe audio → raw text (via Whisper)
+   ↓
+3. Process with LLM → cooked text
+   - System prompt cleans up speech
+   - Optional context from previous iteration is included
+   - Output is processed/formatted text
+   ↓
+4. Review in editor (user edits if desired)
+   ↓
+5. Save to context (cooked text only)
+   ↓
+6. [Loop back to 1]
+```
+
+**Key Point:** Steps 2→3 happen automatically. Step 4 (editor review) is optional but recommended for quality control.
+
+---
+Last Updated: 2026-02-09
