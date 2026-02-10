@@ -34,6 +34,11 @@ def validate_pipeline_mode_args(args):
         print("\nUsage: second-voice --translate-only --text-file <path> [--output-file <path>]")
         sys.exit(3)
 
+    if getattr(args, 'document_mode', False) and not getattr(args, 'output', None):
+        print("Error: --document-mode requires --output")
+        print("\nUsage: second-voice --document-mode --output <path> [--project <name>]")
+        sys.exit(3)
+
     # Validate input provider arguments
     input_provider = getattr(args, 'input_provider', 'default')
     keep_remote = getattr(args, 'keep_remote', False)
@@ -208,6 +213,85 @@ def run_translate_only(config, args, processor):
         return 1
 
 
+def run_document_mode(config, args, recorder, processor):
+    """Execute document mode pipeline: record → transcribe → structure → save."""
+    import signal
+    import sys
+    import time
+
+    output_path = args.output
+    project = getattr(args, 'project', None)
+
+    # Store project in config if provided
+    if project:
+        config.set('project_name', project)
+
+    print(f"Starting document mode (output: {output_path})")
+
+    try:
+        # Record audio
+        print("🎤 Recording... (press Ctrl+C to stop)")
+
+        # Start recording
+        audio_path = recorder.start_recording()
+        if not audio_path:
+            print("Error: Recording initialization failed")
+            return 1
+
+        # Keep recording until interrupted
+        try:
+            while True:
+                amp = recorder.get_amplitude()
+                bar_len = min(int(amp * 50), 10)
+                vu_bar = "#" * bar_len + "-" * (10 - bar_len)
+                sys.stdout.write(f"\rLevel: [{vu_bar}] ")
+                sys.stdout.flush()
+                time.sleep(0.1)
+        except KeyboardInterrupt:
+            pass
+
+        # Stop recording
+        audio_path = recorder.stop_recording()
+        if not audio_path:
+            print("Error: Recording failed")
+            return 1
+
+        print("\nRecording stopped.")
+
+        # Transcribe
+        print("⌛ Transcribing...")
+        from second_voice.utils.timestamp import get_timestamp
+        recording_timestamp = get_timestamp()
+        transcript = processor.transcribe(audio_path, recording_timestamp)
+
+        if not transcript:
+            print("Error: Transcription failed")
+            return 1
+
+        # Process with document structuring prompt
+        print("⌛ Structuring document...")
+        result = processor.process_document_creation(transcript, recording_path=audio_path, project=project)
+
+        if not result:
+            print("Error: Document structuring failed")
+            return 1
+
+        # Save result
+        os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(result)
+
+        print(f"✓ Document created: {output_path}")
+        return 0
+
+    except KeyboardInterrupt:
+        print("\nDocument creation cancelled")
+        return 1
+    except Exception as e:
+        print(f"Error: Document creation failed: {e}")
+        return 1
+
+
 def get_audio_file(args, config):
     """Determine audio file source based on input provider.
 
@@ -267,6 +351,8 @@ Pipeline mode examples:
                                 help="Transcribe existing audio file (requires --audio-file)")
     pipeline_group.add_argument('--translate-only', action='store_true',
                                 help="Translate/process existing text file (requires --text-file)")
+    pipeline_group.add_argument('--document-mode', action='store_true',
+                                help="Create structured markdown document from voice input (requires --output)")
 
     # Input provider options
     input_group = parser.add_argument_group("Input Provider")
@@ -278,6 +364,11 @@ Pipeline mode examples:
                             action='store_true',
                             help="Keep remote file after download (only with --input-provider google-drive)")
 
+    # Document mode options
+    doc_group = parser.add_argument_group("Document Mode")
+    doc_group.add_argument('--project', type=str,
+                          help="Project name for document metadata (optional, auto-inferred if not provided)")
+
     # File parameters
     parser.add_argument('--file', type=str,
                         help="Input audio file to process (bypasses recording)")
@@ -287,6 +378,8 @@ Pipeline mode examples:
                         help="Text file path (input for --translate-only, output for --transcribe-only)")
     parser.add_argument('--output-file', type=str,
                         help="Output file path (for --translate-only)")
+    parser.add_argument('--output', type=str,
+                        help="Output file path (for --document-mode)")
 
     # Editor options
     parser.add_argument('--editor-command', type=str,
@@ -318,6 +411,7 @@ Pipeline mode examples:
     audio_file = get_str_arg(args, 'audio_file')
     text_file = get_str_arg(args, 'text_file')
     output_file = get_str_arg(args, 'output_file')
+    output = get_str_arg(args, 'output')
 
     if audio_file and isinstance(audio_file, str):
         args.audio_file = resolve_file_path(audio_file)
@@ -325,11 +419,14 @@ Pipeline mode examples:
         args.text_file = resolve_file_path(text_file)
     if output_file and isinstance(output_file, str):
         args.output_file = resolve_file_path(output_file)
+    if output and isinstance(output, str):
+        args.output = resolve_file_path(output)
 
     # Validate output files don't exist (overwrite protection)
     record_only = getattr(args, 'record_only', False)
     transcribe_only = getattr(args, 'transcribe_only', False)
     translate_only = getattr(args, 'translate_only', False)
+    document_mode = getattr(args, 'document_mode', False)
     editor_command = get_str_arg(args, 'editor_command')
 
     if record_only is True and audio_file and isinstance(audio_file, str):
@@ -338,6 +435,8 @@ Pipeline mode examples:
         validate_output_file(text_file, "transcribe-only")
     if translate_only is True and output_file and isinstance(output_file, str):
         validate_output_file(output_file, "translate-only")
+    if document_mode is True and output and isinstance(output, str):
+        validate_output_file(output, "document-mode")
 
     # Init config
     config = ConfigurationManager()
@@ -452,6 +551,10 @@ Pipeline mode examples:
 
     if translate_only is True:
         exit_code = run_translate_only(config, args, processor)
+        sys.exit(exit_code)
+
+    if document_mode is True:
+        exit_code = run_document_mode(config, args, recorder, processor)
         sys.exit(exit_code)
 
     # Normal mode handling (interactive workflow)

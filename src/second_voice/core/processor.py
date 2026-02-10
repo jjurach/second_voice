@@ -612,6 +612,260 @@ class AIProcessor:
         print(f"LLM processing error: {error_summary}")
         return f"Error: {error_summary}"
 
+    def process_document_creation(self, transcript: str, recording_path: Optional[str] = None,
+                                  project: Optional[str] = None) -> str:
+        """
+        Process transcript into a structured markdown document.
+
+        Uses a specialized system prompt focused on document organization rather than cleanup.
+
+        :param transcript: Raw transcribed text
+        :param recording_path: Path to the recording (for metadata)
+        :param project: Optional project name for metadata
+        :return: Structured markdown document with headers and formatting
+        """
+        # Build document system prompt
+        system_prompt = """You are a document structuring assistant.
+The user has spoken freely about a topic or ideas.
+
+Your job is to:
+1. Extract the main topic (becomes document title)
+2. Identify 3-5 key sections or themes
+3. List specific points under each section as bullet points
+4. Organize logically (chronologically, by importance, or by theme)
+5. Clean up grammar and remove speech artifacts (ums, ahs, stutters)
+6. Keep the user's original meaning and intent intact
+
+OUTPUT FORMAT:
+- Use markdown formatting
+- Start with # Title (one H1)
+- Use ## Section Headers for each topic (H2)
+- Use - bullet points for details
+- Use paragraphs when topic needs explanation
+- No metadata, no preamble, just the document
+
+IMPORTANT: Output ONLY the markdown document.
+Do not include explanations or instructions.
+The document should be ready to save immediately."""
+
+        # Prepare augmented input with system prompt
+        full_input = f"{system_prompt}\n\nSpoken content to structure:\n{transcript}"
+
+        try:
+            # Process with LLM using document prompt (not cleanup prompt)
+            result = self._process_with_document_prompt(full_input)
+
+            if not result:
+                logger.error("Document processing returned empty result")
+                return None
+
+            # Inject metadata headers
+            source = Path(recording_path).name if recording_path else "voice-input"
+            title = generate_title(result)
+            inferred_project = project or infer_project_name(result)
+
+            header = Header(
+                source=source,
+                status="Structured from voice",
+                title=title,
+                project=inferred_project
+            )
+
+            # Prepend header to structured document
+            header_text = header.to_string(include_title=True, include_project=True)
+            final_doc = f"{header_text}\n\n{result}"
+
+            return final_doc
+
+        except Exception as e:
+            logger.error(f"Document creation failed: {e}")
+            # Fallback: return raw transcript with error header
+            fallback_msg = (
+                f"⚠️ **Warning**: Document structuring failed, returning raw transcript.\n\n"
+                f"Error: {str(e)}\n\n"
+                f"---\n\n"
+                f"{transcript}"
+            )
+            return fallback_msg
+
+    def _process_with_document_prompt(self, text: str) -> str:
+        """
+        Process text through LLM with document structuring prompt.
+
+        Routes to appropriate LLM provider configured in self.llm_provider.
+
+        :param text: Full input including system prompt and content
+        :return: Structured document output
+        """
+        if self.llm_provider == 'openrouter':
+            return self._process_openrouter_document(text)
+        elif self.llm_provider == 'ollama':
+            return self._process_ollama_document(text)
+        elif self.llm_provider == 'cline':
+            return self._process_cline_document(text)
+        else:
+            raise ValueError(f"Unsupported LLM provider: {self.llm_provider}")
+
+    def _process_ollama_document(self, text: str) -> str:
+        """Process document using local Ollama instance."""
+        url = self.config.get('ollama_url', 'http://localhost:11434/api/generate')
+        model = self.config.get('ollama_model', 'llama3')
+        timeout = self.config.get('ollama_timeout', 300)
+
+        logger.debug(f"Ollama document processing - URL: {url}, model: {model}, timeout: {timeout}s")
+
+        try:
+            logger.debug(f"Sending document request to Ollama at {url}")
+            response = requests.post(
+                url,
+                json={
+                    'model': model,
+                    'prompt': text,
+                    'stream': False
+                },
+                timeout=timeout
+            )
+            logger.debug(f"Ollama response: status={response.status_code}")
+            response.raise_for_status()
+            result = response.json().get('response', '')
+            logger.debug(f"Ollama document processing successful, response length: {len(result)}")
+            return result
+        except requests.Timeout as e:
+            error_msg = f"Ollama request timeout after {timeout}s"
+            logger.error(f"{error_msg}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Ollama document processing error: {type(e).__name__}: {e}")
+            raise
+
+    def _process_cline_document(self, text: str) -> str:
+        """Process document using Cline CLI provider."""
+        import subprocess
+        import shlex
+
+        model = self.config.get('cline_llm_model', 'default-model')
+        timeout = self.config.get('cline_timeout', 120)
+        api_key = os.environ.get('CLINE_API_KEY', self.config.get('cline_api_key', ''))
+
+        logger.debug(f"Cline CLI document processing - model: {model}, timeout: {timeout}s")
+
+        cmd_parts = [
+            'cline', 'generate',
+            '--model', model
+        ]
+
+        if api_key:
+            cmd_parts.extend(['--api-key', api_key])
+
+        cmd_parts.extend(['--input', text])
+
+        try:
+            logger.debug(f"Running Cline CLI command for document processing")
+            result = subprocess.run(
+                cmd_parts,
+                capture_output=True,
+                text=True,
+                timeout=timeout
+            )
+
+            if result.returncode != 0:
+                error_msg = f"Cline CLI error: {result.stderr.strip()}"
+                logger.error(error_msg)
+                raise RuntimeError(error_msg)
+
+            processed_text = result.stdout.strip()
+            logger.debug(f"Cline document processing successful, response length: {len(processed_text)}")
+            return processed_text
+
+        except subprocess.TimeoutExpired:
+            error_msg = f"Cline CLI request timeout after {timeout}s"
+            logger.error(error_msg)
+            raise
+        except Exception as e:
+            logger.error(f"Cline document processing error: {type(e).__name__}: {e}")
+            raise
+
+    def _process_openrouter_document(self, text: str) -> str:
+        """Process document using OpenRouter with fallback models."""
+        if not self.api_keys['openrouter']:
+            raise ValueError("OpenRouter API key not configured")
+
+        timeout = self.config.get('openrouter_timeout', 60)
+
+        # Same fallback models as regular processing
+        fallback_models = [
+            'meta-llama/llama-3.3-70b-instruct',
+            'nousresearch/hermes-3-llama-3.1-405b',
+            'google/gemma-3-27b-it',
+            'qwen/qwen3-next-80b-a3b-instruct',
+            'openai/gpt-oss-120b',
+            'google/gemma-3-12b-it',
+            'mistralai/mistral-small-3.1-24b-instruct',
+            'meta-llama/llama-3.2-3b-instruct',
+            'arcee-ai/trinity-large-preview',
+            'upstage/solar-pro-3',
+        ]
+
+        user_model = self.config.get('openrouter_llm_model', self.config.get('llm_model'))
+        if user_model and user_model not in fallback_models:
+            fallback_models.insert(0, user_model)
+
+        logger.debug(f"OpenRouter document processing - primary model: {fallback_models[0]}, fallback chain: {len(fallback_models)} models")
+
+        last_error = None
+        for model_index, model in enumerate(fallback_models):
+            try:
+                logger.debug(f"Attempting OpenRouter document request with model {model_index + 1}/{len(fallback_models)}: {model}")
+                response = requests.post(
+                    'https://openrouter.ai/api/v1/chat/completions',
+                    headers={
+                        'Authorization': f'Bearer {self.api_keys["openrouter"]}',
+                        'Content-Type': 'application/json'
+                    },
+                    json={
+                        'model': model,
+                        'messages': [{'role': 'user', 'content': text}]
+                    },
+                    timeout=timeout
+                )
+                logger.debug(f"OpenRouter response: status={response.status_code}")
+                response.raise_for_status()
+                result = response.json()
+                content = result['choices'][0]['message']['content']
+                logger.info(f"OpenRouter document processing successful with model: {model} (attempt {model_index + 1}/{len(fallback_models)})")
+                return content
+
+            except requests.HTTPError as e:
+                status_code = e.response.status_code if e.response else "unknown"
+                logger.warning(f"OpenRouter API error {status_code} with model {model}")
+                last_error = f"API error {status_code}"
+
+                if model_index >= len(fallback_models) - 1:
+                    break
+                continue
+
+            except requests.Timeout:
+                error_msg = f"Request timeout after {timeout}s with model {model}"
+                logger.warning(error_msg)
+                last_error = error_msg
+
+                if model_index >= len(fallback_models) - 1:
+                    break
+                continue
+
+            except requests.RequestException as e:
+                error_msg = f"Request error with model {model}: {type(e).__name__}"
+                logger.warning(error_msg)
+                last_error = error_msg
+
+                if model_index >= len(fallback_models) - 1:
+                    break
+                continue
+
+        error_summary = f"All {len(fallback_models)} OpenRouter models failed. Last error: {last_error}"
+        logger.error(error_summary)
+        raise RuntimeError(error_summary)
+
     def save_context(self, context: str, max_context_length: int = 1000):
         """
         Save context to a temporary file in the configured temp directory.
