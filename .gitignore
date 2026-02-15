@@ -156,3 +156,6 @@ dev_notes/logs/
 MagicMock/
 samples/test.wav
 !samples/
+
+# bv (beads viewer) local config and caches
+.bv/
