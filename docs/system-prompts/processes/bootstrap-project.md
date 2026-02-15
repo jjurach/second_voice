@@ -1446,7 +1446,21 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
 **Applies to:** Projects explicitly requesting beads integration
 **Goal:** Set up beads task tracking for plan-and-dispatch workflow
 
-**Only execute this phase when explicitly mentioned in the bootstrap request.** Beads is optional; projects can use logs-first workflow without it.
+### ⚠️ CRITICAL: BEADS INITIALIZATION RULES
+
+**ONLY execute this phase when explicitly mentioned in the bootstrap request.** Do NOT initialize beads unless the user's prompt specifically says "beads" or "beads workflow" or similar.
+
+**Beads is STICKY:** Once a project has beads initialized (i.e., `.beads/` directory exists), that attribute persists:
+- All future project plans should assume beads is available
+- Use `bd` commands in workflows and shell scripts
+- Track tasks with beads (don't fall back to logs-only)
+- Beads-aware agents will check for `.beads/` directory and use it automatically
+
+**For next agents working on beads-enabled projects:**
+- Check if `.beads/` directory exists before starting work
+- If it exists, assume beads workflow is active
+- Use `bd ready`, `bd list`, `bd create`, `bd close` commands
+- Document beads interactions in project plans
 
 ### Step 6.5.1: Verify Prerequisites
 

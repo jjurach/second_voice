@@ -20,6 +20,7 @@ docs/system-prompts/
 │   └── definition-of-done.md    # Universal DoD criteria
 ├── processes/
 │   ├── README.md                # Processes directory guide
+│   ├── bootstrap-project.md     # Agent Kernel integration process
 │   ├── document-integrity-scan.md # Documentation verification process
 │   └── tool-entry-points.md     # Tool entry point architecture
 ├── tools/
@@ -38,10 +39,9 @@ docs/system-prompts/
 ├── templates/
 │   ├── README.md                # Templates directory guide
 │   └── structure.md             # Documentation templates (specs, plans, changes)
-├── workflows/                   # Optional workflow patterns
-│   ├── README.md                # Workflows directory guide
-│   ├── logs-first.md            # Documented development workflow
-│   └── custom-template.md       # Template for creating custom workflows
+├── guides/
+│   ├── beads-sticky-attribute.md   # Understanding beads as sticky attribute
+│   └── agent-beads-detection.md    # How agents detect and use beads
 └── languages/
     └── python/
         └── definition-of-done.md # Python-specific DoD (pytest, venv, etc.)
@@ -64,15 +64,34 @@ These files are managed by `bootstrap.py`:
 
 See `docs/system-prompts/processes/tool-entry-points.md` for the complete architecture.
 
+## Guides
+
+The `docs/system-prompts/guides/` directory contains implementation guides for agents:
+
+1. **Beads Sticky Attribute** (`beads-sticky-attribute.md`)
+   - Explains when beads becomes active for a project
+   - Shows how beads persists across sessions
+   - Decision tree for agents to detect beads status
+
+2. **Agent Beads Detection** (`agent-beads-detection.md`)
+   - Quick start checklist for detecting beads at session start
+   - How to decide whether to use beads in project plans
+   - Common scenarios and troubleshooting
+
 ## Processes
 
 The `docs/system-prompts/processes/` directory documents maintenance workflows:
 
-1.  **Document Integrity Scan** (`document-integrity-scan.md`)
+1.  **Bootstrap Project** (`bootstrap-project.md`)
+    - Complete process for integrating Agent Kernel into new projects
+    - Phase 6.5 covers beads initialization (optional, if requested)
+    - Ensures clear content ownership and no duplication
+
+2.  **Document Integrity Scan** (`document-integrity-scan.md`)
     - Describes how `docscan.py` validates the documentation graph.
     - Ensures no broken links or orphaned files.
 
-2.  **Tool Entry Points** (`tool-entry-points.md`)
+3.  **Tool Entry Points** (`tool-entry-points.md`)
     - Describes the "Anemic Entry Point" pattern.
     - Explains how to add support for new AI tools.
 
