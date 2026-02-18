@@ -202,7 +202,7 @@ bd dep remove bd-c3d4 bd-a1b2  # Remove C blocked by A
 # Find beads in-progress for > threshold time (e.g., 24 hours)
 threshold_hours=24
 
-for bead in $(bd ls --status in-progress --json | jq -r '.[].id'); do
+for bead in $(bd list --status in-progress --json | jq -r '.[].id'); do
     claimed_at=$(bd show $bead --json | jq -r '.claimed_at')
     now=$(date +%s)
     age_hours=$(( ($now - $claimed_at) / 3600 ))
@@ -329,7 +329,7 @@ done
 **5.2: Approval beads without plan reference**
 ```bash
 # Find approval beads that don't reference plan file
-for bead in $(bd ls --label approval --json | jq -r '.[].id'); do
+for bead in $(bd list --label approval --json | jq -r '.[].id'); do
     body=$(bd show $bead --json | jq -r '.body')
 
     if ! echo "$body" | grep -q "Plan:"; then
@@ -341,7 +341,7 @@ done
 **5.3: Failure beads without error details**
 ```bash
 # Find failure beads without error context
-for bead in $(bd ls --label failure --json | jq -r '.[].id'); do
+for bead in $(bd list --label failure --json | jq -r '.[].id'); do
     body=$(bd show $bead --json | jq -r '.body')
 
     if ! echo "$body" | grep -q "Error Details:"; then

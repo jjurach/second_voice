@@ -159,7 +159,7 @@ Recently Closed (last 5):
 **Get all beads:**
 ```bash
 # List all beads with full details
-bd ls --json > /tmp/beads.json
+bd list --json > /tmp/beads.json
 ```
 
 **Parse bead data:**
@@ -558,7 +558,7 @@ python3 docs/system-prompts/planning-summary.py --status closed --limit 0
 **Show bead with its blockers:**
 ```bash
 # For each blocked bead, show what it's waiting for
-for bead in $(bd ls --status not-ready --json | jq -r '.[].id'); do
+for bead in $(bd list --status not-ready --json | jq -r '.[].id'); do
     title=$(bd show $bead --json | jq -r '.title')
     blockers=$(bd show $bead --json | jq -r '.blocked_by | join(", ")')
 
@@ -625,7 +625,7 @@ for label, count in label_counts.most_common():
 ls -la .beads/
 
 # Verify beads exist
-bd ls
+bd list
 ```
 
 **Fix:** Create beads or run planning-init.py

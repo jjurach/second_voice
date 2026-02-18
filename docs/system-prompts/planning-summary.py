@@ -5,7 +5,7 @@ Planning Summary - Display execution status for beads task tracking
 This script provides a comprehensive view of task execution status by reading from .beads/issues.jsonl
 
 ARCHITECTURE:
-- Primary: Uses 'bd ls --json' command if beads CLI is available
+- Primary: Uses 'bd list --json' command if beads CLI is available
 - Fallback: Reads directly from .beads/issues.jsonl if bd CLI fails
 - This ensures it works in any environment (with or without beads CLI)
 

@@ -8,7 +8,7 @@
 
 The script has a **two-tier architecture** for reliability:
 
-1. **Primary:** Tries to use `bd ls --json` (beads CLI command)
+1. **Primary:** Tries to use `bd list --json` (beads CLI command)
 2. **Fallback:** Reads directly from `.beads/issues.jsonl` if `bd` isn't available
 
 This means the script works regardless of whether the beads CLI is installed or available.
