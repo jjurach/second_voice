@@ -172,7 +172,24 @@ python3 docs/system-prompts/planning-init.py
    - Create project plan: `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_name.md`
    - Archive inbox item to `dev_notes/inbox-archive/`
 
-2. **Create approval bead**
+2. **Run Planning Pre-Flight Checklist** ⭐ NEW
+
+   **Why:** Catch external dependency issues BEFORE approval instead of mid-execution
+
+   Use: [`docs/system-prompts/checklists/planning-preflight.md`](../checklists/planning-preflight.md)
+
+   Key sections:
+   - ✅ **External Dependencies:** Verify all resources accessible NOW, not assumed
+   - ✅ **Project Plan Structure:** Clear phases, deliverables, effort estimates
+   - ✅ **Tool & Environment:** Document all prerequisites, versions, setup steps
+   - ✅ **Lessons Learned Prep:** Set up continuous improvement capture
+
+   **If checklist reveals issues:**
+   - Fix plan before proceeding
+   - If external resource missing: Document acquisition path in plan using [external-resources.md](../templates/external-resources.md) template
+   - If risk too high: Document deferral plan with clear remediation trigger
+
+3. **Create approval bead** (updated template)
    ```bash
    timestamp=$(date +%Y-%m-%d_%H-%M-%S)
    plan_file="dev_notes/project_plans/${timestamp}_name.md"
@@ -180,7 +197,11 @@ python3 docs/system-prompts/planning-init.py
    bd create "Approve: [Plan Name]" --label approval \
      --body "Plan: ${plan_file}
 
+   ✓ Planning Pre-Flight Checklist Complete
+   See: docs/system-prompts/checklists/planning-preflight.md
+
 Review Checklist:
+- [ ] External dependencies verified or documented
 - [ ] Plan phases are clear and sequenced
 - [ ] Dependencies identified
 - [ ] Risk mitigation adequate
@@ -188,7 +209,7 @@ Review Checklist:
 Approve by closing this bead."
    ```
 
-3. **Create implementation beads for each phase/task**
+4. **Create implementation beads for each phase/task**
    ```bash
    # For each phase in project plan
    bd create "[Task description from plan]" --label implementation
@@ -248,7 +269,54 @@ Approve by closing this bead."
    cat dev_notes/project_plans/2026-02-15_10-30-00_backend-restructure.md
    ```
 
-2. **Check bead graph**
+2. **Validate external dependencies** (Enhanced)
+
+   If the plan involves external resources (third-party code, APIs, data files):
+
+   **Reference:** [external-resources.md](../templates/external-resources.md) template in plan
+
+   Verify for each resource:
+
+   - [ ] **Resource is actually accessible NOW** (not assumed)
+     - Test it: clone, fetch, call API, download file
+     - Can your team access it with current credentials?
+     - Does it have the expected structure/contents?
+     - Not just directory stubs - actual working files?
+
+   - [ ] **Planner verified before approval** (critical step often missed)
+     - Planner's responsibility: confirm accessibility before creating approval bead
+     - This catches issues early (see Mobile App Migration pj-5 lesson)
+     - Don't assume "it must be there"
+
+   - [ ] **Acquisition method documented** (if not currently available)
+     - How to get it if missing?
+     - Who to contact? SLA for getting access?
+     - Prerequisites or setup steps?
+     - Authentication/credentials needed (without storing secrets)?
+
+   - [ ] **Fallback plan explicitly documented**
+     - If resource never becomes available: what's the plan?
+     - Defer certain phases? Mock the resource? Use alternative?
+     - Clear trigger for when to activate fallback
+     - Don't let undefined external dependencies block entire epic
+
+   **Example checklist for code dependencies:**
+   ```markdown
+   - [x] Verified: external/orig/apps/mobile/ directory EXISTS and contains source
+   - [x] Verified: Expected subdirectories present (src/, assets/, android/, ios/)
+   - [x] Verified: Files are complete (not empty stubs)
+   - [ ] If not available: Acquisition path documented (see external-resources.md)
+   - [ ] If not available: Fallback option defined (defer phases 2-4 per plan)
+   ```
+
+   **If external dependencies are missing/blocked:**
+   - [ ] Document acquisition path using [external-resources.md](../templates/external-resources.md)
+   - [ ] Plan which phases are blocked vs. which can proceed independently
+   - [ ] Create explicit "deferred" status in beads (not "open" implying soon availability)
+   - [ ] Define clear trigger: "When resource available, activate these beads"
+   - [ ] Don't add a separate acquisition bead unless acquisition itself is the work - instead defer blocked phases
+
+3. **Check bead graph**
    ```bash
    # View approval bead details
    bd show bd-a1b2
@@ -257,17 +325,22 @@ Approve by closing this bead."
    python3 docs/system-prompts/planning-summary.py
    ```
 
-3. **If approved, close approval bead**
+4. **If approved, close approval bead**
    ```bash
    bd update bd-a1b2 --close
    ```
 
    Implementation beads automatically become "ready"
 
-4. **If changes needed**
+5. **If changes needed**
    - Provide feedback to planner
    - Planner updates plan and beads
    - Return to step 1
+
+   **If dependencies are unmet:**
+   - Mark plan as "WONT-DO - Awaiting [Resource]"
+   - Document what's needed in plan
+   - Schedule for future release when resource available
 
 ### Step 3: Orchestrator Dispatches Work
 
@@ -382,6 +455,30 @@ Recommendation:
 
    Human intervention required.
    ```
+
+### Step 6: Phase Review Checkpoint (For Long Epics)
+
+**When to conduct:** After 40-60% of epic is complete (typically after 2-3 phases of 5+ phase epic)
+
+**Purpose:** Capture lessons learned, validate assumptions, adjust remaining phases based on reality
+
+**Use:** [phase-review-checkpoint.md](../templates/phase-review-checkpoint.md) template
+
+**Who conducts:**
+- Workers: Document feedback in change documentation
+- Planner: Compile checkpoint at midpoint
+- Human: Review and approve adjustments if needed
+
+**What it captures:**
+- Actual vs. planned effort (to forecast remaining work)
+- What worked well / what was harder
+- New risks discovered
+- Needed adjustments to remaining phases
+- Lessons for future epics
+
+**Outcome:** Updated project plan with documented lessons, preventing mid-epic surprises
+
+**Example:** Mobile App Migration should have had checkpoint after Phase 1 (pj-7) completed, discovering that Phase 2 (pj-8) external resource was inaccessible and planning accordingly instead of discovering it mid-execution.
 
 ---
 
@@ -584,8 +681,18 @@ bd update bd-stale-id --close
 
 ## See Also
 
-- **[External Orchestrator](external-orchestrator.md)** - Orchestrator architecture and operation
+### Core Workflows
 - **[Logs-First Workflow](logs-first.md)** - Foundation workflow for documentation
+- **[External Orchestrator](external-orchestrator.md)** - Orchestrator architecture and operation
+
+### New: Checklists & Validation
+- **[Planning Pre-Flight Checklist](../checklists/planning-preflight.md)** - Validate project plan before approval (critical for catching external dependency issues early)
+
+### New: Templates for Project Plans
+- **[External Resources Guide](../templates/external-resources.md)** - Document, verify, and handle external dependencies in your plan
+- **[Phase Review Checkpoint](../templates/phase-review-checkpoint.md)** - Conduct mid-epic reviews to capture lessons and adjust remaining phases
+
+### Operations & Management
 - **[Close Project Process](../processes/close-project.md)** - Includes bead closure step
 - **[Planning Init](../processes/planning-init.md)** - Initialize beads in project
 - **[Planning Doctor](../processes/planning-doctor.md)** - Detect and fix bead issues
@@ -594,3 +701,4 @@ bd update bd-stale-id --close
 ---
 
 **Last Updated:** 2026-02-15
+**Recent Updates:** 2026-02-15 - Added Planning Pre-Flight Checklist, External Resources template, and Phase Review Checkpoint references

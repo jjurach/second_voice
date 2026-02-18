@@ -1,5 +1,11 @@
 # Agent Kernel: System Prompts Module
 
+> **⚠️ IMPORTANT: Generic Documentation**
+>
+> This entire `docs/system-prompts/` directory contains **generic, reusable documentation** designed to work across any project using the AGENTS.md workflow. It should **never** contain project-specific references (module names, file paths, architecture details).
+>
+> **For project-specific documentation:** Use `docs/` (outside of system-prompts/) or other project directories.
+
 The **Agent Kernel** is a reusable, standardized collection of agentic workflow guidelines and patterns. It provides a foundation for consistent AI agent behavior across projects.
 
 ## Overview
@@ -807,36 +813,36 @@ Processes are specialized, one-time or periodic maintenance operations. Located 
 
 ## Project Integration
 
-This Agent Kernel is integrated into the **Second Voice** project with the following extensions:
+This Agent Kernel can be integrated into any project following these patterns:
 
 ### Entry Points
 
 - **[AGENTS.md](../../AGENTS.md)** - Main agent instructions combining Agent Kernel workflows with project-specific requirements
-- **[docs/definition-of-done.md](../definition-of-done.md)** - Project-specific DoD extending Agent Kernel universal and Python DoD
+- **[docs/definition-of-done.md](../definition-of-done.md)** - Project-specific DoD extending Agent Kernel universal DoD
 - **[docs/workflows.md](../workflows.md)** - Project-specific development workflows
 
 ### Project-Specific Extensions
 
-The project adds domain-specific requirements for:
+Projects typically add domain-specific requirements for their:
 
 **Project Type:**
-- CLI Application
-- Audio Processing (AAC, Whisper)
-- Google Gemini Integration
+- CLI Application, Web Service, Library, etc.
+- Domain-specific processing needs
+- External API integrations
 
 **Technology Stack:**
-- Python 3.12+
-- Pytest
-- SoundDevice
-- Pydub
+- Language and version (Python 3.x, Node 18+, etc.)
+- Testing framework (pytest, jest, etc.)
+- Libraries and dependencies
 
-See [docs/definition-of-done.md](../definition-of-done.md) for complete project-specific requirements.
+See [docs/definition-of-done.md](../definition-of-done.md) for project-specific requirements in your implementation.
 
 ### Sync Status
 
-- **Bootstrap sync:** Completed 2026-01-29
-- **Last integration update:** 2026-01-29
-- **Sections synchronized:** CORE-WORKFLOW, PRINCIPLES, PYTHON-DOD
+After running bootstrap.py, check:
+- **Bootstrap sync:** Last run date
+- **Last integration update:** When AGENTS.md was last updated
+- **Sections synchronized:** CORE-WORKFLOW, PRINCIPLES, language-specific DoD
 
 ### Documentation Structure
 
