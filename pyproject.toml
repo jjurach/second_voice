@@ -9,6 +9,7 @@ description = "Recursive AI assistant for voice-driven text refinement"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "mellona",
     "requests",
     "sounddevice",
     "soundfile",
