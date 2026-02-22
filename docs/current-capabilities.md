@@ -69,13 +69,13 @@
 
 ## Documented but NOT Implemented ❌
 
-### Dual-Text Looping (mentioned in architecture.md)
+### Dual-Text Looping (mentioned in [`architecture.md`](architecture.md))
 - ❌ **Original Raw + Processed Text:** LLM does NOT receive both texts on each iteration
 - ❌ **Current State:** Only processed/cooked text from previous iteration is in context
 - ❌ **Archive of Originals:** No preserved history of original raw transcriptions
 - **Impact:** Users cannot see evolution from raw speech → processed output across multiple iterations
 
-### Two-Pane Interactive Interface (mentioned in architecture.md)
+### Two-Pane Interactive Interface (mentioned in [`architecture.md`](architecture.md))
 - ❌ **Split-Pane UI:** Architecture mentions but is NOT implemented
 - ❌ **Top Pane Target Text:** Proposed but no code
 - ❌ **Bottom Pane Chat:** Proposed but no code

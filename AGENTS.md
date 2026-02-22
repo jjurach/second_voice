@@ -209,6 +209,12 @@ You must verify your documentation changes against these requirements before mar
 - The plan must be detailed enough for another agent to execute.
 - Save the plan to `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md`.
 
+> **⚠ Beaded or multi-task plans — mandatory pre-read:**
+> If the prompt asks for a **"beaded"** or **"multi-task"** project plan, you MUST read
+> **`docs/system-prompts/workflows/plan-and-dispatch.md`** before creating any beads.
+> It contains critical guidance on bead placement strategy — including rules for cross-project
+> plans that, if ignored, produce dependency graphs that cannot be enforced.
+
 **Step D: AWAIT DEVELOPER APPROVAL**
 - **NEVER EXECUTE A PLAN WITHOUT EXPLICIT APPROVAL.**
 - Present the full Project Plan to the developer.
@@ -848,7 +854,7 @@ These files define:
 ## The Mandatory Reading List
 
 ### 1. Core Workflow
-**File:** [docs/system-prompts/workflows/logs-first.md](workflows/logs-first.md)
+**File:** [docs/system-prompts/workflows/logs-first.md](docs/system-prompts/workflows/logs-first.md)
 
 **What it contains:**
 - 5-step workflow (Analyze Request → Create Spec → Create Plan → Get Approval → Implement & Document)
