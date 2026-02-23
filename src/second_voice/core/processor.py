@@ -1,9 +1,7 @@
 import os
 import json
-import requests
 import logging
 from typing import Optional, Dict, Any
-from urllib.parse import urljoin
 from pathlib import Path
 
 from mellona import SyncMellonaClient, get_config
@@ -314,17 +312,16 @@ class AIProcessor:
 
     def _process_ollama(self, text: str, context: Optional[str] = None) -> str:
         """
-        Process text using local Ollama instance.
+        Process text using local Ollama instance via mellona.
 
         :param text: User input/instruction
         :param context: Optional previous conversation context
         :return: LLM processed output
         """
-        url = self.config.get('ollama_url', 'http://localhost:11434/api/generate')
         model = self.config.get('ollama_model', 'llama3')
         timeout = self.config.get('ollama_timeout', 300)
 
-        logger.debug(f"Ollama config - URL: {url}, model: {model}, timeout: {timeout}s")
+        logger.debug(f"Ollama config - model: {model}, timeout: {timeout}s")
 
         # Build system prompt for cleanup operations
         system_prompt = (
@@ -346,92 +343,51 @@ class AIProcessor:
                 "perform that transformation instead. Still output only the result, no preamble.\n"
             )
 
-        # Build the full prompt
+        # Build the full prompt with context if provided
         if context:
-            prompt = f"{system_prompt}\nPrevious Context:\n{context}\n\nUser's transcribed speech:\n{text}"
+            prompt = f"Previous Context:\n{context}\n\nUser's transcribed speech:\n{text}"
         else:
-            prompt = f"{system_prompt}\nUser's transcribed speech:\n{text}"
+            prompt = f"User's transcribed speech:\n{text}"
 
         try:
-            logger.debug(f"Sending request to Ollama at {url}")
-            response = requests.post(
-                url,
-                json={
-                    'model': model,
-                    'prompt': prompt,
-                    'stream': False
-                },
-                timeout=timeout
-            )
-            logger.debug(f"Ollama response: status={response.status_code}")
-            response.raise_for_status()
-            result = response.json().get('response', '')
-            logger.debug(f"Ollama processing successful, response length: {len(result)}")
-            return result
-        except requests.Timeout as e:
-            error_msg = f"Ollama request timeout after {timeout}s"
-            logger.error(f"{error_msg}: {e}")
-            print(f"Ollama processing error: {error_msg}")
-            return f"Error: {error_msg}"
-        except requests.ConnectionError as e:
-            error_msg = f"Ollama connection failed ({type(e).__name__})"
-            logger.error(f"{error_msg}: {e}")
-            print(f"Ollama processing error: {error_msg}")
-            return f"Error: {error_msg}"
-        except requests.RequestException as e:
-            logger.error(f"Ollama request error: {type(e).__name__}: {e}")
+            logger.debug(f"Sending request to Ollama via mellona")
+
+            with SyncMellonaClient() as client:
+                response = client.chat(
+                    prompt=prompt,
+                    system=system_prompt,
+                    profile='ollama'
+                )
+
+                logger.debug(f"Ollama processing successful, response length: {len(response.text) if response.text else 0}")
+                return response.text
+
+        except Exception as e:
+            error_msg = f"Ollama processing error: {type(e).__name__}: {e}"
+            logger.error(error_msg)
             print(f"Ollama processing error: {e}")
-            return f"Error processing request: {e}"
+            return f"Error: {error_msg}"
 
     def _process_openrouter(self, text: str, context: Optional[str] = None) -> str:
         """
-        Process text using OpenRouter LLM with automatic model fallback.
+        Process text using OpenRouter LLM via mellona with automatic model fallback.
 
         :param text: User input/instruction
         :param context: Optional previous conversation context
         :return: LLM processed output
         """
-        if not self.api_keys['openrouter']:
-            raise ValueError("OpenRouter API key not configured")
-
         timeout = self.config.get('openrouter_timeout', 60)
 
-        # Define fallback model chain - diverse set of FREE models
-        # Extracted from OpenRouter's current available free models (29 total)
-        # Prioritized by size/quality for text cleanup tasks
-        fallback_models = [
-            # Tier 1: Large, high-quality models
-            'meta-llama/llama-3.3-70b-instruct',        # 70B, excellent quality
-            'nousresearch/hermes-3-llama-3.1-405b',     # 405B, state-of-art
-            'google/gemma-3-27b-it',                    # 27B, good quality
-            'qwen/qwen3-next-80b-a3b-instruct',         # 80B, powerful
-            'openai/gpt-oss-120b',                      # 120B, good general purpose
-
-            # Tier 2: Medium-sized reliable models
-            'google/gemma-3-12b-it',                    # 12B, good balance
-            'mistralai/mistral-small-3.1-24b-instruct', # 24B, fast
-            'meta-llama/llama-3.2-3b-instruct',         # 3B, lightweight
-            'arcee-ai/trinity-large-preview',           # Large, preview
-            'upstage/solar-pro-3',                      # Optimized for text
-
-            # Tier 3: Alternative providers
-            'google/gemma-3-4b-it',                     # 4B, very fast
-            'openai/gpt-oss-20b',                       # 20B, alternative
-            'qwen/qwen3-coder',                         # 480B, coder-optimized
-            'z-ai/glm-4.5-air',                         # GLM model, multilingual
-            'deepseek/deepseek-r1-0528',                # DeepSeek reasoning
-
-            # Tier 4: Other free options
-            'nvidia/nemotron-3-nano-30b-a3b',           # NVIDIA model
-            'arcee-ai/trinity-mini',                    # Smaller trinity
-            'qwen/qwen3-4b',                            # Qwen small
-            'liquid/lfm-2.5-1.2b-instruct',             # LiquidAI small
-        ]
+        # Get fallback models from config
+        fallback_models = self.config.get('openrouter_fallback_models', [])
+        if not fallback_models:
+            logger.error("No fallback models configured")
+            return "Error: No fallback models configured"
 
         # Get user-configured model and add to front if specified
         user_model = self.config.get('openrouter_llm_model', self.config.get('llm_model'))
         if user_model and user_model not in fallback_models:
-            fallback_models.insert(0, user_model)
+            fallback_models = [user_model] + fallback_models
 
         model = fallback_models[0]
         logger.debug(f"OpenRouter LLM config - primary model: {model}, timeout: {timeout}s, fallback chain: {len(fallback_models)} models")
@@ -456,79 +412,37 @@ class AIProcessor:
                 "perform that transformation instead. Still output only the result, no preamble."
             )
 
-        # Prepare messages with cleanup system prompt and optional context
-        messages = [
-            {
-                "role": "system",
-                "content": system_prompt
-            }
-        ]
-
+        # Build full input with context if provided
         if context:
-            messages.append({
-                "role": "system",
-                "content": f"Previous conversation context: {context}"
-            })
-
-        messages.append({
-            "role": "user",
-            "content": text
-        })
+            full_text = f"Previous conversation context: {context}\n\n{text}"
+        else:
+            full_text = text
 
         # Try each model in the fallback chain
         last_error = None
         for model_index, model in enumerate(fallback_models):
             try:
                 logger.debug(f"Attempting OpenRouter request with model {model_index + 1}/{len(fallback_models)}: {model}")
-                response = requests.post(
-                    'https://openrouter.ai/api/v1/chat/completions',
-                    headers={
-                        'Authorization': f'Bearer {self.api_keys["openrouter"]}',
-                        'Content-Type': 'application/json'
-                    },
-                    json={
-                        'model': model,
-                        'messages': messages
-                    },
-                    timeout=timeout
-                )
-                logger.debug(f"OpenRouter response: status={response.status_code}")
 
-                # Log response body for non-200 status codes before raising
-                if response.status_code != 200:
-                    try:
-                        error_body = response.text
-                        logger.error(f"OpenRouter API error {response.status_code} with model {model}: {error_body}")
-                    except Exception:
-                        pass
+                with SyncMellonaClient() as client:
+                    response = client.chat(
+                        prompt=full_text,
+                        system=system_prompt,
+                        profile='openrouter'
+                    )
 
-                response.raise_for_status()
-                result = response.json()
-                content = result['choices'][0]['message']['content']
-                logger.info(f"OpenRouter processing successful with model: {model} (attempt {model_index + 1}/{len(fallback_models)})")
-                logger.debug(f"Response length: {len(content)}")
+                    logger.info(f"OpenRouter processing successful with model: {model} (attempt {model_index + 1}/{len(fallback_models)})")
+                    logger.debug(f"Response length: {len(response.text) if response.text else 0}")
 
-                # Success - print fallback notice if we didn't use the first model
-                if model_index > 0:
-                    print(f"Note: Used fallback model {model} after {model_index} failure(s)")
+                    # Success - print fallback notice if we didn't use the first model
+                    if model_index > 0:
+                        print(f"Note: Used fallback model {model} after {model_index} failure(s)")
 
-                return content
+                    return response.text
 
-            except requests.HTTPError as e:
-                status_code = e.response.status_code if e.response else "unknown"
-                error_body = e.response.text if e.response else ""
-
-                # Parse error details for better logging
-                if status_code == 401:
-                    error_msg = "Invalid or missing OpenRouter API key"
-                elif status_code == 404:
-                    error_msg = f"Model not found: {model}"
-                elif status_code == 429:
-                    error_msg = f"Rate limit exceeded for model: {model}"
-                else:
-                    error_msg = f"API error {status_code} for model {model}"
-
-                logger.warning(f"{error_msg}. Error body: {error_body}")
+            except Exception as e:
+                error_msg = f"Error with model {model}: {type(e).__name__}: {e}"
+                logger.warning(error_msg)
                 last_error = error_msg
 
                 # If this is the last model, don't try more
@@ -537,24 +451,6 @@ class AIProcessor:
 
                 # Try next model
                 logger.info(f"Trying next fallback model...")
-                continue
-
-            except requests.Timeout as e:
-                error_msg = f"Request timeout after {timeout}s with model {model}"
-                logger.warning(f"{error_msg}: {e}")
-                last_error = error_msg
-
-                if model_index >= len(fallback_models) - 1:
-                    break
-                continue
-
-            except requests.RequestException as e:
-                error_msg = f"Request error with model {model}: {type(e).__name__}"
-                logger.warning(f"{error_msg}: {e}")
-                last_error = error_msg
-
-                if model_index >= len(fallback_models) - 1:
-                    break
                 continue
 
         # All models failed - report the error
@@ -658,33 +554,24 @@ The document should be ready to save immediately."""
             raise ValueError(f"Unsupported LLM provider: {self.llm_provider}")
 
     def _process_ollama_document(self, text: str) -> str:
-        """Process document using local Ollama instance."""
-        url = self.config.get('ollama_url', 'http://localhost:11434/api/generate')
+        """Process document using local Ollama instance via mellona."""
         model = self.config.get('ollama_model', 'llama3')
         timeout = self.config.get('ollama_timeout', 300)
 
-        logger.debug(f"Ollama document processing - URL: {url}, model: {model}, timeout: {timeout}s")
+        logger.debug(f"Ollama document processing - model: {model}, timeout: {timeout}s")
 
         try:
-            logger.debug(f"Sending document request to Ollama at {url}")
-            response = requests.post(
-                url,
-                json={
-                    'model': model,
-                    'prompt': text,
-                    'stream': False
-                },
-                timeout=timeout
-            )
-            logger.debug(f"Ollama response: status={response.status_code}")
-            response.raise_for_status()
-            result = response.json().get('response', '')
-            logger.debug(f"Ollama document processing successful, response length: {len(result)}")
-            return result
-        except requests.Timeout as e:
-            error_msg = f"Ollama request timeout after {timeout}s"
-            logger.error(f"{error_msg}: {e}")
-            raise
+            logger.debug(f"Sending document request to Ollama via mellona")
+
+            with SyncMellonaClient() as client:
+                response = client.chat(
+                    prompt=text,
+                    profile='ollama'
+                )
+
+                logger.debug(f"Ollama document processing successful, response length: {len(response.text) if response.text else 0}")
+                return response.text
+
         except Exception as e:
             logger.error(f"Ollama document processing error: {type(e).__name__}: {e}")
             raise
@@ -737,29 +624,19 @@ The document should be ready to save immediately."""
             raise
 
     def _process_openrouter_document(self, text: str) -> str:
-        """Process document using OpenRouter with fallback models."""
-        if not self.api_keys['openrouter']:
-            raise ValueError("OpenRouter API key not configured")
-
+        """Process document using OpenRouter with fallback models via mellona."""
         timeout = self.config.get('openrouter_timeout', 60)
 
-        # Same fallback models as regular processing
-        fallback_models = [
-            'meta-llama/llama-3.3-70b-instruct',
-            'nousresearch/hermes-3-llama-3.1-405b',
-            'google/gemma-3-27b-it',
-            'qwen/qwen3-next-80b-a3b-instruct',
-            'openai/gpt-oss-120b',
-            'google/gemma-3-12b-it',
-            'mistralai/mistral-small-3.1-24b-instruct',
-            'meta-llama/llama-3.2-3b-instruct',
-            'arcee-ai/trinity-large-preview',
-            'upstage/solar-pro-3',
-        ]
+        # Get fallback models from config
+        fallback_models = self.config.get('openrouter_fallback_models', [])
+        if not fallback_models:
+            error_msg = "No fallback models configured"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
         user_model = self.config.get('openrouter_llm_model', self.config.get('llm_model'))
         if user_model and user_model not in fallback_models:
-            fallback_models.insert(0, user_model)
+            fallback_models = [user_model] + fallback_models
 
         logger.debug(f"OpenRouter document processing - primary model: {fallback_models[0]}, fallback chain: {len(fallback_models)} models")
 
@@ -767,45 +644,18 @@ The document should be ready to save immediately."""
         for model_index, model in enumerate(fallback_models):
             try:
                 logger.debug(f"Attempting OpenRouter document request with model {model_index + 1}/{len(fallback_models)}: {model}")
-                response = requests.post(
-                    'https://openrouter.ai/api/v1/chat/completions',
-                    headers={
-                        'Authorization': f'Bearer {self.api_keys["openrouter"]}',
-                        'Content-Type': 'application/json'
-                    },
-                    json={
-                        'model': model,
-                        'messages': [{'role': 'user', 'content': text}]
-                    },
-                    timeout=timeout
-                )
-                logger.debug(f"OpenRouter response: status={response.status_code}")
-                response.raise_for_status()
-                result = response.json()
-                content = result['choices'][0]['message']['content']
-                logger.info(f"OpenRouter document processing successful with model: {model} (attempt {model_index + 1}/{len(fallback_models)})")
-                return content
 
-            except requests.HTTPError as e:
-                status_code = e.response.status_code if e.response else "unknown"
-                logger.warning(f"OpenRouter API error {status_code} with model {model}")
-                last_error = f"API error {status_code}"
+                with SyncMellonaClient() as client:
+                    response = client.chat(
+                        prompt=text,
+                        profile='openrouter'
+                    )
 
-                if model_index >= len(fallback_models) - 1:
-                    break
-                continue
+                    logger.info(f"OpenRouter document processing successful with model: {model} (attempt {model_index + 1}/{len(fallback_models)})")
+                    return response.text
 
-            except requests.Timeout:
-                error_msg = f"Request timeout after {timeout}s with model {model}"
-                logger.warning(error_msg)
-                last_error = error_msg
-
-                if model_index >= len(fallback_models) - 1:
-                    break
-                continue
-
-            except requests.RequestException as e:
-                error_msg = f"Request error with model {model}: {type(e).__name__}"
+            except Exception as e:
+                error_msg = f"Error with model {model}: {type(e).__name__}: {e}"
                 logger.warning(error_msg)
                 last_error = error_msg
 

@@ -18,6 +18,27 @@ class ConfigurationManager:
         'cline_llm_model': 'default-model',  # Added Cline CLI model config
         'cline_api_key': None,  # Optional API key for Cline CLI
         'temp_dir': './tmp',
+        'openrouter_fallback_models': [
+            'meta-llama/llama-3.3-70b-instruct',
+            'nousresearch/hermes-3-llama-3.1-405b',
+            'google/gemma-3-27b-it',
+            'qwen/qwen3-next-80b-a3b-instruct',
+            'openai/gpt-oss-120b',
+            'google/gemma-3-12b-it',
+            'mistralai/mistral-small-3.1-24b-instruct',
+            'meta-llama/llama-3.2-3b-instruct',
+            'arcee-ai/trinity-large-preview',
+            'upstage/solar-pro-3',
+            'google/gemma-3-4b-it',
+            'openai/gpt-oss-20b',
+            'qwen/qwen3-coder',
+            'z-ai/glm-4.5-air',
+            'deepseek/deepseek-r1-0528',
+            'nvidia/nemotron-3-nano-30b-a3b',
+            'arcee-ai/trinity-mini',
+            'qwen/qwen3-4b',
+            'liquid/lfm-2.5-1.2b-instruct',
+        ],
         'audio_config': {
             'sample_rate': 16000,
             'channels': 1,
