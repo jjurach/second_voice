@@ -52,6 +52,26 @@ class TestProcessorInitialization:
 # Tests should mock mellona instead of raw HTTP requests.
 # See docs/project-context.md for credential management details.
 
+
+# ============================================================================
+# Mellona Client Mock Fixture
+# ============================================================================
+
+@pytest.fixture
+def mock_mellona_client():
+    """Mock mellona's SyncMellonaClient for STT and LLM operations."""
+    with mock.patch('second_voice.core.processor.SyncMellonaClient') as mock_client_class:
+        mock_instance = mock.MagicMock()
+        mock_client_class.return_value.__enter__ = mock.MagicMock(return_value=mock_instance)
+        mock_client_class.return_value.__exit__ = mock.MagicMock(return_value=None)
+
+        # Default mock responses
+        mock_instance.transcribe.return_value = mock.MagicMock(text="Transcribed text from mellona")
+        mock_instance.chat.return_value = mock.MagicMock(text="Response from mellona LLM")
+
+        yield mock_instance
+
+
 class TestTranscriptionConfiguration:
     """Test transcription configuration for mellona integration."""
 
@@ -102,7 +122,7 @@ class TestGroqTranscription:
 
 
 class TestTranscriptionDispatch:
-    """Test transcription provider selection."""
+    """Test transcription provider selection with mellona mocks."""
 
     def test_transcribe_invalid_provider(self, mock_audio_file):
         """Raise error for unsupported STT provider."""
@@ -115,27 +135,37 @@ class TestTranscriptionDispatch:
         with pytest.raises(ValueError, match="Unsupported STT provider"):
             processor.transcribe(str(mock_audio_file))
 
-    def test_transcribe_dispatches_to_groq(self):
-        """Dispatch to Groq provider when configured."""
+    def test_transcribe_dispatches_to_groq(self, mock_audio_file, mock_mellona_client):
+        """Dispatch to Groq provider via mellona when configured."""
         config = {
             'stt_provider': 'groq',
             'llm_provider': 'ollama'
         }
         processor = AIProcessor(config)
 
-        # Verify dispatch configuration
-        assert processor.stt_provider == 'groq'
+        result = processor.transcribe(str(mock_audio_file))
 
-    def test_transcribe_dispatches_to_local_whisper(self):
-        """Dispatch to local Whisper provider when configured."""
+        # Verify mellona client was called with groq provider
+        mock_mellona_client.transcribe.assert_called_once()
+        call_args = mock_mellona_client.transcribe.call_args
+        assert call_args[1]['provider'] == 'groq'
+        assert result == "Transcribed text from mellona"
+
+    def test_transcribe_dispatches_to_local_whisper(self, mock_audio_file, mock_mellona_client):
+        """Dispatch to local Whisper provider via mellona when configured."""
         config = {
             'stt_provider': 'local_whisper',
             'llm_provider': 'ollama'
         }
         processor = AIProcessor(config)
 
-        # Verify dispatch configuration
-        assert processor.stt_provider == 'local_whisper'
+        result = processor.transcribe(str(mock_audio_file))
+
+        # Verify mellona client was called with local_whisper provider
+        mock_mellona_client.transcribe.assert_called_once()
+        call_args = mock_mellona_client.transcribe.call_args
+        assert call_args[1]['provider'] == 'local_whisper'
+        assert result == "Transcribed text from mellona"
 
 
 class TestOllamaProcessing:
@@ -216,7 +246,7 @@ class TestOpenRouterProcessing:
 
 
 class TestLLMProcessingDispatch:
-    """Test LLM processing provider selection."""
+    """Test LLM processing provider selection with mellona mocks."""
 
     def test_process_text_invalid_provider(self):
         """Raise error for unsupported LLM provider."""
@@ -229,27 +259,39 @@ class TestLLMProcessingDispatch:
         with pytest.raises(ValueError, match="Unsupported LLM provider"):
             processor.process_text('Test')
 
-    def test_process_text_dispatches_to_ollama(self):
-        """Dispatch to Ollama when configured."""
+    def test_process_text_dispatches_to_ollama(self, mock_mellona_client):
+        """Dispatch to Ollama via mellona when configured."""
         config = {
             'stt_provider': 'local_whisper',
-            'llm_provider': 'ollama'
+            'llm_provider': 'ollama',
+            'ollama_model': 'llama3'
         }
         processor = AIProcessor(config)
 
-        # Verify dispatch to Ollama
-        assert processor.llm_provider == 'ollama'
+        result = processor.process_text('Test input')
 
-    def test_process_text_dispatches_to_openrouter(self):
-        """Dispatch to OpenRouter when configured."""
+        # Verify mellona client was called with ollama profile
+        mock_mellona_client.chat.assert_called_once()
+        call_args = mock_mellona_client.chat.call_args
+        assert call_args[1]['profile'] == 'ollama'
+        assert result == "Response from mellona LLM"
+
+    def test_process_text_dispatches_to_openrouter(self, mock_mellona_client):
+        """Dispatch to OpenRouter via mellona when configured."""
         config = {
             'stt_provider': 'local_whisper',
-            'llm_provider': 'openrouter'
+            'llm_provider': 'openrouter',
+            'openrouter_fallback_models': ['openai/gpt-4', 'openai/gpt-3.5-turbo']
         }
         processor = AIProcessor(config)
 
-        # Verify dispatch to OpenRouter
-        assert processor.llm_provider == 'openrouter'
+        result = processor.process_text('Test input')
+
+        # Verify mellona client was called with openrouter profile
+        mock_mellona_client.chat.assert_called_once()
+        call_args = mock_mellona_client.chat.call_args
+        assert call_args[1]['profile'] == 'openrouter'
+        assert result == "Response from mellona LLM"
 
 
 class TestContextManagement:

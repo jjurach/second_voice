@@ -1,25 +1,31 @@
 {
+    "_migration_note": "API keys are now managed by mellona. See ~/.config/mellona/config.yaml for credential setup. Set GROQ_API_KEY, OPENROUTER_API_KEY, etc. as environment variables or in mellona's config.",
     "mode": "auto",
     "stt_provider": "local_whisper",
-    "llm_provider": "ollama",
+    "llm_provider": "openrouter",
+    "_comment_stt_provider": "Options: local_whisper, groq. Credentials are managed by mellona.",
+    "_comment_llm_provider": "Options: openrouter, ollama, cline. Credentials for openrouter and groq are managed by mellona.",
     "groq_stt_model": "whisper-large-v3",
-    "openrouter_llm_model": "openai/gpt-oss-120b:free",
+    "openrouter_llm_model": "openai/gpt-4",
+    "_comment_openrouter_fallback": "Fallback model chain for OpenRouter (used if primary model fails). Remove API-dependent models if you don't have those API keys configured in mellona.",
+    "openrouter_fallback_models": [
+        "openai/gpt-4",
+        "anthropic/claude-3-opus",
+        "openai/gpt-3.5-turbo",
+        "meta-llama/llama-2-70b-chat"
+    ],
     "cline_llm_model": "default-model",
-    "ollama_url": "http://localhost:11434/api/generate",
     "ollama_model": "llama3",
+    "ollama_url": "http://localhost:11434",
     "temp_dir": "./tmp",
     "vault_path": "~/Documents/Obsidian/VoiceInbox",
-    "_comment_stt": "STT provider config — these can also live in ~/.config/mellona/config.yaml",
+    "_comment_providers": "These settings are specific to second_voice. Additional settings can be configured in ~/.config/mellona/config.yaml.",
     "providers": {
         "local_whisper": {
             "url": "http://localhost:9090",
             "timeout": 300
-        },
-        "groq": {
-            "stt_model": "whisper-large-v3"
         }
     },
-    "_comment_credentials": "API keys are no longer stored here. Set GROQ_API_KEY and OPENROUTER_API_KEY as environment variables, or store them in ~/.config/mellona/config.yaml",
     "audio_config": {
         "sample_rate": 16000,
         "channels": 1,
