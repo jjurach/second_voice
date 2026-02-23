@@ -6,6 +6,8 @@ from typing import Optional, Dict, Any
 from urllib.parse import urljoin
 from pathlib import Path
 
+from mellona import SyncMellonaClient, get_config
+
 from ..utils.headers import Header, generate_title, infer_project_name
 from ..utils.timestamp import create_whisper_filename
 
@@ -23,12 +25,21 @@ class AIProcessor:
         """
         Initialize processor with configuration.
 
-        :param config: Configuration dictionary containing provider settings
+        :param config: ConfigurationManager instance containing provider settings
         """
         self.config = config
         self.stt_provider = config.get('stt_provider', 'local_whisper')
         self.llm_provider = config.get('llm_provider', 'ollama')
-        
+
+        # Set up mellona config chain
+        # Includes second_voice settings and mellona config
+        second_voice_config_path = config.config_path if hasattr(config, 'config_path') else os.path.expanduser('~/.config/second_voice/settings.json')
+        mellona_config_path = os.path.expanduser('~/.config/mellona/config.yaml')
+        get_config(config_chain=[
+            second_voice_config_path,
+            mellona_config_path,
+        ])
+
         # API configurations
         self.api_keys = {
             'groq': os.environ.get('GROQ_API_KEY', config.get('groq_api_key', '')),
@@ -156,106 +167,46 @@ class AIProcessor:
 
     def _transcribe_local_whisper(self, audio_path: str) -> Optional[str]:
         """
-        Transcribe audio using Local Whisper service.
+        Transcribe audio using Local Whisper service via mellona.
 
         :param audio_path: Path to the audio file
         :return: Transcribed text or None
         """
-        url = self.config.get('local_whisper_url', 'http://localhost:9090/v1/audio/transcriptions')
-        timeout = self.config.get('local_whisper_timeout', 60)
-
-        logger.debug(f"Whisper config - URL: {url}, timeout: {timeout}s")
-
-        # First, check if the service is reachable
-        health_url = url.replace('/v1/audio/transcriptions', '/health')
-        logger.debug(f"Checking Whisper service health at {health_url}...")
-        try:
-            health_response = requests.get(health_url, timeout=5)
-            logger.debug(f"Whisper health check: {health_response.status_code}")
-        except requests.RequestException as health_error:
-            logger.warning(f"Whisper service health check failed: {type(health_error).__name__}: {health_error}")
-            print(f"Local Whisper transcription error: Service unavailable ({type(health_error).__name__})")
-            return None
-
         try:
             logger.debug(f"Opening audio file: {audio_path}")
             file_size = os.path.getsize(audio_path)
             logger.debug(f"Audio file size: {file_size} bytes")
 
-            with open(audio_path, 'rb') as audio_file:
-                logger.debug(f"Sending transcription request to {url}")
-                response = requests.post(
-                    url,
-                    files={'file': audio_file},
-                    data={'model': 'whisper-1'},
-                    timeout=timeout
-                )
-                logger.debug(f"Received response: status={response.status_code}")
-                response.raise_for_status()
-                result = response.json().get('text', None)
-                logger.debug(f"Transcription successful, text length: {len(result) if result else 0}")
-                return result
-        except requests.Timeout as e:
-            logger.error(f"Whisper request timeout after {timeout}s: {e}")
-            print(f"Local Whisper transcription error: Request timeout (exceeded {timeout}s)")
-            return None
-        except requests.ConnectionError as e:
-            logger.error(f"Whisper connection error: {type(e).__name__}: {e}")
-            print(f"Local Whisper transcription error: Connection failed ({type(e).__name__})")
-            return None
-        except requests.RequestException as e:
-            logger.error(f"Whisper request error: {type(e).__name__}: {e}")
-            print(f"Local Whisper transcription error: {type(e).__name__}: {e}")
-            return None
+            with SyncMellonaClient() as client:
+                logger.debug(f"Sending transcription request to local_whisper provider via mellona")
+                response = client.transcribe(audio_path, provider="local_whisper")
+                logger.debug(f"Transcription successful, text length: {len(response.text) if response.text else 0}")
+                return response.text
         except Exception as e:
-            logger.error(f"Unexpected error during transcription: {type(e).__name__}: {e}")
-            print(f"Local Whisper transcription error: Unexpected error: {type(e).__name__}: {e}")
+            logger.error(f"Local Whisper transcription error: {type(e).__name__}: {e}")
+            print(f"Local Whisper transcription error: {type(e).__name__}: {e}")
             return None
 
     def _transcribe_groq(self, audio_path: str) -> Optional[str]:
         """
-        Transcribe audio using Groq Whisper API.
+        Transcribe audio using Groq Whisper API via mellona.
 
         :param audio_path: Path to the audio file
         :return: Transcribed text or None
         """
-        if not self.api_keys['groq']:
-            raise ValueError("Groq API key not configured")
-
-        timeout = self.config.get('groq_timeout', 60)
         model = self.config.get('groq_stt_model', 'whisper-large-v3')
-        logger.debug(f"Groq transcription - model: {model}, timeout: {timeout}s")
+        logger.debug(f"Groq transcription - model: {model}")
 
         try:
             file_size = os.path.getsize(audio_path)
             logger.debug(f"Opening audio file: {audio_path} ({file_size} bytes)")
 
-            with open(audio_path, 'rb') as audio_file:
-                logger.debug(f"Sending transcription request to Groq API")
-                # Use OpenAI-compatible endpoint
-                response = requests.post(
-                    'https://api.groq.com/openai/v1/audio/transcriptions',
-                    headers={
-                        'Authorization': f'Bearer {self.api_keys["groq"]}'
-                    },
-                    files={
-                        'file': (os.path.basename(audio_path), audio_file, 'audio/wav')
-                    },
-                    data={
-                        'model': model
-                    },
-                    timeout=timeout
-                )
-                logger.debug(f"Groq response: status={response.status_code}")
-                response.raise_for_status()
-                result = response.json().get('text', None)
-                logger.debug(f"Groq transcription successful, text length: {len(result) if result else 0}")
-                return result
-        except requests.Timeout as e:
-            logger.error(f"Groq request timeout after {timeout}s: {e}")
-            print(f"Transcription error: Request timeout (exceeded {timeout}s)")
-            return None
-        except requests.RequestException as e:
+            with SyncMellonaClient() as client:
+                logger.debug(f"Sending transcription request to Groq provider via mellona")
+                response = client.transcribe(audio_path, provider="groq", model=model)
+                logger.debug(f"Groq transcription successful, text length: {len(response.text) if response.text else 0}")
+                return response.text
+        except Exception as e:
             logger.error(f"Groq transcription error: {type(e).__name__}: {e}")
             print(f"Transcription error: {e}")
             return None
