@@ -296,6 +296,58 @@ Example configuration:
 }
 ```
 
+## Credentials Management
+
+Second Voice delegates credential management to [mellona](https://github.com/anthropics/mellona), a unified credential and provider configuration system. This ensures:
+
+- **Single source of truth** for all credentials across tools
+- **Secure credential storage** via environment variables, keyring, or mellona config
+- **No hardcoded API keys** in second_voice configuration
+
+### Setting Up Credentials
+
+Credentials for STT (Groq, local Whisper) and LLM (OpenRouter, Ollama, Cline) providers are configured through mellona.
+
+#### For OpenRouter (LLM):
+
+```bash
+# Option 1: Set environment variable
+export OPENROUTER_API_KEY="your-key-here"
+
+# Option 2: Configure in mellona
+mellona config --provider openrouter --api-key "your-key-here"
+```
+
+#### For Groq (STT):
+
+```bash
+# Option 1: Set environment variable
+export GROQ_API_KEY="your-key-here"
+
+# Option 2: Configure in mellona
+mellona config --provider groq --api-key "your-key-here"
+```
+
+#### For Cline (LLM):
+
+```bash
+# Set environment variable
+export CLINE_API_KEY="your-key-here"
+```
+
+### Migration from Old Credential System
+
+Second Voice previously stored API keys directly in `~/.config/second_voice/settings.json`. This is **no longer supported** as of Phase 4.
+
+**If you have old credentials in your config file:**
+
+1. Move them to mellona or environment variables (see above)
+2. Remove the old keys from `~/.config/second_voice/settings.json`
+3. Verify setup:
+   ```bash
+   second-voice --help | grep mellona  # Should show mellona options
+   ```
+
 ## Development
 
 ### Running Tests

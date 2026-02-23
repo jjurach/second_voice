@@ -16,7 +16,6 @@ class ConfigurationManager:
         'ollama_url': 'http://localhost:11434/api/generate',
         'ollama_model': 'llama-pro:latest',
         'cline_llm_model': 'default-model',  # Added Cline CLI model config
-        'cline_api_key': None,  # Optional API key for Cline CLI
         'temp_dir': './tmp',
         'openrouter_fallback_models': [
             'meta-llama/llama-3.3-70b-instruct',

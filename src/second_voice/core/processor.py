@@ -38,12 +38,6 @@ class AIProcessor:
             mellona_config_path,
         ])
 
-        # API configurations
-        self.api_keys = {
-            'groq': os.environ.get('GROQ_API_KEY', config.get('groq_api_key', '')),
-            'openrouter': os.environ.get('OPENROUTER_API_KEY', config.get('openrouter_api_key', ''))
-        }
-
     def _detect_meta_operation(self, text: str) -> bool:
         """
         Detect if user is asking for a transformation of their own text.
@@ -239,7 +233,7 @@ class AIProcessor:
 
         model = self.config.get('cline_llm_model', 'default-model')
         timeout = self.config.get('cline_timeout', 120)
-        api_key = os.environ.get('CLINE_API_KEY', self.config.get('cline_api_key', ''))
+        api_key = os.environ.get('CLINE_API_KEY', '')
 
         logger.debug(f"Cline CLI config - model: {model}, timeout: {timeout}s")
 
@@ -583,7 +577,7 @@ The document should be ready to save immediately."""
 
         model = self.config.get('cline_llm_model', 'default-model')
         timeout = self.config.get('cline_timeout', 120)
-        api_key = os.environ.get('CLINE_API_KEY', self.config.get('cline_api_key', ''))
+        api_key = os.environ.get('CLINE_API_KEY', '')
 
         logger.debug(f"Cline CLI document processing - model: {model}, timeout: {timeout}s")
 

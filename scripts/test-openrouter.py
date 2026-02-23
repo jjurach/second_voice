@@ -11,29 +11,24 @@ import requests
 from pathlib import Path
 
 def load_api_key():
-    """Load API key from config file or environment."""
+    """Load API key from environment or mellona config."""
     # Try environment first
     api_key = os.environ.get('OPENROUTER_API_KEY')
     if api_key:
         print("✓ Found API key in OPENROUTER_API_KEY environment variable")
         return api_key
 
-    # Try config file
-    config_path = Path.home() / '.config' / 'second_voice' / 'settings.json'
-    if config_path.exists():
-        try:
-            with open(config_path) as f:
-                config = json.load(f)
-                api_key = config.get('openrouter_api_key')
-                if api_key:
-                    print(f"✓ Found API key in {config_path}")
-                    return api_key
-        except Exception as e:
-            print(f"⚠️  Could not read config: {e}")
+    # Try mellona config
+    mellona_config_path = Path.home() / '.config' / 'mellona' / 'config.yaml'
+    if mellona_config_path.exists():
+        print(f"⚠️  Found mellona config at {mellona_config_path}")
+        print(f"   (Credentials are managed by mellona, not second_voice)")
 
-    print("❌ No API key found in environment or config file")
-    print(f"   Expected: OPENROUTER_API_KEY environment variable")
-    print(f"   Or: {config_path}")
+    print("❌ No API key found in environment")
+    print(f"   To configure OpenRouter credentials:")
+    print(f"   1. Set OPENROUTER_API_KEY environment variable, OR")
+    print(f"   2. Configure mellona in ~/.config/mellona/config.yaml")
+    print(f"   3. Run: mellona config --provider openrouter --api-key YOUR_KEY")
     return None
 
 
