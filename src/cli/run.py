@@ -4,6 +4,8 @@ import os
 import subprocess
 from pathlib import Path
 
+from mellona import get_arg_parser, apply_cli_args, get_config
+
 # Ensure src directory is in python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.abspath(os.path.join(current_dir, '../'))
@@ -329,8 +331,12 @@ def get_audio_file(args, config):
 
 
 def main():
+    # Get mellona argument parser as parent
+    mellona_arg_parser = get_arg_parser()
+
     parser = argparse.ArgumentParser(
         description="Second Voice - AI Assistant",
+        parents=[mellona_arg_parser],
         epilog="""
 Pipeline mode examples:
   second-voice --record-only --audio-file recording.wav
@@ -397,6 +403,10 @@ Pipeline mode examples:
 
     args = parser.parse_args()
 
+    # Apply mellona CLI arguments to config
+    mellona_config = get_config()
+    mellona_config = apply_cli_args(args, mellona_config)
+
     # Helper function to get string args safely (handling mocks)
     def get_str_arg(obj, attr_name, default=None):
         """Get string argument from args, returns None if not a real string."""
@@ -440,6 +450,9 @@ Pipeline mode examples:
 
     # Init config
     config = ConfigurationManager()
+
+    # Store mellona config for use by AIProcessor
+    config.set('mellona_config', mellona_config)
 
     # Set editor command if provided (only if it's a real string, not a mock)
     if editor_command:

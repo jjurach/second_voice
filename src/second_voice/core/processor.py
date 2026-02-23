@@ -29,14 +29,20 @@ class AIProcessor:
         self.stt_provider = config.get('stt_provider', 'local_whisper')
         self.llm_provider = config.get('llm_provider', 'ollama')
 
-        # Set up mellona config chain
-        # Includes second_voice settings and mellona config
-        second_voice_config_path = config.config_path if hasattr(config, 'config_path') else os.path.expanduser('~/.config/second_voice/settings.json')
-        mellona_config_path = os.path.expanduser('~/.config/mellona/config.yaml')
-        get_config(config_chain=[
-            second_voice_config_path,
-            mellona_config_path,
-        ])
+        # Use mellona config if provided (from CLI), otherwise set up default chain
+        mellona_config = config.get('mellona_config')
+        if not mellona_config:
+            # Set up mellona config chain
+            # Includes second_voice settings and mellona config
+            second_voice_config_path = config.config_path if hasattr(config, 'config_path') else os.path.expanduser('~/.config/second_voice/settings.json')
+            mellona_config_path = os.path.expanduser('~/.config/mellona/config.yaml')
+            mellona_config = get_config(config_chain=[
+                second_voice_config_path,
+                mellona_config_path,
+            ])
+
+        # Store the mellona config for use in API calls
+        self.mellona_config = mellona_config
 
     def _detect_meta_operation(self, text: str) -> bool:
         """
