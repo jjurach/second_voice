@@ -7,7 +7,7 @@ services:
       # Map the host's model directory to the container
       - /usr/share/ollama/.ollama:/root/.ollama
       # Mount your custom Modelfiles directory
-      - /home/phaedrus/AiSpace/models/Modelfiles:/root/Modelfiles
+      - ${MODELFILES_DIR:-~/AiSpace/models/Modelfiles}:/root/Modelfiles
     ports:
       - "11434:11434"
     environment:
