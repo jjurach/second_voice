@@ -1,4 +1,5 @@
 -e ../mellona
+aiohttp
 sounddevice
 soundfile
 numpy
