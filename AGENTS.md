@@ -44,13 +44,13 @@ Standard workflow applies - faster iteration, less documentation overhead.
 To make logs-first the default for all tasks:
 
 ```bash
-python3 docs/system-prompts/bootstrap.py --enable-logs-first --commit
+python3 bootstrap.py --enable-logs-first --commit
 ```
 
 To disable it entirely:
 
 ```bash
-python3 docs/system-prompts/bootstrap.py --disable-logs-first --commit
+python3 bootstrap.py --disable-logs-first --commit
 ```
 
 For more information, see `docs/workflows.md`.
@@ -134,7 +134,7 @@ For more information, see `docs/workflows.md`.
 
 When the user refers to implementing, executing, or applying a **"process"** (e.g., "apply the document-integrity-scan process", "run the verification process"):
 
-1. Check `docs/system-prompts/processes/` directory
+1. Check `processes/` directory
 2. Look for documentation matching the requested process
 3. Read the process specification and execute as instructed
 4. Report results to user
@@ -174,7 +174,7 @@ You must verify your documentation changes against these requirements before mar
 - **Execution Plans:** `dev_notes/` (Polecat managed, ephemeral/tactical).
 
 ### 3. Documentation Access
-- **System Prompts:** `docs/system-prompts/` (Local Copy)
+- **System Prompts:** `` (Local Copy)
 - **Project Specs:** `${GT_TOWN_ROOT}/docs/specs/`
 <!-- END-SECTION -->
 
@@ -205,13 +205,13 @@ You must verify your documentation changes against these requirements before mar
 - Spec files signify user intentions and goals, and are typically used to create or update project plans.
 
 **Step C: Create a Project Plan (If Required)**
-- Use the **Project Plan Structure** defined in `docs/system-prompts/templates/structure.md`.
+- Use the **Project Plan Structure** defined in `templates/structure.md`.
 - The plan must be detailed enough for another agent to execute.
 - Save the plan to `dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md`.
 
 > **⚠ Beaded or multi-task plans — mandatory pre-read:**
 > If the prompt asks for a **"beaded"** or **"multi-task"** project plan, you MUST read
-> **`docs/system-prompts/workflows/plan-and-dispatch.md`** before creating any beads.
+> **`workflows/plan-and-dispatch.md`** before creating any beads.
 > It contains critical guidance on bead placement strategy — including rules for cross-project
 > plans that, if ignored, produce dependency graphs that cannot be enforced.
 
@@ -240,8 +240,8 @@ You must verify your documentation changes against these requirements before mar
 
 <!-- SECTION: PRINCIPLES -->
 This section is maintained by the Agent Kernel. For the complete, authoritative version, see:
-- [Universal DoD](docs/system-prompts/principles/definition-of-done.md) - Agent Kernel universal requirements
-- [Python DoD](docs/system-prompts/languages/python/definition-of-done.md) - Agent Kernel language requirements
+- [Universal DoD](principles/definition-of-done.md) - Agent Kernel universal requirements
+- [Python DoD](languages/python/definition-of-done.md) - Agent Kernel language requirements
 
 **Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)
 
@@ -309,7 +309,7 @@ This section is maintained by the Agent Kernel. For the complete, authoritative 
 
 ### Python Projects
 
-See `docs/system-prompts/languages/python/definition-of-done.md` for Python-specific requirements including:
+See `languages/python/definition-of-done.md` for Python-specific requirements including:
 - pytest test framework setup
 - `requirements.txt` and `pyproject.toml` management
 - Type hints and docstrings
@@ -318,7 +318,7 @@ See `docs/system-prompts/languages/python/definition-of-done.md` for Python-spec
 
 <!-- SECTION: PYTHON-DOD -->
 This section is maintained by the Agent Kernel. For the complete, authoritative version, see:
-- [Python DoD](docs/system-prompts/languages/python/definition-of-done.md) - Agent Kernel Python requirements
+- [Python DoD](languages/python/definition-of-done.md) - Agent Kernel Python requirements
 
 **Project-specific extensions:** See [docs/definition-of-done.md](docs/definition-of-done.md)
 
@@ -326,7 +326,7 @@ This section is maintained by the Agent Kernel. For the complete, authoritative 
 
 # Definition of Done: Python Specifics
 
-This document extends the universal Definition of Done (see `docs/system-prompts/principles/definition-of-done.md`) with Python-specific criteria and tools.
+This document extends the universal Definition of Done (see `principles/definition-of-done.md`) with Python-specific criteria and tools.
 
 ## 1. Python Environment & Dependencies
 
@@ -715,7 +715,7 @@ Run bootstrap.py with workflow detection:
 
 ```bash
 cd /path/to/your/project
-python3 docs/system-prompts/bootstrap.py --analyze-workflow
+python3 bootstrap.py --analyze-workflow
 ```
 
 This will:
@@ -726,7 +726,7 @@ This will:
 To enable logs-first workflow:
 
 ```bash
-python3 docs/system-prompts/bootstrap.py --enable-logs-first --commit
+python3 bootstrap.py --enable-logs-first --commit
 ```
 
 ### Subsequent Runs
@@ -735,10 +735,10 @@ Once enabled, logs-first workflow will be injected into AGENTS.md automatically.
 
 ```bash
 # Check current state (dry run)
-python3 docs/system-prompts/bootstrap.py --analyze-workflow
+python3 bootstrap.py --analyze-workflow
 
 # Disable if needed
-python3 docs/system-prompts/bootstrap.py --disable-logs-first --commit
+python3 bootstrap.py --disable-logs-first --commit
 ```
 
 ---
@@ -854,7 +854,7 @@ These files define:
 ## The Mandatory Reading List
 
 ### 1. Core Workflow
-**File:** [docs/system-prompts/workflows/logs-first.md](docs/system-prompts/workflows/logs-first.md)
+**File:** [workflows/logs-first.md](workflows/logs-first.md)
 
 **What it contains:**
 - 5-step workflow (Analyze Request → Create Spec → Create Plan → Get Approval → Implement & Document)
@@ -903,7 +903,7 @@ These files provide additional context when working on specific features:
 - **Architecture:** [docs/architecture.md](docs/architecture.md) - System design, components, and data flow
 - **Implementation Reference:** [docs/implementation-reference.md](docs/implementation-reference.md) - Code patterns, style, and conventions
 - **Workflows:** [docs/workflows.md](docs/workflows.md) - Development processes and available workflow options
-- **Tool Guides:** [docs/system-prompts/tools/](tools/) - Guides for Aider, Claude Code, and other tools
+- **Tool Guides:** [tools/](tools/) - Guides for Aider, Claude Code, and other tools
 
 ---
 
@@ -915,7 +915,7 @@ After reading the mandatory files, you should be able to answer:
 - ✓ What timestamp format do I use for dev_notes files? (Hint: YYYY-MM-DD_HH-MM-SS)
 - ✓ What are the possible status values for a Project Plan? (Hint: 5 values)
 - ✓ When is a task considered "Done"? (Hint: See Definition of Done checklist)
-- ✓ What directories am I NOT allowed to edit? (Hint: docs/system-prompts/)
+- ✓ What directories am I NOT allowed to edit? (Hint: )
 - ✓ Where do I create temporary files? (Hint: Current directory, pattern tmp-*)
 - ✓ What should I do if I'm uncertain about something? (Hint: STOP and ask)
 
